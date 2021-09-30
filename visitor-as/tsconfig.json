@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "../dist",
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "downlevelIteration": true,
+    "preserveConstEnums": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noEmitOnError": true,
+    "allowJs": false,
+    "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "strict": true,
+    "lib": ["esnext","esnext.string"]
+  },
+  "include": ["./**/*"]
+}

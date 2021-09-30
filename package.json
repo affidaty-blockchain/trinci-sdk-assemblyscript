@@ -1,0 +1,36 @@
+{
+    "name": "@affidaty/trinci-sdk-as",
+    "version": "1.0.6",
+    "description": "Trinci SDK for Assemblyscript smart contract development.",
+    "main": "index.ts",
+    "files": [
+        "boilerplate",
+        "sdk",
+        "visitor-as-cjs",
+        "index.ts",
+        "init.sh"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json"
+    },
+    "author": "Affidaty S.p.A",
+    "license": "MIT",
+    "keywords": [
+        "blockchain",
+        "affidaty",
+        "trinci",
+        "assemblyscript",
+        "smart contract"
+    ],
+    "dependencies": {
+        "@wapc/as-msgpack": "^0.1.13",
+        "lodash.clonedeep": "^4.5.0",
+        "ts-mixer": "^6.0.0",
+        "ts-node": "^10.2.1"
+    },
+    "devDependencies": {
+        "@assemblyscript/loader": "^0.19.11",
+        "assemblyscript": "^0.19.11",
+        "typescript": "^4.4.3"
+    }
+}

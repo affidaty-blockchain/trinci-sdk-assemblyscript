@@ -1,0 +1,20 @@
+{
+    "name": "as_smart_contract",
+    "version": "0.0.1",
+    "description": "",
+    "scripts": {
+        "init": "npx asscinit",
+        "asbuild:debug": "asc assembly/index.ts --config asconfig.json --target debug --transform ./msgpackable.ts --use abort=",
+        "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./msgpackable.ts --use abort=",
+        "asbuild": "npm run asbuild:debug && npm run asbuild:release"
+    },
+    "author": "",
+    "license": "",
+    "dependencies": {
+        "@affidaty/trinci-sdk-as": "^1.0.0"
+    },
+    "devDependencies": {
+        "@assemblyscript/loader": "^0.19.11",
+        "assemblyscript": "^0.19.11"
+    }
+}
