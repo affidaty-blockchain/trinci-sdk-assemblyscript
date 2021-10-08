@@ -1,6 +1,7 @@
 import Types from './types';
 import MemUtils from './memutils';
 import Utils from './utils';
+import MsgPack from './msgpack';
 
 declare function hf_log(messageAddress: u32, messageLength: u32): void;
 declare function hf_load_data(keyAddress: u32, keyLength: u32): Types.TCombinedPtr;
