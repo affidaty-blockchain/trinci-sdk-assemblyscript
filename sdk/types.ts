@@ -19,6 +19,14 @@ namespace Types {
         /** Original transaction submitter */
         public origin: string;
     }
+
+    /** Public standard key structure */
+    @msgpackable
+    export class PublicKey {
+        public type: string = '';
+        public curve: string = '';
+        public value: ArrayBuffer = new ArrayBuffer(0);
+    }
 }
 
 export default Types;

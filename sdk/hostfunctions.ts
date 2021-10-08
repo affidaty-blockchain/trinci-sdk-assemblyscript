@@ -16,37 +16,15 @@ declare function  hf_call(
     dataAddress: u32,
     dataLength: u32,
 ): Types.TCombinedPtr;
-// declare function  hf_verify(
-//     pubKeyAddress: u32,
-//     pubKeyLength: u32,
-//     dataAddress: u32,
-//     dataLength: u32,
-//     signatureAddress: u32,
-//     signatureLength: u32,
-// ): u32;
+declare function  hf_verify(
+    pubKeyAddress: u32,
+    pubKeyLength: u32,
+    dataAddress: u32,
+    dataLength: u32,
+    signatureAddress: u32,
+    signatureLength: u32,
+): u32;
 namespace HostFunctions {
-    // // Verify the signature of the given data by the given pk and algorithm
-    // export function verify(publicKey: &PublicKey, data: &[u8], sign: &[u8]) -> bool {
-    //     let pk = match rmp_serialize(&pk) {
-    //         Ok(val) => val,
-    //         Err(_) => return false,
-    //     };
-    //     let pk_addr = slice_to_mem(&pk);
-    //     let data_addr = slice_to_mem(data);
-    //     let sign_addr = slice_to_mem(sign);
-
-    //     unsafe {
-    //         hf_verify(
-    //             pk_addr,
-    //             pk.len() as i32,
-    //             data_addr,
-    //             data.len() as i32,
-    //             sign_addr,
-    //             sign.len() as i32,
-    //         ) == 1
-    //     }
-    // }
-
     /** call another smart contract method from within a smart contyract */
     export function call(targetId: string, method: string, data: u8[]): u8[] {
         let targetIdAddress = MemUtils.stringToMem(targetId);
@@ -104,6 +82,24 @@ namespace HostFunctions {
         let idAddress = MemUtils.stringToMem(destId);
         let valueAddress = MemUtils.u8ArrayToMem(value);
         hf_store_asset(idAddress, destId.length, valueAddress, value.length);
+    }
+
+    /** Verify the data signature against provided public key */
+    export function verify(publicKey: Types.PublicKey, data: u8[], signature: u8[]): bool {
+        let pubKeyBytes = MsgPack.serialize<Types.PublicKey>(publicKey);
+        let pubKeyAddress = MemUtils.u8ArrayToMem(pubKeyBytes);
+        let dataAddress = MemUtils.u8ArrayToMem(data);
+        let signatureAddress = MemUtils.u8ArrayToMem(signature);
+        return (
+            hf_verify(
+                pubKeyAddress,
+                pubKeyBytes.length,
+                dataAddress,
+                data.length,
+                signatureAddress,
+                signature.length,
+            ) == 1
+        )
     }
 }
 
