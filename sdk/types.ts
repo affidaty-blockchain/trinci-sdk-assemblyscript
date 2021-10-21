@@ -19,6 +19,21 @@ namespace Types {
         /** Original transaction submitter */
         public origin: string;
     }
+
+    export class AppOutput {
+        /** Boolean value returned by the wasm WebAssembly application (smart contract) */
+        success: boolean = false;
+        /** Raw binary data returned by the wasm WebAssembly application (smart contract) */
+        result: ArrayBuffer = new ArrayBuffer(0);
+    }
+
+    /** Public standard key structure */
+    @msgpackable
+    export class PublicKey {
+        public type: string = '';
+        public curve: string = '';
+        public value: ArrayBuffer = new ArrayBuffer(0);
+    }
 }
 
 export default Types;

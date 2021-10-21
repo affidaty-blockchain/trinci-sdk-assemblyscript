@@ -321,6 +321,17 @@ namespace MsgPack {
         const resultAddress = MemUtils.u8ArrayToMem(resultU8Array);
         return Utils.combinePtr(resultAddress, resultU8Array.length);
     }
+
+    /** Specific smart contract return value decoder. Used to decode HostFunctions.call() return value */
+    export function appOutputDecode(appOutputU8: u8[]): Types.AppOutput {
+        let appOutput = new Types.AppOutput();
+        let ab = Utils.u8ArrayToArrayBuffer(appOutputU8);
+        let decoder = new Decoder(ab);
+        decoder.readArraySize();
+        appOutput.success = decoder.readBool();
+        appOutput.result = decoder.readByteArray();
+        return appOutput;
+    }
 }
 
 export default MsgPack;
