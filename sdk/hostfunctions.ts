@@ -27,7 +27,7 @@ declare function  hf_verify(
 ): u32;
 namespace HostFunctions {
     /** call another smart contract method from within a smart contyract */
-    export function call(targetId: string, method: string, data: u8[]): u8[] {
+    export function call(targetId: string, method: string, data: u8[]): Types.AppOutput {
         let targetIdAddress = MemUtils.stringToMem(targetId);
         let methodAddress = MemUtils.stringToMem(method);
         let dataAddress = MemUtils.u8ArrayToMem(data);
@@ -40,7 +40,9 @@ namespace HostFunctions {
             data.length,
         );
         let combPtrTuple = Utils.splitPtr(combPtr);
-        return MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1]);
+        return MsgPack.appOutputDecode(
+            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+        )
     }
 
     /** Outputs a log message into nodes logs (debug log level) */

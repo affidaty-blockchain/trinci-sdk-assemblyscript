@@ -20,6 +20,13 @@ namespace Types {
         public origin: string;
     }
 
+    export class AppOutput {
+        /** Boolean value returned by the wasm WebAssembly application (smart contract) */
+        success: boolean = false;
+        /** Raw binary data returned by the wasm WebAssembly application (smart contract) */
+        result: ArrayBuffer = new ArrayBuffer(0);
+    }
+
     /** Public standard key structure */
     @msgpackable
     export class PublicKey {
