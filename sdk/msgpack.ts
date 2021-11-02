@@ -265,8 +265,25 @@ function writeAppOutput(writer: Writer, success: bool, result: ArrayBuffer): voi
     writer.writeByteArray(result);
 }
 
-namespace MsgPack {
+function writePubKey(writer: Writer, pubKey: Types.PublicKey): void {
+    writer.writeArraySize(3);
+    writer.writeString(pubKey.type);
+    writer.writeString(pubKey.curve);
+    writer.writeByteArray(pubKey.value);
+}
 
+namespace MsgPack {
+    /** Specific unnamed public key encode */
+    export function pubKeyEncode(pubKey: Types.PublicKey): u8[] {
+        const sizer = new Sizer();
+        writePubKey(sizer, pubKey);
+        const buffer = new ArrayBuffer(sizer.length);
+        const encoder = new Encoder(buffer);
+        writePubKey(encoder, pubKey);
+        const resultU8Array = Utils.arrayBufferToU8Array(buffer);
+        return resultU8Array;
+    }
+}
     /** Template function to serialize a class into an array of bytes (read on limitations in readme) */
     export function serialize<T>(classObj: T): u8[] {
         let sizer = new Sizer();

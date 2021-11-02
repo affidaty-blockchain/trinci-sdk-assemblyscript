@@ -22,7 +22,7 @@ namespace Types {
 
     export class AppOutput {
         /** Boolean value returned by the wasm WebAssembly application (smart contract) */
-        success: boolean = false;
+        success: bool = false;
         /** Raw binary data returned by the wasm WebAssembly application (smart contract) */
         result: ArrayBuffer = new ArrayBuffer(0);
     }

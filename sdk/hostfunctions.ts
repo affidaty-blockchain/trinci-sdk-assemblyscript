@@ -89,7 +89,7 @@ namespace HostFunctions {
 
     /** Verify the data signature against provided public key */
     export function verify(publicKey: Types.PublicKey, data: u8[], signature: u8[]): bool {
-        let pubKeyBytes = MsgPack.serialize<Types.PublicKey>(publicKey);
+        let pubKeyBytes = MsgPack.pubKeyEncode(publicKey);
         let pubKeyAddress = MemUtils.u8ArrayToMem(pubKeyBytes);
         let dataAddress = MemUtils.u8ArrayToMem(data);
         let signatureAddress = MemUtils.u8ArrayToMem(signature);
