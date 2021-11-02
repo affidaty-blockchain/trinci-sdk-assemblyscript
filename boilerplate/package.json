@@ -10,7 +10,7 @@
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/trinci-sdk-as": "^1.0.0"
+        "@affidaty/trinci-sdk-as": "^2.0.0"
     },
     "devDependencies": {
         "@assemblyscript/loader": "^0.19.11",
