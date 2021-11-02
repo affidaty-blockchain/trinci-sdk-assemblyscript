@@ -1,5 +1,5 @@
 {
-    "name": "@developer2/trinci-sdk-as",
+    "name": "@affidaty/trinci-sdk-as",
     "version": "2.0.2",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "main": "index.ts",
