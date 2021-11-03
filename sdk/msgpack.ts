@@ -283,7 +283,7 @@ namespace MsgPack {
         const resultU8Array = Utils.arrayBufferToU8Array(buffer);
         return resultU8Array;
     }
-}
+
     /** Template function to serialize a class into an array of bytes (read on limitations in readme) */
     export function serialize<T>(classObj: T): u8[] {
         let sizer = new Sizer();
