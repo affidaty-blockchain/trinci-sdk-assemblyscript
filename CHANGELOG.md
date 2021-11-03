@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## [2.0.4] - 2021-11-03
  
+### Fixed
+
+- msgpack.ts parentheses fix.
+
 
 ## [2.0.3] - 2021-11-02
  
