@@ -327,7 +327,7 @@ namespace MsgPack {
     }
 
     /** Specific smart contract return value encoder */
-    export function appOutputEncode(success: boolean, result: u8[]): Types.TCombinedPtr {
+    export function appOutputEncode(success: bool, result: u8[]): Types.TCombinedPtr {
         let resultArrayBuffer = Utils.u8ArrayToArrayBuffer(result);
         const sizer = new Sizer();
         writeAppOutput(sizer, success, resultArrayBuffer);
