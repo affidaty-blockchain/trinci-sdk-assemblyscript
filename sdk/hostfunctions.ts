@@ -9,6 +9,7 @@ declare function hf_store_data(keyAddress: u32, keyLength: u32, dataAddress: u32
 declare function hf_remove_data(keyAddress: u32, keyLength: u32): void;
 declare function hf_load_asset(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 declare function hf_store_asset(idAddr: u32, idLength: u32, valueAddr: u32, valueLength: u32): void;
+declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPtr;
 declare function  hf_call(
     accountIdAddress: u32,
     accountIdLength: u32,
@@ -85,6 +86,14 @@ namespace HostFunctions {
         let idAddress = MemUtils.stringToMem(destId);
         let valueAddress = MemUtils.u8ArrayToMem(value);
         hf_store_asset(idAddress, destId.length, valueAddress, value.length);
+    }
+
+    /** Computes sha256 from given bytes. */
+    export function sha256(data: u8[]): u8[] {
+        let dataAddr = MemUtils.u8ArrayToMem(data);
+        let combinedPtr = hf_sha256(dataAddr, data.length);
+        let ptrTuple = Utils.splitPtr(combinedPtr);
+        return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
     }
 
     /** Verify the data signature against provided public key */
