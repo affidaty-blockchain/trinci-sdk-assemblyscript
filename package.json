@@ -1,6 +1,6 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "main": "index.ts",
     "files": [
@@ -8,13 +8,16 @@
         "sdk",
         "visitor-as-cjs",
         "index.ts",
-        "init.sh"
+        "init.sh",
+        "LICENSE",
+        "CHANGELOG.md",
+        "README.md"
     ],
     "scripts": {
         "build": "tsc -p tsconfig.json"
     },
     "author": "Affidaty S.p.A",
-    "license": "MIT",
+    "license": "AGPL-3.0-only",
     "keywords": [
         "blockchain",
         "affidaty",
