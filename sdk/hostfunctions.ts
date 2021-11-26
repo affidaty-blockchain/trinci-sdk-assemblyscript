@@ -1,3 +1,4 @@
+import { Decoder } from '@wapc/as-msgpack';
 import Types from './types';
 import MemUtils from './memutils';
 import Utils from './utils';
@@ -7,6 +8,7 @@ declare function hf_log(messageAddress: u32, messageLength: u32): void;
 declare function hf_load_data(keyAddress: u32, keyLength: u32): Types.TCombinedPtr;
 declare function hf_store_data(keyAddress: u32, keyLength: u32, dataAddress: u32, dataLength: u32): void;
 declare function hf_remove_data(keyAddress: u32, keyLength: u32): void;
+declare function hf_get_keys(patternAddress: u32, patternSize: u32): Types.TCombinedPtr;
 declare function hf_load_asset(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 declare function hf_store_asset(idAddr: u32, idLength: u32, valueAddr: u32, valueLength: u32): void;
 declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPtr;
@@ -71,6 +73,31 @@ namespace HostFunctions {
     export function removeData(key: string): void {
         let keyAddr = MemUtils.stringToMem(key);
         hf_remove_data(keyAddr, key.length);
+    }
+
+    /** Get keys list from smart contract owner's accout */
+    export function getKeys(pattern: string = '*'): string[] {
+        if (pattern.length <= 0) {
+            pattern = '*';
+        }
+        let patternAddress = MemUtils.stringToMem(pattern);
+        let combPtr = hf_get_keys(
+            patternAddress,
+            pattern.length,
+        );
+        let combPtrTuple = Utils.splitPtr(combPtr);
+        let getKeysResult = MsgPack.appOutputDecode(
+            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+        );
+        let result: string[] = [];
+        if (getKeysResult.success) {
+            let decoder = new Decoder(getKeysResult.result);
+            let arraySize = decoder.readArraySize();
+            for (let i: u32 = 0; i < arraySize; i++) {
+                result.push(decoder.readString());
+            }
+        };
+        return result;
     }
 
     /** Loads asset-specific data from source account */
