@@ -75,8 +75,10 @@ namespace HostFunctions {
         hf_remove_data(keyAddr, key.length);
     }
 
-    /** Get keys list from smart contract owner's accout */
-    export function getKeys(pattern: string = '*'): string[] {
+    /** Get keys list from smart contract owner's accout.
+     * @param pattern - pattern string to search. Currently only prefixes are supported. If not empty, has to end with a '\*'. if empty, '*' is assumed, which shows all the keys
+     */
+     export function getKeys(pattern: string = '*'): string[] {
         if (pattern.length <= 0) {
             pattern = '*';
         }
