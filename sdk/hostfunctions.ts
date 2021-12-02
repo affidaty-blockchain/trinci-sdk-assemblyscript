@@ -12,7 +12,7 @@ declare function hf_get_keys(patternAddress: u32, patternSize: u32): Types.TComb
 declare function hf_load_asset(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 declare function hf_store_asset(idAddr: u32, idLength: u32, valueAddr: u32, valueLength: u32): void;
 declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPtr;
-declare function  hf_call(
+declare function hf_call(
     accountIdAddress: u32,
     accountIdLength: u32,
     methodAddress: u32,
@@ -20,7 +20,7 @@ declare function  hf_call(
     dataAddress: u32,
     dataLength: u32,
 ): Types.TCombinedPtr;
-declare function  hf_verify(
+declare function hf_verify(
     pubKeyAddress: u32,
     pubKeyLength: u32,
     dataAddress: u32,
