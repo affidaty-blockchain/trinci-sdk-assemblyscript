@@ -54,7 +54,7 @@ namespace HostFunctions {
         )
     }
 
-    /** Emit an event */
+    /** Emits a smart contract event */
     export function emit(eventName: string, eventData: u8[]): void {
         let eventNameAddress = MemUtils.stringToMem(eventName);
         let eventDataAddress = MemUtils.u8ArrayToMem(eventData);
