@@ -28,6 +28,12 @@ declare function  hf_verify(
     signatureAddress: u32,
     signatureLength: u32,
 ): u32;
+declare function hf_emit(
+    eventNameAddress: u32,
+    eventNameLength: u32,
+    eventDataAddress: u32,
+    eventDataLength: u32,
+): void;
 namespace HostFunctions {
     /** call another smart contract method from within a smart contyract */
     export function call(targetId: string, method: string, data: u8[]): Types.AppOutput {
@@ -46,6 +52,13 @@ namespace HostFunctions {
         return MsgPack.appOutputDecode(
             MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
         )
+    }
+
+    /** Emit an event */
+    export function emit(eventName: string, eventData: u8[]): void {
+        let eventNameAddress = MemUtils.stringToMem(eventName);
+        let eventDataAddress = MemUtils.u8ArrayToMem(eventData);
+        hf_emit(eventNameAddress, eventName.length, eventDataAddress, eventData.length);
     }
 
     /** Outputs a log message into nodes logs (debug log level) */
