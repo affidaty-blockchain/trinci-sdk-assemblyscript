@@ -1,4 +1,4 @@
-import { Types, Utils, MemUtils, HostFunctions, MsgPack } from '../node_modules/@affidaty/trinci-sdk-as'
+import sdk from '../node_modules/@affidaty/trinci-sdk-as'
 
 // exposing heap.alloc function for host to pass data
 // to this module
@@ -6,12 +6,12 @@ export function alloc(size: i32): i32 {
     return heap.alloc(size) as i32;
 }
 // after loading module, host calls this function automatically
-export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i32): Types.TCombinedPtr {
+export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i32): sdk.Types.TCombinedPtr {
     // decoding context and getting args from memory
-    let ctxU8Arr: u8[] = MemUtils.u8ArrayFromMem(ctxAddress, ctxSize);
-    let ctx = MsgPack.ctxDecode(ctxU8Arr);
-    let argsU8: u8[] = MemUtils.u8ArrayFromMem(argsAddress, argsSize);
-    let methodsMap = new Map<string, (ctx: Types.AppContext, args: u8[])=>Types.TCombinedPtr>();
+    let ctxU8Arr: u8[] = sdk.MemUtils.u8ArrayFromMem(ctxAddress, ctxSize);
+    let ctx = sdk.MsgPack.ctxDecode(ctxU8Arr);
+    let argsU8: u8[] = sdk.MemUtils.u8ArrayFromMem(argsAddress, argsSize);
+    let methodsMap = new Map<string, (ctx: sdk.Types.AppContext, args: u8[])=>sdk.Types.TCombinedPtr>();
 
     // REGISTER YOUR METHODS HERE
     // See definitions below
@@ -23,25 +23,25 @@ export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i
     // ERROR IF METHOD NOT REGISTERED
     if (!methodsMap.has(ctx.method)) {
         let success = false;
-        let resultBytes = Utils.stringtoU8Array('Method not found.');
-        return MsgPack.appOutputEncode(success, resultBytes);
+        let resultBytes = sdk.Utils.stringtoU8Array('Method not found.');
+        return sdk.MsgPack.appOutputEncode(success, resultBytes);
     }
 
     // CALL METHOD ASSOCIATED TO STRING
     return methodsMap.get(ctx.method)(ctx, argsU8);
 }
 
-function testMethod(ctx: Types.AppContext, argsU8: u8[]): Types.TCombinedPtr {
+function testMethod(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // HostFunctions contains all the available methods to interact with the blockchain
     // outside of protected WASM environment.
     // Use IntelliSense to explore other methods.
     // This one is for logs. To see those logs launch node with at least debug log level
-    HostFunctions.log('testMethod()');
+    sdk.HostFunctions.log('testMethod()');
 
     // resultBytes can be an arbitrary u8[] so you can output data in your own format
     let success = true;
-    let resultBytes = Utils.stringtoU8Array('Test method OK');
-    return MsgPack.appOutputEncode(success, resultBytes);
+    let resultBytes = sdk.Utils.stringtoU8Array('Test method OK');
+    return sdk.MsgPack.appOutputEncode(success, resultBytes);
 }
 
 // Use this decorator if you want to use serialize/deserialize generics
@@ -62,41 +62,41 @@ class Key {
     key: string = '';
 }
 
-function storeData(ctx: Types.AppContext, argsU8: u8[]): Types.TCombinedPtr {
+function storeData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least "debug" log level
-    HostFunctions.log('storeData()');
-    let args = MsgPack.deserialize<KeyData>(argsU8);
-    HostFunctions.log(`key: [${args.key}].`);
-    HostFunctions.log(`data: [${Utils.arrayBufferToU8Array(args.data).toString()}].`);
-    HostFunctions.storeData(args.key, Utils.arrayBufferToU8Array(args.data));
+    sdk.HostFunctions.log('storeData()');
+    let args = sdk.MsgPack.deserialize<KeyData>(argsU8);
+    sdk.HostFunctions.log(`key: [${args.key}].`);
+    sdk.HostFunctions.log(`data: [${sdk.Utils.arrayBufferToU8Array(args.data).toString()}].`);
+    sdk.HostFunctions.storeData(args.key, sdk.Utils.arrayBufferToU8Array(args.data));
 
     // resultBytes can be an arbitrary u8[] so you can output data in your own format
     let success = true;
-    let resultBytes = Utils.stringtoU8Array('Data stored');
-    return MsgPack.appOutputEncode(success, resultBytes);
+    let resultBytes = sdk.Utils.stringtoU8Array('Data stored');
+    return sdk.MsgPack.appOutputEncode(success, resultBytes);
 }
 
-function loadData(ctx: Types.AppContext, argsU8: u8[]): Types.TCombinedPtr {
+function loadData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least debug log level
-    HostFunctions.log('loadData()');
-    let args = MsgPack.deserialize<Key>(argsU8);
-    HostFunctions.log(`key: [${args.key}].`);
-    let data = HostFunctions.loadData(args.key);
-    HostFunctions.log(`data: [${data.toString()}].`);
+    sdk.HostFunctions.log('loadData()');
+    let args = sdk.MsgPack.deserialize<Key>(argsU8);
+    sdk.HostFunctions.log(`key: [${args.key}].`);
+    let data = sdk.HostFunctions.loadData(args.key);
+    sdk.HostFunctions.log(`data: [${data.toString()}].`);
 
     // resultBytes can be an arbitrary u8[] so you can output data in your own format
     let success = true;
-    return MsgPack.appOutputEncode(success, data);
+    return sdk.MsgPack.appOutputEncode(success, data);
 }
 
-function removeData(ctx: Types.AppContext, argsU8: u8[]): Types.TCombinedPtr {
+function removeData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least debug log level
-    HostFunctions.log('loadData()');
-    let args = MsgPack.deserialize<Key>(argsU8);
-    HostFunctions.log(`key: [${args.key}].`);
-    HostFunctions.removeData(args.key);
+    sdk.HostFunctions.log('loadData()');
+    let args = sdk.MsgPack.deserialize<Key>(argsU8);
+    sdk.HostFunctions.log(`key: [${args.key}].`);
+    sdk.HostFunctions.removeData(args.key);
 
     let success = true;
-    let resultBytes = Utils.stringtoU8Array('Data removed');
-    return MsgPack.appOutputEncode(success, resultBytes);
+    let resultBytes = sdk.Utils.stringtoU8Array('Data removed');
+    return sdk.MsgPack.appOutputEncode(success, resultBytes);
 }
