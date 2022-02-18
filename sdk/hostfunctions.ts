@@ -11,7 +11,9 @@ declare function hf_remove_data(keyAddress: u32, keyLength: u32): void;
 declare function hf_get_keys(patternAddress: u32, patternSize: u32): Types.TCombinedPtr;
 declare function hf_load_asset(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 declare function hf_store_asset(idAddr: u32, idLength: u32, valueAddr: u32, valueLength: u32): void;
+declare function hf_get_account_contract(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPtr;
+declare function hf_drand(max: u64): Types.TCombinedPtr;
 declare function hf_call(
     accountIdAddress: u32,
     accountIdLength: u32,
@@ -130,6 +132,16 @@ namespace HostFunctions {
         hf_store_asset(idAddress, destId.length, valueAddress, value.length);
     }
 
+    /** Returns smart contract associated with given account. */
+    export function getAccountContract(accountId: string): string {
+        let idAddress = MemUtils.stringToMem(accountId);
+        let combinedPtr = hf_get_account_contract(idAddress, accountId.length);
+        let ptrTuple = Utils.splitPtr(combinedPtr);
+        let resultBytesU8 = MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+        let resultBytesHex = Utils.arrayBufferToHexString(Utils.u8ArrayToArrayBuffer(resultBytesU8));
+        return resultBytesHex;
+    }
+
     /** Computes sha256 from given bytes. */
     export function sha256(data: u8[]): u8[] {
         let dataAddr = MemUtils.u8ArrayToMem(data);
@@ -154,6 +166,11 @@ namespace HostFunctions {
                 signature.length,
             ) == 1
         )
+    }
+
+    /** returns */
+    export function drand(max: u64): u64 {
+        return hf_drand(max);
     }
 }
 
