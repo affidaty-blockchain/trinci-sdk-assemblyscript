@@ -1,0 +1,8 @@
+{
+    "wasmPath": "../build/release.wasm",
+    "nodeUrl": "http://localhost:8000/",
+    "network": "QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ",
+    "publishPrivKeyB58": "",
+    "pollingMaxTries": 20,
+    "pollingSleepMs": 1000
+}

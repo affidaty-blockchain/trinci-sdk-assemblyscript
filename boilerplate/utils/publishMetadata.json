@@ -1,0 +1,6 @@
+{
+    "name" : "Test smart contract",
+    "version": "0.1",
+    "description" : "My awesome smart contract.",
+    "url" : "http://my.url/"
+}
