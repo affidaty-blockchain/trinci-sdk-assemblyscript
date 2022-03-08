@@ -7,11 +7,14 @@ import MemUtils from './memutils';
 // containing type name cannot be used to denote a type directly.
 function getMember<VT, CT>(classObj: CT, memberName:string, value: VT): VT {
     let memberIndex: i32 = -1;
+    //@ts-ignore
     for (let i = 0; i < classObj.__structure.length; i++) {
+        //@ts-ignore
         if (classObj.__structure[i][0] == memberName) {
             memberIndex = i;
         }
     }
+    //@ts-ignore
     return changetype<(c:CT)=>VT>(classObj.__getters[memberIndex])(classObj);
 }
 
@@ -90,9 +93,13 @@ function writeArray<T>(writer: Writer, classObj: T, arrayFieldName: string, full
 }
 
 function write<T>(writer: Writer, classObj: T): void {
+    //@ts-ignore
     writer.writeMapSize(classObj.__structure.length);
+    //@ts-ignore
     for (let i = 0; i < classObj.__structure.length; i++) {
+        //@ts-ignore
         let fieldName:  string = classObj.__structure[i][0];
+        //@ts-ignore
         let fieldType: string = classObj.__structure[i][1];
         let iteractions: i32 = 1;
         writer.writeString(fieldName);
@@ -109,6 +116,7 @@ function write<T>(writer: Writer, classObj: T): void {
             let valType: i32 = 0;
             writer.writeInt32(getMember(classObj, fieldName, valType));
         } else if (fieldType == 'i64') {
+            //@ts-ignore
             let valType: i64 = 0;
             writer.writeInt64(getMember(classObj, fieldName, valType));
         } else if (fieldType == 'u8') {
@@ -145,19 +153,24 @@ function write<T>(writer: Writer, classObj: T): void {
 
 function setMember<VT, CT>(classObj: CT, memberName:string, value: VT): void {
     let memberIndex: i32 = -1;
+    //@ts-ignore
     for (let i = 0; i < classObj.__structure.length; i++) {
+        //@ts-ignore
         if (classObj.__structure[i][0] == memberName) {
             memberIndex = i;
             break;
         }
     }
+    //@ts-ignore
     changetype<(c:CT, v:VT)=>void>(classObj.__setters[memberIndex])(classObj, value);
 }
 
 function read<T>(decoder: Decoder): T {
     let classObj = instantiate<T>();
     let typesMap = new Map<string, string>();
+    //@ts-ignore
     for (let i = 0; i < classObj.__structure.length; i++) {
+        //@ts-ignore
         typesMap.set(classObj.__structure[i][0], classObj.__structure[i][1]);
     }
     let numFields = decoder.readMapSize() as i32;
