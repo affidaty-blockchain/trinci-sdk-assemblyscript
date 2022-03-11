@@ -8,7 +8,7 @@ import { default as HostFunctions } from './hostfunctions';
  * @param {number[]} resultBytes
  * @return {*} 
  */
-function Ok(resultBytes:number[]):Types.TCombinedPtr { return MsgPack.appOutputEncode(true, resultBytes); }
+function Ok<T>(data:T):Types.TCombinedPtr { return MsgPack.appOutputEncode(true, MsgPack.serialize<T>(data)); }
 /**
  * Return a TCombinedPtr that contains unsucces and string message about error
  *
