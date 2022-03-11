@@ -1,6 +1,8 @@
 namespace Types {
     /** Two 32 bit numbers (address and length) combined into one 64 bit*/
     export type TCombinedPtr = u64;
+    /** Alias of TCombinedPtr */
+    export type WasmResult = TCombinedPtr;
     /** Two 32 bit numbers (address and length) combined into array*/
     export type TCombinedPtrTuple = StaticArray<u32>;
 
@@ -19,7 +21,9 @@ namespace Types {
         /** Original transaction submitter */
         public origin: string;
     }
-
+     /** Alias of Application context */
+    export class CTX extends AppContext {
+    }
     export class AppOutput {
         /** Boolean value returned by the wasm WebAssembly application (smart contract) */
         success: bool = false;
