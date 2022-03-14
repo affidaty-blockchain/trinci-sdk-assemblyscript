@@ -362,6 +362,540 @@ namespace MsgPack {
         appOutput.result = decoder.readByteArray();
         return appOutput;
     }
+
+    export function serBool(value: bool): u8[] {
+        let sizer = new Sizer();
+        sizer.writeBool(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeBool(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserBool(u8Arr: u8[]): bool {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readBool();
+    }
+
+    export function serUInt8(value: u8): u8[] {
+        let sizer = new Sizer();
+        sizer.writeUInt8(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeUInt8(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt8(u8Arr: u8[]): u8 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readUInt8();
+    }
+
+    export function serUInt16(value: u16): u8[] {
+        let sizer = new Sizer();
+        sizer.writeUInt16(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeUInt16(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt16(u8Arr: u8[]): u16 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readUInt16();
+    }
+
+    export function serUInt32(value: u32): u8[] {
+        let sizer = new Sizer();
+        sizer.writeUInt32(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeUInt32(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt32(u8Arr: u8[]): u32 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readUInt32();
+    }
+
+    export function serUInt64(value: u64): u8[] {
+        let sizer = new Sizer();
+        sizer.writeUInt64(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeUInt64(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt64(u8Arr: u8[]): u64 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readUInt64();
+    }
+
+    export function serInt8(value: i8): u8[] {
+        let sizer = new Sizer();
+        sizer.writeInt8(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeInt8(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt8(u8Arr: u8[]): i8 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readInt8();
+    }
+
+    export function serInt16(value: i16): u8[] {
+        let sizer = new Sizer();
+        sizer.writeInt16(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeInt16(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt16(u8Arr: u8[]): i16 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readInt16();
+    }
+
+    export function serInt32(value: i32): u8[] {
+        let sizer = new Sizer();
+        sizer.writeInt32(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeInt32(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt32(u8Arr: u8[]): i32 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readInt32();
+    }
+
+    export function serInt64(value: i64): u8[] {
+        let sizer = new Sizer();
+        sizer.writeInt64(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeInt64(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt64(u8Arr: u8[]): i64 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readInt64();
+    }
+
+    export function serFloat32(value: f32): u8[] {
+        let sizer = new Sizer();
+        sizer.writeFloat32(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeFloat32(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserFloat32(u8Arr: u8[]): f32 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readFloat32();
+    }
+
+    export function serFloat64(value: f64): u8[] {
+        let sizer = new Sizer();
+        sizer.writeFloat64(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeFloat64(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserFloat64(u8Arr: u8[]): f64 {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readFloat64();
+    }
+
+    export function serString(value: string): u8[] {
+        let sizer = new Sizer();
+        sizer.writeString(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeString(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserString(u8Arr: u8[]): string {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readString();
+    }
+
+    export function serArrayBuffer(value: ArrayBuffer): u8[] {
+        let sizer = new Sizer();
+        sizer.writeByteArray(value);
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeByteArray(value);
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserArrayBuffer(u8Arr: u8[]): ArrayBuffer {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        return decoder.readByteArray();
+    }
+
+    export function serBoolArray(value: bool[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeBool(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeBool(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserBoolArray(u8Arr: u8[]): bool[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: bool[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readBool())
+        }
+        return resultArray;
+    }
+
+    export function serUInt8Array(value: u8[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeUInt8(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeUInt8(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt8Array(u8Arr: u8[]): u8[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: u8[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readUInt8())
+        }
+        return resultArray;
+    }
+
+    export function serUInt16Array(value: u16[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeUInt16(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeUInt16(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt16Array(u8Arr: u8[]): u16[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: u16[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readUInt16())
+        }
+        return resultArray;
+    }
+
+    export function serUInt32Array(value: u32[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeUInt32(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeUInt32(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt32Array(u8Arr: u8[]): u32[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: u32[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readUInt32())
+        }
+        return resultArray;
+    }
+
+    export function serUInt64Array(value: u64[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeUInt64(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeUInt64(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserUInt64Array(u8Arr: u8[]): u64[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: u64[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readUInt64())
+        }
+        return resultArray;
+    }
+
+    export function serInt8Array(value: i8[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeInt8(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeInt8(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt8Array(u8Arr: u8[]): i8[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: i8[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readInt8())
+        }
+        return resultArray;
+    }
+
+    export function serInt16Array(value: i16[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeInt16(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeInt16(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt16Array(u8Arr: u8[]): i16[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: i16[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readInt16())
+        }
+        return resultArray;
+    }
+
+    export function serInt32Array(value: i32[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeInt32(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeInt32(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt32Array(u8Arr: u8[]): i32[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: i32[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readInt32())
+        }
+        return resultArray;
+    }
+
+    export function serInt64Array(value: i64[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeInt64(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeInt64(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserInt64Array(u8Arr: u8[]): i64[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: i64[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readInt64())
+        }
+        return resultArray;
+    }
+
+    export function serFloat32Array(value: f32[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeFloat32(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeFloat32(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserFloat32Array(u8Arr: u8[]): f32[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: f32[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readFloat32())
+        }
+        return resultArray;
+    }
+
+    export function serFloat64Array(value: f64[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeFloat64(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeFloat64(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserFloat64Array(u8Arr: u8[]): f64[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: f64[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readFloat64())
+        }
+        return resultArray;
+    }
+
+    export function serStringArray(value: string[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeString(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeString(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserStringArray(u8Arr: u8[]): string[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: string[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readString())
+        }
+        return resultArray;
+    }
+
+    export function serArrayBufferArray(value: ArrayBuffer[]): u8[] {
+        let sizer = new Sizer();
+        sizer.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            sizer.writeByteArray(value[i])
+        }
+        let ab = new ArrayBuffer(sizer.length);
+        let encoder = new Encoder(ab);
+        encoder.writeArraySize(value.length);
+        for (let i = 0; i < value.length; i++) {
+            encoder.writeByteArray(value[i])
+        }
+        return Utils.arrayBufferToU8Array(ab);
+    }
+
+    export function deserArrayBufferArray(u8Arr: u8[]): ArrayBuffer[] {
+        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
+        let decoder = new Decoder(ab);
+        let arraySize = decoder.readArraySize();
+        let resultArray: ArrayBuffer[] = [];
+        for (let i = 0; i < arraySize; i++) {
+            resultArray.push(decoder.readByteArray())
+        }
+        return resultArray;
+    }
 }
+
 
 export default MsgPack;

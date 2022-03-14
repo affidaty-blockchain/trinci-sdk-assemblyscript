@@ -36,7 +36,7 @@ declare function hf_emit(
     eventDataAddress: u32,
     eventDataLength: u32,
 ): void;
-namespace HostFunctions {
+export namespace HostFunctions {
     /** call another smart contract method from within a smart contyract */
     export function call(targetId: string, method: string, data: u8[]): Types.AppOutput {
         let targetIdAddress = MemUtils.stringToMem(targetId);
@@ -76,12 +76,32 @@ namespace HostFunctions {
         hf_store_data(keyAddr, key.length, dataAddr, data.length);
     }
 
+    /**
+     * A template wrapper for storeData host function. Performs automatic serialization of classes defined witd '@msgpackable' decorator.
+     * @param key - key under which data will be saved
+     * @param object - object of a class defined with '@msgpackable' decorator
+     */
+     export function storeDataT<T>(key: string, object: T): void {
+        const byteData = MsgPack.serialize<T>(object);
+        return storeData(key,byteData);
+    }
+
     /** Loads data by key from account hosting smart contract. */
     export function loadData(key: string): u8[] {
         const keyAddress = MemUtils.stringToMem(key);
         let combinedPtr = hf_load_data(keyAddress, key.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
         return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+    }
+
+    /**
+     * A template wrapper for loadData host function. Performs automatic deserialization of classes defined witd '@msgpackable' decorator.
+     * @template T - type of the object returned
+     * @param key - key under which data were be saved
+     */
+    export function loadDataT<T>(key: string):T {
+        const resultBytes = loadData(key);
+        return MsgPack.deserialize<T>(resultBytes);
     }
 
     /** Removes data by key from account hosting smart contract. */
@@ -125,11 +145,31 @@ namespace HostFunctions {
         return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
     }
 
+    /**
+     * A template wrapper for loadAsset host function. Performs automatic deserialization of classes defined witd '@msgpackable' decorator.
+     * @template T - type of the object returned
+     * @param accountId - Account from which you want to load asset-specific data
+     */
+    export function loadAssetT<T>(accountId: string): T {
+        const resultBytes = loadAsset(accountId);
+        return MsgPack.deserialize<T>(resultBytes);
+    }
+
     /** Stores asset-specific data into destination account */
     export function storeAsset(destId: string, value: u8[]): void {
         let idAddress = MemUtils.stringToMem(destId);
         let valueAddress = MemUtils.u8ArrayToMem(value);
         hf_store_asset(idAddress, destId.length, valueAddress, value.length);
+    }
+
+    /**
+     * A template wrapper for storeAsset host function. Performs automatic serialization of classes defined witd '@msgpackable' decorator.
+     * @param accountId - Account under which you want to store asset-specific data
+     * @param object - object of a class defined with '@msgpackable' decorator
+     */
+    export function storeAssetT<T>(accountId: string, object: T): void {
+        const objectBytes = MsgPack.serialize<T>(object);
+        return HostFunctions.storeAsset(accountId, objectBytes);    
     }
 
     /** Returns smart contract associated with given account. */

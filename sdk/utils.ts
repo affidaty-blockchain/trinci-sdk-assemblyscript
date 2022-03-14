@@ -1,7 +1,6 @@
-import { Sizer, Decoder,Encoder, Writer } from '@wapc/as-msgpack'
 import Types from './types';
 
-namespace Utils {
+export namespace Utils {
 
     /** Combines two 32bit numbers into one 64bit */
     export function combinePtr(offset: u32, length: u32): Types.TCombinedPtr {
@@ -87,21 +86,6 @@ namespace Utils {
             result += byteStr;
         }
         return result;
-    }
-     /** converts a MessagePack U64 into U64 */
-    export function deserializeU64(u8Arr: u8[]): u64 {
-        let ab = Utils.u8ArrayToArrayBuffer(u8Arr);
-        let decoder = new Decoder(ab);
-        return decoder.readUInt64();
-    }
-    /** converts a U64 into  MessagePack U64 */
-    export function serializeU64(value: u64): u8[] {
-        let sizer = new Sizer();
-        sizer.writeUInt64(value);
-        let ab = new ArrayBuffer(sizer.length);
-        let encoder = new Encoder(ab);
-        encoder.writeUInt64(value);
-        return Utils.arrayBufferToU8Array(ab);
     }
 }
 

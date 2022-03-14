@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.3] - 2022-03-14
+
+### Added
+
+- sdk.Return namespace containing some helper functions for easy creation of various smart contract responces.
+- sdk.Response namespace with some smart contract responces management functions.
+- Functions for (de)serialization of various primitives(and their arrays) added to MsgPack namespace.
+- loadDataT<>(), storeDataT<>(), loadAssetT<>(), storeAssetT<>() added to HostFunctions namespace
+
 ## [2.3.2] - 2022-02-28
 
 ### Added

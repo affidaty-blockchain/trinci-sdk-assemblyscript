@@ -1,8 +1,26 @@
-import { default as Types } from './types';
-import { default as Utils } from './utils';
-import { default as MemUtils } from './memutils';
-import { default as HostFunctions } from './hostfunctions';
-import { default as MsgPack } from './msgpack';
-import { Ok, Error, False, Null, True, Some,storeData, loadData , removeData , loadAsset , storeAsset } from './wmio';
+import Types from './types';
+import Utils from './utils';
+import MemUtils from './memutils';
+import HostFunctions from './hostfunctions';
+import MsgPack from './msgpack';
+import { Return, Response } from './wmio';
 
-export { Types, Utils, MemUtils, HostFunctions, MsgPack, Ok, Error, False, Null, True, Some,storeData, loadData , removeData , loadAsset , storeAsset };
+export {
+    Types,
+    Utils,
+    MemUtils,
+    HostFunctions,
+    MsgPack,
+    Return,
+    Response
+};
+
+export default {
+    Types,
+    Utils,
+    MemUtils,
+    HostFunctions,
+    MsgPack,
+    Return,
+    Response
+};
