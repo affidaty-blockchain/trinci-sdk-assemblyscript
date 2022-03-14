@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.7] - 2022-03-14
+
+### Added
+
+- added possibility to test compiled smart contracts(.wasm) directly with jest without need to set up a full TRINCI node.
+- added a sample jest test for sample smart contract. Try it with `npm run test` after compiling example smart contract with `npm run asbuild`.
+
 ## [2.3.6] - 2022-03-14
 
 ### Added

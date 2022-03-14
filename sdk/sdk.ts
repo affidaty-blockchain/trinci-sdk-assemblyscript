@@ -14,13 +14,3 @@ export {
     Return,
     Response
 };
-
-export default {
-    Types,
-    Utils,
-    MemUtils,
-    HostFunctions,
-    MsgPack,
-    Return,
-    Response
-};
