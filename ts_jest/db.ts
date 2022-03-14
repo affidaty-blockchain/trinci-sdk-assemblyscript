@@ -1,17 +1,57 @@
 import fs from "fs";
+import Table from 'cli-table';
+
 import { getRefHash } from "./utils";
 
-export interface IWasmPathWithName {path: string, name?: string};
+export interface IWasmPathWithName { path: string, name?: string };
 export class trinciDB {
     dataDb: Map<string, Map<string, Uint8Array>>; // <Account1, Map(<dataKey,val>)>
     assetDb: Map<string, Map<string, Uint8Array>>; // <Account1, Map(<assetAccount,val>)>
-    wasmModulesIndex: Map<string, {module: WebAssembly.Module, name: string}>; // <refHash1, {name, wasmModule1}>
+    wasmModulesIndex: Map<string, { module: WebAssembly.Module, name: string }>; // <refHash1, {name, wasmModule1}>
     accountBindings: Map<string, string>; // <Account1, ContractRefHash1>
     constructor() {
         this.dataDb = new Map();
         this.assetDb = new Map();
         this.wasmModulesIndex = new Map();
         this.accountBindings = new Map();
+    }
+    printAssets() {
+        const {allAccounts,table} = this._preparePrint();
+        const allAccountsArray:string[] = Array.from(allAccounts);
+        for(let acc of allAccountsArray) {
+            table.push(allAccountsArray.map((a) => {
+                if(this.assetDb.has(a)) {
+                    const accountMap = this.assetDb.get(a);
+                    const result = accountMap.get(acc) || 0;
+                    if(typeof result == "number") {
+                        return result;
+                    } else {
+                        //TODO: messagePackDecode
+                    }
+                }
+                return 0;
+            }));
+        }
+        console.log(table.toString());
+    }
+    private _preparePrint():any {
+        const dataAccounts = [...this.dataDb.keys()];
+        const assetAccounts = [...this.assetDb.keys()];
+        const allAccounts = new Set<string>(...dataAccounts, ...assetAccounts);
+        // remove TRINCI account
+        allAccounts.delete("TRINCI");
+
+        const table :Table= new Table({
+            head: Array.from(allAccounts).map(t => {
+                if (this.accountBindings.has(t)) {
+                    return t + "\n (" + this.accountBindings.get(t) + ")";
+                } else {
+                    return t + "\n ( --  )";
+                }
+            })
+            , colWidths: [100, 200]
+        });
+        return {allAccounts,table};
     }
     /**
      * take buffer from file and register it into DB , use as key the hash of file
@@ -26,9 +66,9 @@ export class trinciDB {
         const wasmBuffer = fs.readFileSync(typeof wasmFilePath == 'string' ? wasmFilePath : wasmFilePath.path);
         const refHash = getRefHash(wasmBuffer);
         const module = await WebAssembly.compile(wasmBuffer);
-        const name = typeof wasmFilePath == 'string' ? '' : (wasmFilePath.name ? wasmFilePath.name : '') ;
-        this.wasmModulesIndex.set(refHash, {module, name});
-        if(accountId) {
+        const name = typeof wasmFilePath == 'string' ? '' : (wasmFilePath.name ? wasmFilePath.name : '');
+        this.wasmModulesIndex.set(refHash, { module, name });
+        if (accountId) {
             this.bindContractToAccount(accountId, refHash);
         }
         return refHash;
@@ -41,7 +81,7 @@ export class trinciDB {
      * @return {*}  {boolean}
      * @memberof trinciDB
      */
-    contractRegistered(refHash: string) : boolean {
+    contractRegistered(refHash: string): boolean {
         return this.wasmModulesIndex.has(refHash);
     }
 
@@ -69,7 +109,7 @@ export class trinciDB {
      * @memberof trinciDB
      */
     bindContractToAccount(accountId: string, refHash: string): boolean {
-        if(!this.contractRegistered(refHash)) {
+        if (!this.contractRegistered(refHash)) {
             return false;
         }
         this.accountBindings.set(accountId, refHash);
@@ -84,27 +124,27 @@ export class trinciDB {
         return refHash;
     }
 
-    getAccountContractModule(accountId:string): WebAssembly.Module | null {
+    getAccountContractModule(accountId: string): WebAssembly.Module | null {
         const hash = this.getAccountContractHash(accountId);
-        if(!hash) {
+        if (!hash) {
             return null;
         }
         const module = this.getContractModule(hash);
         return module;
     }
 
-    setAccountData(accountId:string, key: string, data: Uint8Array): void{
+    setAccountData(accountId: string, key: string, data: Uint8Array): void {
         let accountDataDb = this.dataDb.get(accountId);
         if (!accountDataDb) {
-            accountDataDb = new Map<string,Uint8Array>();
+            accountDataDb = new Map<string, Uint8Array>();
         }
         accountDataDb.set(key, data);
         this.dataDb.set(accountId, accountDataDb);
         return;
     }
 
-    getAccountData(accountId:string, key: string):Uint8Array | null {
-        if(!this.dataDb.has(accountId)){
+    getAccountData(accountId: string, key: string): Uint8Array | null {
+        if (!this.dataDb.has(accountId)) {
             return null;
         }
         const data = this.dataDb.get(accountId)!.get(key);
@@ -114,11 +154,10 @@ export class trinciDB {
         return data;
     }
 
-    removeAccountData(accountId: string, dataKey: string):void {
+    removeAccountData(accountId: string, dataKey: string): void {
         const accountDataDb = this.dataDb.get(accountId)!;
-        if(accountDataDb){
-            if (accountDataDb.delete(dataKey))
-            {
+        if (accountDataDb) {
+            if (accountDataDb.delete(dataKey)) {
                 this.dataDb.set(accountId, accountDataDb);
             }
         }
@@ -128,15 +167,15 @@ export class trinciDB {
     setAccountAsset(ownerAccountId: string, assetAccountId: string, assetData: Uint8Array): void {
         let accountAssetDb = this.assetDb.get(ownerAccountId);
         if (!accountAssetDb) {
-            accountAssetDb = new Map<string,Uint8Array>();
+            accountAssetDb = new Map<string, Uint8Array>();
         }
         accountAssetDb.set(assetAccountId, assetData);
         this.assetDb.set(ownerAccountId, accountAssetDb);
         return;
     }
 
-    getAccountAsset(ownerAccountId: string, assetAccountId: string ): Uint8Array | null {
-        if(!this.assetDb.has(ownerAccountId)){
+    getAccountAsset(ownerAccountId: string, assetAccountId: string): Uint8Array | null {
+        if (!this.assetDb.has(ownerAccountId)) {
             return null;
         }
         const data = this.assetDb.get(ownerAccountId)!.get(assetAccountId);
@@ -149,11 +188,11 @@ export class trinciDB {
     getAccountDataKeys(accountId: string, pattern: string = '*'): string[] {
         const resultList: string[] = [];
         const accountDataDb = this.dataDb.get(accountId);
-        if(!accountDataDb){
+        if (!accountDataDb) {
             return [];
         }
         if (!pattern.includes("*")) {
-            if (!accountDataDb.has(pattern)){
+            if (!accountDataDb.has(pattern)) {
                 return [];
             }
             return [pattern];
@@ -163,7 +202,7 @@ export class trinciDB {
             return [];
         }
         const patternSubstring = pattern.substring(0, pattern.indexOf('*') >= 0 ? pattern.indexOf('*') : 0);
-        if (patternSubstring.length == 0 ) {
+        if (patternSubstring.length == 0) {
             return accountDataKeys;
         }
         for (let i = 0; i < accountDataKeys.length; i++) {

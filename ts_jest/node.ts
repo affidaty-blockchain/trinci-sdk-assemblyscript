@@ -10,7 +10,9 @@ export class TrinciNode {
     constructor() {
         this.db = new TrinciDB();
     }
-
+    printDB():void {
+        this.db.printAssets();
+    }
     async registerContract(wasmFilePath: string | IWasmPathWithName, bindAccount?:string ):Promise<string> {
         return new Promise<string>((resolve, reject) => {
             this.db.registerContract(wasmFilePath, bindAccount)
