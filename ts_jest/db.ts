@@ -1,7 +1,7 @@
 import fs from "fs";
 import Table from 'cli-table';
 
-import { getRefHash } from "./utils";
+import { getRefHash, mpDecode } from "./utils";
 
 export interface IWasmPathWithName { path: string, name?: string };
 export class trinciDB {
@@ -16,42 +16,50 @@ export class trinciDB {
         this.accountBindings = new Map();
     }
     printAssets() {
-        const {allAccounts,table} = this._preparePrint();
+        const {allAccounts,table,headAccounts} = this._preparePrint();
         const allAccountsArray:string[] = Array.from(allAccounts);
-        for(let acc of allAccountsArray) {
-            table.push(allAccountsArray.map((a) => {
-                if(this.assetDb.has(a)) {
-                    const accountMap = this.assetDb.get(a)!;
-                    const result = accountMap.get(acc) || 0;
-                    if(typeof result == "number") {
-                        return result;
+        for(let rowAccount of allAccountsArray) {
+            const amounts = headAccounts.map((colAccount:string) => {
+                if(this.assetDb.has(rowAccount)) {
+                    const assetMap = this.assetDb.get(rowAccount)!;
+                    if(assetMap.has(colAccount)) {
+                        const result =  assetMap.get(colAccount);
+                        return mpDecode(result as Uint8Array);
                     } else {
-                        //TODO: messagePackDecode
+                        return "--";
                     }
+                    
+
+                } else {
+                    return "--";
                 }
-                return 0;
-            }));
+                
+            });
+            table.push([rowAccount,...amounts]);
         }
         console.log(table.toString());
     }
     private _preparePrint():any {
         const dataAccounts = [...this.dataDb.keys()];
         const assetAccounts = [...this.assetDb.keys()];
-        const allAccounts = new Set<string>(...dataAccounts, ...assetAccounts);
+        
+        const allAccounts = new Set<string>([...dataAccounts, ...assetAccounts]);
         // remove TRINCI account
         allAccounts.delete("TRINCI");
-
+        const headAccounts: string[] =  Array.from(allAccounts).filter(t => this.accountBindings.has(t));
         const table :Table= new Table({
-            head: Array.from(allAccounts).map(t => {
-                if (this.accountBindings.has(t)) {
-                    return t + "\n (" + this.accountBindings.get(t) + ")";
+            head: ["#",...headAccounts].map(t => {
+                if(t == "#") {
+                    return "#";
+                } else if (this.accountBindings.has(t)) {
+                    return t + "\n(" + this.accountBindings.get(t) + ")";
                 } else {
-                    return t + "\n ( --  )";
+                    return t + "\n( -- )";
                 }
             })
-            , colWidths: [100, 200]
+           // , colWidths: [10, 20]
         });
-        return {allAccounts,table};
+        return {allAccounts,table,headAccounts};
     }
     /**
      * take buffer from file and register it into DB , use as key the hash of file
