@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.8] - 2022-03-15
+
+### Added
+
+- `serializeInternalType<>()` and `deserializeInternalType<>()` functions to easily (de)serialize internal assemblyscript types (`bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `f32`, `f64`, `string`, `ArrayBuffer`) and arrays of those types.
+
+### Changed
+
+- slightly changed TX class structure in Jest test environment
+
+### Fixed
+
+- missing docker files
+
 ## [2.3.7] - 2022-03-14
 
 ### Added
@@ -110,3 +124,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - HostFunctions.call() now returns a named structure (Types.AppOutput) instead of raw bytes.
+
+```plantuml
+Bob -> Alice : hello
+Alice -> Bob : hi
+```
