@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  trinci:
+    image: 'trinci_node_image'
+#    volumes:
+#      - ../:/home/node/smartcontract
+    container_name: "trinci-node"
+    build:
+      context: ./trinci
+    network_mode: host
+
+  smartcontract:
+    image: 'smartcontract_builder_image'
+    container_name: "sc-compiler"
+    build:
+      context: ./smartcontract 
+    volumes:
+      - ../../:/home/node/smartcontract
+    user: "node"
+    working_dir: /home/node/smartcontract
+   
