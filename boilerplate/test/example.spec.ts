@@ -14,12 +14,12 @@ describe('desc1', () => {
 
         // creating new mocked transaction
         const tx = new TX()
-        .setNetwork('net_str')
-        .setTarget('target_acc')
-        .setContract(scRefHash)
-        .setArgs('a b c d e')
-        .setMethod('test_method')
-        .setSigner('signer_acc');
+        .network('net_str')
+        .target('target_acc')
+        .contract(scRefHash)
+        .args('a b c d e')
+        .method('test_method')
+        .signer('signer_acc');
 
         // running smart contract by passing it our mocked transaction
         let runResult = await n.runTx(tx);

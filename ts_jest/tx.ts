@@ -1,72 +1,70 @@
 import { mpEncode, mpDecode } from './utils';
 import CTX from './ctx';
+
 export class TX {
-    network:string;
-    target : string;
-    contract: string;
-    method: string;
-    args: any = {};
-    signer:string = '';
+    _network:string;
+    _target : string;
+    _contract: string;
+    _method: string;
+    _args: any = {};
+    _signer:string = '';
 
     constructor(target: string = '', contractRefHash: string = '', method: string = '', network: string = '') {
-        this.network = network;
-        this.target = target;
-        this.contract = contractRefHash;
-        this.method = method;
+        this._network = network;
+        this._target = target;
+        this._contract = contractRefHash;
+        this._method = method;
     }
 
-    setNetwork(network: string) {
-        this.network = network;
+    network(network: string) {
+        this._network = network;
         return this;
     }
 
-    setTarget(target:string ) {
-        this.target = target;
+    target(target:string ) {
+        this._target = target;
         return this;
     }
 
-    setContract(contractRefHash:string ) {
-        this.contract = contractRefHash;
+    contract(contractRefHash:string ) {
+        this._contract = contractRefHash;
         return this;
     }
 
-    setMethod(method: string) {
-        this.method = method;
+    method(method: string) {
+        this._method = method;
         return this;
     }
 
-    setArgs(args:any = {}) {
-        this.args = args;
+    args(args: any = {}) {
+        this._args = args;
         return this;
     }
 
-    setArgsBytes(): Buffer {
-        return mpEncode(this.args);
-    }
-
-    setSigner(accountId: string) {
-        this.signer = accountId;
+    argsBytes(bytes: Uint8Array) {
+        this._args = mpDecode(bytes);
         return this;
     }
 
-    set argsBytes(argsBytes: Uint8Array) {
-        this.args = mpDecode(argsBytes);
+    signer(accountId: string) {
+        this._signer = accountId;
+        return this;
     }
 
-    get argsBytes(): Uint8Array {
-        return new Uint8Array(mpEncode(this.args))
+    getArgsBytes(): Uint8Array {
+        return new Uint8Array(mpEncode(this._args));
     }
 
     toCTX(): CTX {
         const ctx = new CTX();
-        ctx.network = this.network;
-        ctx.owner = this.target;
-        ctx.caller = this.signer;
-        ctx.origin = this.signer;
-        ctx.method = this.method;
+        ctx.network = this._network;
+        ctx.owner = this._target;
+        ctx.caller = this._signer;
+        ctx.origin = this._signer;
+        ctx.method = this._method;
         ctx.depth = 0;
         return ctx;
     }
 }
-//let ctx = new TX().to("Account1").method("test").args({a:1}).sign("Account2").toCTX();
+
 export default TX;

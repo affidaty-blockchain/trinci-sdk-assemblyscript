@@ -56,7 +56,7 @@ export class TrinciNode {
     }
 
     async runTx(tx:TX, mockHostFunctions = {}):Promise<WasmResult> {
-        return this.runCtx(tx.toCTX(),tx.argsBytes, tx.contract, mockHostFunctions);
+        return this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions);
     }
 }
 
