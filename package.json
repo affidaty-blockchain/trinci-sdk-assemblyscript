@@ -1,6 +1,6 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.3.12",
+    "version": "2.3.13",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "main": "index.ts",
     "files": [
@@ -27,7 +27,9 @@
         "smart contract"
     ],
     "dependencies": {
+        "@types/cli-table": "^0.3.0",
         "@wapc/as-msgpack": "^0.1.13",
+        "cli-table": "^0.3.11",
         "lodash.clonedeep": "^4.5.0",
         "ts-mixer": "^6.0.0",
         "ts-node": "^10.2.1"
