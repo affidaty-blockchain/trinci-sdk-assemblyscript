@@ -21,7 +21,7 @@ export class trinciDB {
         for(let acc of allAccountsArray) {
             table.push(allAccountsArray.map((a) => {
                 if(this.assetDb.has(a)) {
-                    const accountMap = this.assetDb.get(a);
+                    const accountMap = this.assetDb.get(a)!;
                     const result = accountMap.get(acc) || 0;
                     if(typeof result == "number") {
                         return result;
