@@ -5,7 +5,15 @@
     "scripts": {
         "asbuild:debug": "asc assembly/index.ts --config asconfig.json --target debug --transform ./msgpackable.ts --use abort=",
         "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./msgpackable.ts --use abort=",
-        "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+        "asbuild": "npm run asbuild:release",
+        "docker:init": "cd ./utils/docker && make containers-init",
+        "node:start": "cd ./utils/docker && make node-start",
+        "node:stop": "cd ./utils/docker && make node-stop",
+        "node:reset": "cd ./utils/docker && make node-reset",
+        "node:logs": "cd ./utils/docker && make node-logs",
+        "compile": "cd ./utils/docker && make smartcontract-build",
+        "publish": "./utils/publish.js",
+        "exec": "./utils/exec.js",
         "test": "jest --no-coverage"
     },
     "author": "",
