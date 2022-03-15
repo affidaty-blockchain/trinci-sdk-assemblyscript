@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.10] - 2022-03-15
+
+### Added
+
+- dependencies for db jest test class
+
 ## [2.3.9] - 2022-03-15
 
 ### Fixed
