@@ -15,11 +15,18 @@ export namespace Return {
     }
 
     /**
-     * Returns a combined pointer to passed bytes wrapped in a 'Success' response;
+     * Returns a combined pointer to passed bytes wrapped in a 'Success' response when T is an internal type as:string,u32,ecc...;
      * @param resultBytes - Bytes you want to return
     */
-    export function Success(resultBytes:u8[]):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, resultBytes);
+    export function Success<T>(val:T):Types.TCombinedPtr {
+        return MsgPack.appOutputEncode(true, MsgPack.serializeInternalType<T>(val));
+    }
+    /**
+     * Returns a combined pointer to passed bytes wrapped in a 'Success' response when O is a class decorated in @msgpackable;
+     * @param resultBytes - Bytes you want to return
+    */
+     export function SuccessAsObject<O>(obj:O):Types.TCombinedPtr {
+        return MsgPack.appOutputEncode(true, MsgPack.serialize<O>(obj));
     }
 
     /**
