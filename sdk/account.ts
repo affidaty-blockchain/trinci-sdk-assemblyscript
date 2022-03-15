@@ -37,17 +37,19 @@ export class OwnerDB {
         const valSer = HostFunctions.loadData(key);
         return  MsgPack.deserializeInternalType<T>(valSer);
     }
-    static set<T>(key:string,val:T):void {
+    static set<T>(key:string,val:T):u8[] {
         const valSer = MsgPack.serializeInternalType<T>(val);
         HostFunctions.storeData(key,valSer);
+        return valSer;
     }
     static getObject<T>(key:string):T {
         const valSer = HostFunctions.loadData(key);
         return  MsgPack.deserialize<T>(valSer);
     }
-    static setObject<T>(key:string,val:T):void {
+    static setObject<T>(key:string,val:T):u8[] {
         const valSer = MsgPack.serialize<T>(val);
         HostFunctions.storeData(key,valSer);
+        return valSer;
     }
     static has(key:string):boolean {
         const ret = HostFunctions.getKeys(key);
