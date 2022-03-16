@@ -88,7 +88,18 @@ export class trinciDB {
         }
         return refHash;
     }
-
+    balance(coinAccount:string,accountId:string):number {
+        if(this.assetDb.has(accountId)) {
+            const acc = this.assetDb.get(accountId)!;
+            if(acc.has(coinAccount)) {
+                const result = acc.get(coinAccount)!;
+                return mpDecode(result as Uint8Array);
+            } else {
+                return 0;
+            }   
+        }
+        return 0;
+    }
     /**
      * check if smart contract exists
      *
