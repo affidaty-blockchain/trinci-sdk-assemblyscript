@@ -9,11 +9,13 @@ export class trinciDB {
     assetDb: Map<string, Map<string, Uint8Array>>; // <Account1, Map(<assetAccount,val>)>
     wasmModulesIndex: Map<string, { module: WebAssembly.Module, name: string }>; // <refHash1, {name, wasmModule1}>
     accountBindings: Map<string, string>; // <Account1, ContractRefHash1>
+    wasmFilesRed: Map<string, string>; // <Account1, ContractRefHash1>
     constructor() {
         this.dataDb = new Map();
         this.assetDb = new Map();
         this.wasmModulesIndex = new Map();
         this.accountBindings = new Map();
+        this.wasmFilesRed = new Map();
     }
     printAssets() {
         const {allAccounts,table,headAccounts} = this._preparePrint();
@@ -41,18 +43,21 @@ export class trinciDB {
     }
     private _preparePrint():any {
         const dataAccounts = [...this.dataDb.keys()];
+        const accountBindings = [...this.accountBindings.keys()];
         const assetAccounts = [...this.assetDb.keys()];
         
-        const allAccounts = new Set<string>([...dataAccounts, ...assetAccounts]);
+        const allAccounts = new Set<string>([...accountBindings, ...assetAccounts,...dataAccounts]);
         // remove TRINCI account
         allAccounts.delete("TRINCI");
+        
         const headAccounts: string[] =  Array.from(allAccounts).filter(t => this.accountBindings.has(t));
         const table :Table= new Table({
             head: ["#",...headAccounts].map(t => {
                 if(t == "#") {
                     return "#";
                 } else if (this.accountBindings.has(t)) {
-                    return t + "\n(" + this.accountBindings.get(t) + ")";
+                    const hash =this.accountBindings.get(t)!;
+                    return t + "\n(" + this.wasmFilesRed.get(hash) + ")";
                 } else {
                     return t + "\n( -- )";
                 }
@@ -71,8 +76,10 @@ export class trinciDB {
      * @memberof trinciDB
      */
     async registerContract(wasmFilePath: string | IWasmPathWithName, accountId?: string): Promise<string> {
-        const wasmBuffer = fs.readFileSync(typeof wasmFilePath == 'string' ? wasmFilePath : wasmFilePath.path);
+        const wasmSource = typeof wasmFilePath == 'string' ? wasmFilePath : wasmFilePath.path;
+        const wasmBuffer = fs.readFileSync(wasmSource);
         const refHash = getRefHash(wasmBuffer);
+        this.wasmFilesRed.set(refHash,wasmSource);
         const module = await WebAssembly.compile(wasmBuffer);
         const name = typeof wasmFilePath == 'string' ? '' : (wasmFilePath.name ? wasmFilePath.name : '');
         this.wasmModulesIndex.set(refHash, { module, name });
