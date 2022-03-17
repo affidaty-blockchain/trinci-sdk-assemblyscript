@@ -1,3 +1,4 @@
+
 import fastSha256 from 'fast-sha256';
 import * as Errors from './errors';
 import * as Defaults from './defaults';
@@ -105,11 +106,21 @@ export class WasmMachine {
                 },
                 trace(msg: any, n: any) {
                     console.log('called trace()');
-                }
+                },
             },
             hostfunctions: {
                 hf_log: (offset: number, length: number) => {
                     console.log(`WASM_LOG(${offset}+${length}): ${Buffer.from(this.readFromWasmMem(offset, length)).toString()}`);
+                },
+                hf_emit: (
+                    eventNameAddress: number,
+                    eventNameLength: number,
+                    eventDataAddress: number,
+                    eventDataLength: number
+                ) => {
+                    const eventName = Buffer.from(this.readFromWasmMem(eventNameAddress, eventNameLength)).toString();
+                    const eventData = this.readFromWasmMem(eventDataAddress, eventDataLength);
+                    console.log(`${eventName}: ${Buffer.from(eventData).toString('hex')}`);
                 },
                 hf_load_data: (keyOffset: number, keyLength: number): bigint => {
                     const key = Buffer.from(this.readFromWasmMem(keyOffset, keyLength)).toString();
@@ -242,6 +253,7 @@ export class WasmMachine {
                 },
             },
         };
+        Object.assign(this.imports.env,this.imports.hostfunctions);
         return;
     }
 
