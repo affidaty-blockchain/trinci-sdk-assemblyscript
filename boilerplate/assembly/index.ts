@@ -1,4 +1,4 @@
-import sdk from '../node_modules/@affidaty/trinci-sdk-as'
+import sdk from './sdk';
 
 // exposing heap.alloc function for host to pass data
 // to this module
