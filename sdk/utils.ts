@@ -13,17 +13,16 @@ export namespace Utils {
         return cPtr;
     }
 
-    /** Splist a 64bit number into array of two 32bit */
+    /** Splist a 64bit number into array of two 32bit*/
     export function splitPtr(combinedPtr: Types.TCombinedPtr): Types.TCombinedPtrTuple {
-        let ptrTuple = new StaticArray<u32>(2);
-        ptrTuple = [
+        let ptrTuple: [u32, u32] = [
             (combinedPtr >> 32) as u32,
             combinedPtr as u32,
         ];
         return ptrTuple;
     }
 
-    /** converts string into an array of bytes */
+    /** Converts string into an array of bytes */
     export function stringtoU8Array(str: string): u8[] {
         let vec: u8[] = new Array<u8>(str.length);
         for (let i = 0; i < str.length; i++) {

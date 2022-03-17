@@ -272,13 +272,7 @@ function readDecorated<T>(decoder: Decoder): T {
     return classObj;
 }
 
-// type TInternalTypeString =
-// | 'u8' | 'Array<u8>' | 'u16' | 'Array<u16>' | 'u32'|'Array<u32>'|'u64'|'Array<u64>'
-// |'i8'|'Array<i8>'|'i16'|'Array<i16>'|'i32'|'Array<i32>'|'i64'|'Array<i64>'
-// |'f32'|'Array<f32>'|'f64'|'Array<f64>'|'bool'|'Array<bool>'
-// |'String'|'Array<~lib/string/String>'|'ArrayBuffer'|'Array<~lib/arraybuffer/ArrayBuffer>';
-
-export const serMap: Map<string, usize> = new Map();
+const serMap: Map<string, usize> = new Map();
 serMap.set('u8', changetype<usize>(MsgPack.InternalTypes.serUInt8));
 serMap.set('Array<u8>', changetype<usize>(MsgPack.InternalTypes.serUInt8Array));
 serMap.set('u16', changetype<usize>(MsgPack.InternalTypes.serUInt16));
@@ -306,7 +300,7 @@ serMap.set('Array<~lib/string/String>', changetype<usize>(MsgPack.InternalTypes.
 serMap.set('ArrayBuffer', changetype<usize>(MsgPack.InternalTypes.serArrayBuffer));
 serMap.set('Array<~lib/arraybuffer/ArrayBuffer>', changetype<usize>(MsgPack.InternalTypes.serArrayBufferArray));
 
-export const deserMap: Map<string, usize> = new Map();
+const deserMap: Map<string, usize> = new Map();
 deserMap.set('u8', changetype<usize>(MsgPack.InternalTypes.deserUInt8));
 deserMap.set('Array<u8>', changetype<usize>(MsgPack.InternalTypes.deserUInt8Array));
 deserMap.set('u16', changetype<usize>(MsgPack.InternalTypes.deserUInt16));
@@ -347,8 +341,9 @@ function writePubKey(writer: Writer, pubKey: Types.PublicKey): void {
     writer.writeByteArray(pubKey.value);
 }
 
+/** Contains ready-to-use serialization functions for most common use cases. */
 namespace MsgPack {
-    /** Specific unnamed public key encode */
+    /** Specific unnamed public key encode. */
     export function pubKeyEncode(pubKey: Types.PublicKey): u8[] {
         const sizer = new Sizer();
         writePubKey(sizer, pubKey);
@@ -359,7 +354,10 @@ namespace MsgPack {
         return resultU8Array;
     }
 
-    /** Template function to serialize a class into an array of bytes (read on limitations in readme) */
+    /** Template function to serialize a custom class decorated with `@msgpackable` decorator.
+     * @template T - a type decorated with `@msgpackable` decorator.
+     * @param classObj - object to serialize
+    */
     export function serialize<T>(classObj: T): u8[] {
         let sizer = new Sizer();
         writeDecorated(sizer, classObj);
@@ -369,7 +367,10 @@ namespace MsgPack {
         return Utils.arrayBufferToU8Array(arrayBuffer);
     }
 
-    /** Template function to deserialize a class from a given array of bytes (read on limitations in readme)*/
+    /** Template function to deserialize a custom class decorated with `@msgpackable` decorator.
+     * @template T - a type decorated with `@msgpackable` decorator.
+     * @param u8Array - bytes to deserialize
+    */
     export function deserialize<T>(u8Array: u8[]): T {
         let arrayBuffer = Utils.u8ArrayToArrayBuffer(u8Array);
         let decoder = new Decoder(arrayBuffer);
@@ -377,31 +378,31 @@ namespace MsgPack {
         return classObj;
     }
 
+
+    /** Template function to serialize an internal type (or an array of type) value.
+     * Supported types: u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, bool, string, ArrayBuffer
+     * @template T - internal type.
+     * @param classObj - object to serialize
+    */
     export function serializeInternalType<T>(value: T): u8[] {
         const typename = nameof<T>();
         const serFunction = changetype<(value: T) => u8[]>(serMap.get(typename));
         return serFunction(value);
-        // if (serMap.has(typename)) {
-        //     const serFunction = changetype<(value: T) => u8[]>(serMap.get(typename));
-        //     return serFunction(value);
-        // } else {
-        //     return serializeDecorated<T>(value);
-        // }
     }
 
+    /** Template function to deserialize an internal type (or an array of type) value.
+     * Supported types: u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, bool, string, ArrayBuffer
+     * @template T - internal type.
+     * @param bytes - bytes to deserialize
+    */
     export function deserializeInternalType<T>(bytes: u8[]): T {
         const typename = nameof<T>();
         const deserFunction = changetype<(bytes: u8[]) => T>(deserMap.get(typename));
         return deserFunction(bytes);
-        // if (deserMap.has(typename)) {
-        //     const deserFunction = changetype<(bytes: u8[]) => T>(serMap.get(typename));
-        //     return deserFunction(bytes);
-        // } else {
-        //     return deserializeDecorated<T>(bytes);
-        // }
     }
 
-    /** Specific smart contract context decoder, used in run() function */
+    /**
+     * Decodes application context information from passed bytes. used in run() function. */
     export function ctxDecode(ctxU8Arr: u8[]): Types.AppContext {
         const ctxArrayBuffer = Utils.u8ArrayToArrayBuffer(ctxU8Arr);
         const decoder = new Decoder(ctxArrayBuffer);
@@ -449,6 +450,9 @@ namespace MsgPack {
         return appOutput;
     }
 
+    /** Functions used to (de)serialize internal assemblyscript types and their arrays.
+     * Supported types: u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, bool, string, ArrayBuffer
+    */
     export namespace InternalTypes {
         export function serBool(value: bool): u8[] {
             let sizer = new Sizer();

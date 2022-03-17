@@ -1,10 +1,16 @@
 namespace Types {
-    /** Two 32 bit numbers (address and length) combined into one 64 bit*/
+
+    /** Two 32 bit numbers (address and length) combined into one 64 bit.
+     * Returned by smart contract to trinci core as coordinates
+     * to the actual return saved to wasmMemory
+    */
     export type TCombinedPtr = u64;
+
     /** Alias of TCombinedPtr */
     export type WasmResult = TCombinedPtr;
-    /** Two 32 bit numbers (address and length) combined into array*/
-    export type TCombinedPtrTuple = StaticArray<u32>;
+
+    /** Two 32 bit numbers (address and length) combined into array. */
+    export type TCombinedPtrTuple = [u32, u32];
 
     /** Application context */
     export class AppContext {
@@ -21,9 +27,10 @@ namespace Types {
         /** Original transaction submitter */
         public origin: string;
     }
+
      /** Alias of Application context */
-    export class CTX extends AppContext {
-    }
+    export type CTX = AppContext;
+
     export class AppOutput {
         /** Boolean value returned by the wasm WebAssembly application (smart contract) */
         success: bool = false;
@@ -31,7 +38,7 @@ namespace Types {
         result: ArrayBuffer = new ArrayBuffer(0);
     }
 
-    /** Public standard key structure */
+    /** Standard public key structure also found in transactions */
     @msgpackable
     export class PublicKey {
         public type: string = '';
