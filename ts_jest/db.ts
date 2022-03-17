@@ -9,13 +9,13 @@ export class trinciDB {
     assetDb: Map<string, Map<string, Uint8Array>>; // <Account1, Map(<assetAccount,val>)>
     wasmModulesIndex: Map<string, { module: WebAssembly.Module, name: string }>; // <refHash1, {name, wasmModule1}>
     accountBindings: Map<string, string>; // <Account1, ContractRefHash1>
-    wasmFilesRed: Map<string, string>; // <Account1, ContractRefHash1>
+    wasmFilesRef: Map<string, string>; // <Account1, ContractRefHash1>
     constructor() {
         this.dataDb = new Map();
         this.assetDb = new Map();
         this.wasmModulesIndex = new Map();
         this.accountBindings = new Map();
-        this.wasmFilesRed = new Map();
+        this.wasmFilesRef = new Map();
     }
     getDataFromOwnerDB(ownerDB:string,key:string):any {
         if (this.dataDb.has(ownerDB)) {
@@ -33,7 +33,7 @@ export class trinciDB {
                     return "";
                 } else if(this.accountBindings.has(t)) {
                     const hash =this.accountBindings.get(t)!;
-                    return t + "\n(" + this.wasmFilesRed.get(hash) + ")";
+                    return t + "\n(" + this.wasmFilesRef.get(hash) + ")";
                 } else {
                     return t + "\n( -- )";
                 }
@@ -87,7 +87,7 @@ export class trinciDB {
                     return "#";
                 } else if (this.accountBindings.has(t)) {
                     const hash =this.accountBindings.get(t)!;
-                    return t + "\n(" + this.wasmFilesRed.get(hash) + ")";
+                    return t + "\n(" + this.wasmFilesRef.get(hash) + ")";
                 } else {
                     return t + "\n( -- )";
                 }
@@ -109,7 +109,7 @@ export class trinciDB {
         const wasmSource = typeof wasmFilePath == 'string' ? wasmFilePath : wasmFilePath.path;
         const wasmBuffer = fs.readFileSync(wasmSource);
         const refHash = getRefHash(wasmBuffer);
-        this.wasmFilesRed.set(refHash,wasmSource);
+        this.wasmFilesRef.set(refHash,wasmSource);
         const module = await WebAssembly.compile(wasmBuffer);
         const name = typeof wasmFilePath == 'string' ? '' : (wasmFilePath.name ? wasmFilePath.name : '');
         this.wasmModulesIndex.set(refHash, { module, name });
