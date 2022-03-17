@@ -1,4 +1,3 @@
-
 import fastSha256 from 'fast-sha256';
 import * as Errors from './errors';
 import * as Defaults from './defaults';
@@ -165,6 +164,55 @@ export class WasmMachine {
                     const data = this.readFromWasmMem(dataOffset, dataLength);
                     const sha256 = fastSha256(data);
                     return Utils.combinePointer(this.writeToWasmMem(sha256), sha256.byteLength);
+                },
+                hf_scall : (
+                    accountOffset: number,
+                    accountLength: number,
+                    methodOffset: number,
+                    methodLength: number,
+                    hashOffset: number,
+                    hashLength : number,
+                    dataOffset: number,
+                    dataLength: number
+                ) : bigint => {
+                    
+                    const calledAccount = Buffer.from(this.readFromWasmMem(accountOffset, accountLength)).toString();
+                    const calledMethod = Buffer.from(this.readFromWasmMem(methodOffset, methodLength)).toString();
+                    const args = this.readFromWasmMem(dataOffset, dataLength);
+                    const hashContract = Buffer.from(this.readFromWasmMem(hashOffset, hashLength)).toString();
+                    // lookiing for hash of callerAccount
+                    let contractHaseInCalledAccount = this.db.getAccountContractHash(calledAccount);
+                    if(contractHaseInCalledAccount == null || contractHaseInCalledAccount == hashContract) {
+                        this.db.accountBindings.set(calledAccount, hashContract);
+                        contractHaseInCalledAccount = hashContract;
+                    } else {
+                        // impossible to bind an account already tampered
+                        const result = new WasmResult().setError(Errors.ACCOUNT_ALREADY_BINDED).toBytes();
+                        return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
+                    }
+                    if(contractHaseInCalledAccount) { // if exists, chack if hash === hashContract
+                        
+                            //TODO: return ptrcombinde with specific error
+                       
+                            // tamper account with hashContract
+                            this.db.bindContractToAccount(calledAccount,hashContract);
+                            // same CALL logic
+                            const moduleToCall = this.db.getAccountContractModule(calledAccount);
+                            console.log("Enter in scall",this.db);
+                            if (!moduleToCall) {
+                                
+                                const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
+                                return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
+                            }
+                            
+                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
+                            const runResult = newWasmMachine.run(args);
+                            const runResultBytes = runResult.toBytes();
+                            return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
+                        
+                    }
+                    const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
+                    return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                 },
                 hf_call: (
                     accountOffset: number,

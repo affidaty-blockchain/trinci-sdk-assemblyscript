@@ -22,6 +22,18 @@ declare function hf_call(
     dataAddress: u32,
     dataLength: u32,
 ): Types.TCombinedPtr;
+declare function hf_scall(
+    accountIdAddress: u32,
+    accountIdLength: u32,
+    methodAddress: u32,
+    methodLength: u32,
+    hashAddress: u32,
+    hashLength: u32,
+    dataAddress: u32,
+    dataLength: u32,
+): Types.TCombinedPtr;
+
+
 declare function hf_verify(
     pubKeyAddress: u32,
     pubKeyLength: u32,
@@ -47,6 +59,28 @@ export namespace HostFunctions {
             targetId.length,
             methodAddress,
             method.length,
+            dataAddress,
+            data.length,
+        );
+        let combPtrTuple = Utils.splitPtr(combPtr);
+        return MsgPack.appOutputDecode(
+            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+        )
+    }
+
+    /** call another smart contract method from within a smart contyract using specific hash*/
+    export function scall(targetId: string, method: string, hash:string, data: u8[]): Types.AppOutput {
+        let targetIdAddress = MemUtils.stringToMem(targetId);
+        let methodAddress = MemUtils.stringToMem(method);
+        let dataAddress = MemUtils.u8ArrayToMem(data);
+        let hashAdress = MemUtils.stringToMem(hash);
+        let combPtr = hf_scall(
+            targetIdAddress,
+            targetId.length,
+            methodAddress,
+            method.length,
+            hashAdress,
+            hash.length,
             dataAddress,
             data.length,
         );

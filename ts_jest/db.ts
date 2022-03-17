@@ -17,6 +17,38 @@ export class trinciDB {
         this.accountBindings = new Map();
         this.wasmFilesRed = new Map();
     }
+    getDataFromOwnerDB(ownerDB:string,key:string):any {
+        if (this.dataDb.has(ownerDB)) {
+            const ownerDBMap = this.dataDb.get(ownerDB);
+            if(ownerDBMap!.has(key)) {
+                return mpDecode(ownerDBMap!.get(key) as Uint8Array);
+            }
+        }
+        return null;
+    }
+    printData(accountId:string) {
+        const table :Table= new Table({
+            head: ["#key",accountId].map(t => {
+                if(t == "#key") {
+                    return "";
+                } else if(this.accountBindings.has(t)) {
+                    const hash =this.accountBindings.get(t)!;
+                    return t + "\n(" + this.wasmFilesRed.get(hash) + ")";
+                } else {
+                    return t + "\n( -- )";
+                }
+            })
+        });
+        table.push(["Key","MessagePackDecode(data)"]);
+        if (this.dataDb.has(accountId)) {
+            const accountData = this.dataDb.get(accountId);
+            const keys:string[] = [...accountData!.keys()];
+            for(let k of keys) {
+                table.push([k,JSON.stringify(mpDecode(accountData!.get(k) as Uint8Array))]);
+            }
+        }
+        console.log(table.toString());
+    }
     printAssets() {
         const {allAccounts,table,headAccounts} = this._preparePrint();
         const allAccountsArray:string[] = Array.from(allAccounts);
@@ -30,8 +62,6 @@ export class trinciDB {
                     } else {
                         return "--";
                     }
-                    
-
                 } else {
                     return "--";
                 }
