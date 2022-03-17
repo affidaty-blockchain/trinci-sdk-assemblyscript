@@ -80,7 +80,7 @@ export namespace HostFunctions {
         );
         let combPtrTuple = Utils.splitPtr(combPtr);
         return MsgPack.appOutputDecode(
-            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+            MemUtils.u8ArrayFromMem(combPtrTuple.offset, combPtrTuple.length)
         )
     }
 
@@ -107,7 +107,7 @@ export namespace HostFunctions {
         );
         let combPtrTuple = Utils.splitPtr(combPtr);
         return MsgPack.appOutputDecode(
-            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+            MemUtils.u8ArrayFromMem(combPtrTuple.offset, combPtrTuple.length)
         )
     }
 
@@ -147,7 +147,7 @@ export namespace HostFunctions {
         const keyAddress = MemUtils.stringToMem(key);
         let combinedPtr = hf_load_data(keyAddress, key.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
-        return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+        return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
     }
 
     /**
@@ -180,7 +180,7 @@ export namespace HostFunctions {
         );
         let combPtrTuple = Utils.splitPtr(combPtr);
         let getKeysResult = MsgPack.appOutputDecode(
-            MemUtils.u8ArrayFromMem(combPtrTuple[0], combPtrTuple[1])
+            MemUtils.u8ArrayFromMem(combPtrTuple.offset, combPtrTuple.length)
         );
         let result: string[] = [];
         if (getKeysResult.success) {
@@ -198,7 +198,7 @@ export namespace HostFunctions {
         let idAddress = MemUtils.stringToMem(sourceId);
         let combinedPtr = hf_load_asset(idAddress, sourceId.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
-        return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+        return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
     }
 
     /**
@@ -234,7 +234,7 @@ export namespace HostFunctions {
         let idAddress = MemUtils.stringToMem(accountId);
         let combinedPtr = hf_get_account_contract(idAddress, accountId.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
-        let resultBytesU8 = MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+        let resultBytesU8 = MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
         let resultBytesHex = Utils.arrayBufferToHexString(Utils.u8ArrayToArrayBuffer(resultBytesU8));
         return resultBytesHex;
     }
@@ -244,7 +244,7 @@ export namespace HostFunctions {
         let dataAddr = MemUtils.u8ArrayToMem(data);
         let combinedPtr = hf_sha256(dataAddr, data.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
-        return MemUtils.u8ArrayFromMem(ptrTuple[0], ptrTuple[1]);
+        return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
     }
 
     /** Verify the data signature against provided public key. */

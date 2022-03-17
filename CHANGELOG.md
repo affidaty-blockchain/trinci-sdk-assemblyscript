@@ -5,36 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.3.10] - 2022-03-15
-
-### Added
-
-- dependencies for db jest test class
-
-## [2.3.9] - 2022-03-15
-
-### Fixed
-
-- added missing visitor-as directory
-
-## [2.3.8] - 2022-03-15
+## [2.4.0] - UNPUBLISHED
 
 ### Added
 
 - `serializeInternalType<>()` and `deserializeInternalType<>()` functions to easily (de)serialize internal assemblyscript types (`bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `f32`, `f64`, `string`, `ArrayBuffer`) and arrays of those types.
-
-### Changed
-
-- slightly changed TX class structure in Jest test environment
-
-### Fixed
-
-- missing docker files
-
-## [2.3.7] - 2022-03-14
-
-### Added
-
 - added possibility to test compiled smart contracts(.wasm) directly with jest without need to set up a full TRINCI node.
 - added a sample jest test for sample smart contract. Try it with `npm run test` after compiling example smart contract with `npm run asbuild`.
 

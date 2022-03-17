@@ -15,10 +15,10 @@ export namespace Utils {
 
     /** Splist a 64bit number into array of two 32bit*/
     export function splitPtr(combinedPtr: Types.TCombinedPtr): Types.TCombinedPtrTuple {
-        let ptrTuple: [u32, u32] = [
-            (combinedPtr >> 32) as u32,
-            combinedPtr as u32,
-        ];
+        const ptrTuple: Types.TCombinedPtrTuple = {
+            offset: (combinedPtr >> 32) as u32,
+            length: combinedPtr as u32,
+        };
         return ptrTuple;
     }
 

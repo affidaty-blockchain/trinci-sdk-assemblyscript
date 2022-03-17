@@ -9,8 +9,13 @@ namespace Types {
     /** Alias of TCombinedPtr */
     export type WasmResult = TCombinedPtr;
 
-    /** Two 32 bit numbers (address and length) combined into array. */
-    export type TCombinedPtrTuple = [u32, u32];
+    /** Two 32 bit numbers (offset and length) combined into array. */
+    export class TCombinedPtrTuple {
+        /** Data offset */
+        offset: u32 = 0;
+        /** Data length */
+        length: u32 = 0;
+    };
 
     /** Application context */
     export class AppContext {
