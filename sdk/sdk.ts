@@ -1,7 +1,7 @@
 import Types from './types';
 import Utils from './utils';
 import MemUtils from './memutils';
-import HostFunctions from './hostfunctions';
+import HostFunctions from './env';
 import MsgPack from './msgpack';
 import { Return, Response } from './wmio';
 

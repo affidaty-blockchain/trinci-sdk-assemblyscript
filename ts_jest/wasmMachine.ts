@@ -107,8 +107,6 @@ export class WasmMachine {
                 trace(msg: any, n: any) {
                     console.log('called trace()');
                 },
-            },
-            hostfunctions: {
                 hf_log: (offset: number, length: number) => {
                     console.log(`WASM_LOG(${offset}+${length}): ${Buffer.from(this.readFromWasmMem(offset, length)).toString()}`);
                 },
