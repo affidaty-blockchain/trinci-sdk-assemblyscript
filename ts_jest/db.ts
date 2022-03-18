@@ -1,7 +1,7 @@
 import fs from "fs";
 import Table from 'cli-table';
 
-import { getRefHash, mpDecode } from "./utils";
+import { getRefHash, mpDecode, mpEncode } from "./utils";
 
 export interface IWasmPathWithName { path: string, name?: string };
 export class trinciDB {
@@ -16,6 +16,12 @@ export class trinciDB {
         this.wasmModulesIndex = new Map();
         this.accountBindings = new Map();
         this.wasmFilesRef = new Map();
+    }
+    mpDecode(data:Uint8Array):any {
+        return mpDecode(data);
+    }
+    mpEncode(data:any):Uint8Array {
+        return mpEncode(data);
     }
     getDataFromOwnerDB(ownerDB:string,key:string):any {
         if (this.dataDb.has(ownerDB)) {
@@ -57,8 +63,7 @@ export class trinciDB {
                 if(this.assetDb.has(rowAccount)) {
                     const assetMap = this.assetDb.get(rowAccount)!;
                     if(assetMap.has(colAccount)) {
-                        const result =  assetMap.get(colAccount);
-                        return mpDecode(result as Uint8Array);
+                        return JSON.stringify(this.balance(colAccount,rowAccount));
                     } else {
                         return "--";
                     }

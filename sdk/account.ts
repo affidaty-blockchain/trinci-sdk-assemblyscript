@@ -31,6 +31,19 @@ export class AccountAssetU64 {
         }
         return false;
     }
+    divide(amount:u64,fractionsArray:u64[]):u64[] {
+        // 101,[3,3,3]
+        const total = fractionsArray.reduce((acc,nextItem) => {return acc+nextItem;},0);
+        const results:u64[] = [];
+        for (let partIndex in fractionsArray) {
+            //   4        202 x 2  % 100  
+            results[partIndex] = amount*fractionsArray[partIndex]/total; 
+        }
+        //rest = 2
+        results[0] += (amount - results.reduce(((acc:u64,nextItem:u64):u64 => acc+nextItem ),0));
+        return results;
+        
+    }
  }
 export class OwnerDB {
     static get<T>(key:string):T {
