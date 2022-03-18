@@ -35,7 +35,7 @@ export class AccountAssetU64 {
         // 101,[3,3,3]
         const total = fractionsArray.reduce((acc,nextItem) => {return acc+nextItem;},0);
         const results:u64[] = [];
-        for (let partIndex in fractionsArray) {
+        for (let partIndex:usize = 0; partIndex < fractionsArray.length; partIndex++) {
             //   4        202 x 2  % 100  
             results[partIndex] = amount*fractionsArray[partIndex]/total; 
         }
