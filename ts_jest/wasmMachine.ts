@@ -207,7 +207,7 @@ export class WasmMachine {
                             this.db.bindContractToAccount(calledAccount,hashContract);
                             // same CALL logic
                             const moduleToCall = this.db.getAccountContractModule(calledAccount);
-                            console.log("Enter in scall",this.db);
+                            console.log("Enter in scall");
                             if (!moduleToCall) {
                                 
                                 const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
