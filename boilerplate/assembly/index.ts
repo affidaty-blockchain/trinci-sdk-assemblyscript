@@ -23,7 +23,7 @@ export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i
     // ERROR IF METHOD NOT REGISTERED
     if (!methodsMap.has(ctx.method)) {
         let success = false;
-        let resultBytes = sdk.Utils.stringtoU8Array('Method not found.');
+        let resultBytes = sdk.Utils.stringtoU8Array('method not found');
         return sdk.MsgPack.appOutputEncode(success, resultBytes);
     }
 
