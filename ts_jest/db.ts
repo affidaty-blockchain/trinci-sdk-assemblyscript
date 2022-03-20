@@ -17,6 +17,25 @@ export class trinciDB {
         this.accountBindings = new Map();
         this.wasmFilesRef = new Map();
     }
+    fork():trinciDB {
+        let backUp = new trinciDB();
+        const tmpDataMap: Map<string, Map<string, Uint8Array>> = new Map();
+        const tmpAssetMap: Map<string, Map<string, Uint8Array>> = new Map(); // <Account1, Map(<assetAccount,val>)>
+        let keys =[ ...this.dataDb.keys() ];
+        for(let k of keys) {
+            tmpDataMap.set(k,new Map(this.dataDb.get(k)));
+        }
+        keys =[ ...this.assetDb.keys() ];
+        for(let k of keys) {
+            tmpAssetMap.set(k,new Map(this.assetDb.get(k)));
+        }
+        backUp.dataDb = tmpDataMap;
+        backUp.assetDb = tmpAssetMap;
+        backUp.wasmModulesIndex = new Map(this.wasmModulesIndex);
+        backUp.accountBindings = new Map(this.accountBindings);
+        backUp.wasmFilesRef = new Map(this.wasmFilesRef);
+        return backUp;
+    }
     mpDecode(data:Uint8Array):any {
         return mpDecode(data);
     }
@@ -39,7 +58,9 @@ export class trinciDB {
                     return "";
                 } else if(this.accountBindings.has(t)) {
                     const hash =this.accountBindings.get(t)!;
-                    return t + "\n(" + this.wasmFilesRef.get(hash) + ")";
+                    const fileName = this.wasmFilesRef.get(hash)!.split("/").pop();
+
+                    return t + "\n(" + fileName + ")";
                 } else {
                     return t + "\n( -- )";
                 }
@@ -92,7 +113,8 @@ export class trinciDB {
                     return "#";
                 } else if (this.accountBindings.has(t)) {
                     const hash =this.accountBindings.get(t)!;
-                    return t + "\n(" + this.wasmFilesRef.get(hash) + ")";
+                    const fileName = this.wasmFilesRef.get(hash)!.split("/").pop();
+                    return t + "\n(" + fileName + ")";
                 } else {
                     return t + "\n( -- )";
                 }

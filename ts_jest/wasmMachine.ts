@@ -271,7 +271,6 @@ export class WasmMachine {
                     try {
                         const runResult = newWasmMachine.run(args);
                         const runResultBytes = runResult.toBytes();
-                        console.log("IsCallable",calledMethod,this.isCallable(calledMethod));
                         return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
                     } catch(e) {
                         const result = new WasmResult().setError(Errors.METHOD_NOT_FOUND).toBytes();

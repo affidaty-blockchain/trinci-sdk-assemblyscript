@@ -44,12 +44,17 @@ export class TrinciNode {
             if (!wasmModule) {
                 throw new Error(Errors.MODULE_NOT_FOUND);
             }
+            const forkedDB = this.db.fork();
             const wasmMachine = new WasmMachine(wasmModule, ctx, this.db, hostFunctionsMock);
-            let wmRunResult = new WasmResult()
+            let wmRunResult = new WasmResult();
             try {
                 wmRunResult = wasmMachine.run(argsBytes);
             } catch (error) {
                 return reject(error);
+            }
+            if(wmRunResult.isError) {
+                //console.log(this.db,forkedDB);
+                this.db = forkedDB;
             }
             return resolve(wmRunResult);
         });
