@@ -62,6 +62,35 @@ export class TrinciNode {
 
     async runTx(tx:TX, mockHostFunctions = {}):Promise<WasmResult> {
         return this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions);
+        /*
+        return new Promise((resolve,reject) => {
+            this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions).then(wasmResult => {
+                if(wasmResult.isError) {
+                    reject(wasmResult);
+                } else {
+                    resolve(wasmResult);
+                }
+            }).catch(reject);
+        });*/
+    }
+    async runBulkTxs(txs:TX[], mockHostFunctions = {}):Promise<WasmResult[]> {
+        return new Promise((resolve,reject) => {
+            // fork db
+            const forkedDB = this.db.fork();
+            Promise.all(txs.map(async (tx:TX) => this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions))).then(results => {
+                if(results.find(wasmResult => wasmResult.isError)) {
+                    this.db = forkedDB;
+                    reject(results);    
+                }
+                resolve(results);
+            }).catch(e => {
+                this.db = forkedDB;
+                reject(e);
+            });
+
+            //const results:WasmResult[] = txs.map(async (tx:TX) => await this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions));
+            
+        });
     }
 }
 
