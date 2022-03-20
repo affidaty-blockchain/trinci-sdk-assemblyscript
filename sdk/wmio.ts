@@ -23,7 +23,7 @@ export namespace Return {
      * @param value - value you want to return
     */
     export function Success<T>(value:T):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, MsgPack.serializeInternalType<T>(val));
+        return MsgPack.appOutputEncode(true, MsgPack.serializeInternalType<T>(value));
     }
 
     /**
