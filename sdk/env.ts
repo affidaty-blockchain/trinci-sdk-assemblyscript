@@ -24,6 +24,8 @@ declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPt
 
 declare function hf_drand(max: u64): Types.TCombinedPtr;
 
+declare function hf_is_callable(accountIdAddress: u32,accountIdLength: u32,methodAddress: u32,methodLength: u32): u8;
+
 declare function hf_call(
     accountIdAddress: u32,
     accountIdLength: u32,
@@ -61,6 +63,12 @@ declare function hf_emit(
 ): void;
 
 export namespace HostFunctions {
+    /** check if method is callable in targetId account */
+    export function is_callable(targetId: string, method: string): bool {
+        let targetIdAddress = MemUtils.stringToMem(targetId);
+        let methodAddress = MemUtils.stringToMem(method);
+        return (hf_is_callable(targetIdAddress,targetId.length,methodAddress,method.length) ==1);
+    }
     /** Calls another smart contract method from within a smart contract.
      * @param targetId - account to call
      * @param method - method to call

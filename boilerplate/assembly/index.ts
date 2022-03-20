@@ -1,36 +1,36 @@
 import sdk from './sdk';
-
-// exposing heap.alloc function for host to pass data
-// to this module
-export function alloc(size: i32): i32 {
-    return heap.alloc(size) as i32;
-}
-// after loading module, host calls this function automatically
-export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i32): sdk.Types.TCombinedPtr {
-    // decoding context and getting args from memory
-    let ctxU8Arr: u8[] = sdk.MemUtils.u8ArrayFromMem(ctxAddress, ctxSize);
-    let ctx = sdk.MsgPack.ctxDecode(ctxU8Arr);
-    let argsU8: u8[] = sdk.MemUtils.u8ArrayFromMem(argsAddress, argsSize);
-    let methodsMap = new Map<string, (ctx: sdk.Types.AppContext, args: u8[])=>sdk.Types.TCombinedPtr>();
-
-    // REGISTER YOUR METHODS HERE
-    // See definitions below
-    methodsMap.set('test_method', testMethod);
-    methodsMap.set('store_data', storeData);
-    methodsMap.set('load_data', loadData);
-    methodsMap.set('remove_data', removeData);
-
-    // ERROR IF METHOD NOT REGISTERED
-    if (!methodsMap.has(ctx.method)) {
-        let success = false;
-        let resultBytes = sdk.Utils.stringtoU8Array('method not found');
-        return sdk.MsgPack.appOutputEncode(success, resultBytes);
+    const methodsMap = new Map<string, (ctx: sdk.Types.AppContext, args: u8[])=>sdk.Types.TCombinedPtr>();
+    //####################### Native required function ###############################################################
+    // exposing heap.alloc function for host to pass data
+    // to this module
+    export function alloc(size: i32): i32 {
+        return heap.alloc(size) as i32;
     }
-
-    // CALL METHOD ASSOCIATED TO STRING
-    return methodsMap.get(ctx.method)(ctx, argsU8);
-}
-
+    export function run(ctxAddress: i32, ctxSize: i32, argsAddress: i32, argsSize: i32): sdk.Types.WasmResult {
+        // decoding context and getting args from memory
+        let ctxU8Arr: u8[] = sdk.MemUtils.u8ArrayFromMem(ctxAddress, ctxSize);
+        let ctx = sdk.MsgPack.ctxDecode(ctxU8Arr);
+        let argsU8: u8[] = sdk.MemUtils.u8ArrayFromMem(argsAddress, argsSize);
+        
+        // ERROR IF METHOD NOT REGISTERED
+        if (!methodsMap.has(ctx.method)) {
+            let success = false;
+            let resultBytes = sdk.Utils.stringtoU8Array('method not found');
+            return sdk.MsgPack.appOutputEncode(success, resultBytes);
+        }
+        // CALL METHOD ASSOCIATED TO STRING
+        return methodsMap.get(ctx.method)(ctx, argsU8);
+    }
+    export function is_callabe(methodAddress: i32, methodSize: i32): u8 {
+        // decoding method from memory
+        const calledMethod:string = sdk.MsgPack.deserializeInternalType<string>(sdk.MemUtils.u8ArrayFromMem(methodAddress, methodSize));
+        sdk.HostFunctions.log("Request method:" + calledMethod);
+        // ERROR IF METHOD NOT REGISTERED
+        return methodsMap.has(calledMethod) ? 1 : 0;
+    }
+    //####################### private internal Functionn ###############################################################
+    
+methodsMap.set('test_method', testMethod);
 function testMethod(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // HostFunctions contains all the available methods to interact with the blockchain
     // outside of protected WASM environment.
@@ -61,7 +61,7 @@ class KeyData {
 class Key {
     key: string = '';
 }
-
+methodsMap.set('store_data', storeData);
 function storeData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least "debug" log level
     sdk.HostFunctions.log('storeData()');
@@ -75,7 +75,7 @@ function storeData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombined
     let resultBytes = sdk.Utils.stringtoU8Array('Data stored');
     return sdk.MsgPack.appOutputEncode(success, resultBytes);
 }
-
+methodsMap.set('load_data', loadData);
 function loadData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least debug log level
     sdk.HostFunctions.log('loadData()');
@@ -89,6 +89,7 @@ function loadData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedP
     return sdk.MsgPack.appOutputEncode(success, data);
 }
 
+methodsMap.set('remove_data', removeData);
 function removeData(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
     // To see those logs launch node with at least debug log level
     sdk.HostFunctions.log('loadData()');
