@@ -80,7 +80,7 @@ export class TrinciNode {
             Promise.all(txs.map(async (tx:TX) => this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions))).then(results => {
                 if(results.find(wasmResult => wasmResult.isError)) {
                     this.db = forkedDB;
-                    reject(results);    
+                    return reject(results);    
                 }
                 resolve(results);
             }).catch(e => {
