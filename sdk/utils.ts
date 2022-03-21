@@ -30,7 +30,10 @@ export namespace Utils {
         }
         return vec;
     }
-
+     /** converts an arrayBuffer into string */
+    export function arrayBufferToString(arr:ArrayBuffer):string {
+        return u8ArrayToString(arrayBufferToU8Array(arr));
+    }
     /** converts an array of bytes into string */
     export function u8ArrayToString(u8Arr: u8[]): string {
         let str: string = '';
