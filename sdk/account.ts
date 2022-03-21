@@ -33,14 +33,14 @@ export class AccountAssetU64 {
     }
     divide(amount:u64,fractionsArray:u64[]):u64[] {
         // 101,[3,3,3]
-        const total = fractionsArray.reduce((acc,nextItem) => {return acc+nextItem;},0);
-        const results:u64[] = [];
-        for (let partIndex:usize = 0; partIndex < fractionsArray.length; partIndex++) {
-            //   4        202 x 2  % 100  
-            results[partIndex] = amount*fractionsArray[partIndex]/total; 
+        const u64Start:u64=0;
+        const total = fractionsArray.reduce((acc,nextItem) => {return acc+nextItem;},u64Start);
+        const results:u64[] = new Array<u64>(fractionsArray.length);
+        for(let i=0;i<fractionsArray.length;i++) {
+            results[i] = amount*fractionsArray[i]/total
         }
         //rest = 2
-        results[0] += (amount - results.reduce(((acc:u64,nextItem:u64):u64 => acc+nextItem ),0));
+        results[0] += (amount - results.reduce(((acc:u64,nextItem:u64):u64 => acc+nextItem ),u64Start));
         return results;
         
     }
