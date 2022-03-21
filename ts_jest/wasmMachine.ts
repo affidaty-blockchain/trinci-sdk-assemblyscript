@@ -278,6 +278,17 @@ export class WasmMachine {
                     }
                     
                 },
+                hf_verify: (
+                    pubKeyAddress: number,
+                    pubKeyLength: number,
+                    dataAddress: number,
+                    dataLength: number,
+                    signatureAddress: number,
+                    signatureLength: number,
+                ): number => {
+                    console.log('called hf_verify() function. returning true;');
+                    return 1;
+                },
             },
         };
         Object.assign(this.imports.env,this.imports.hostfunctions);
