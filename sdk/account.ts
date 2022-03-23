@@ -68,4 +68,11 @@ export class OwnerDB {
         const ret = HostFunctions.getKeys(key);
         return ret.length > 1;
     }
+    static delete(key:string):boolean {
+        if(this.has(key)) {
+            const ret = HostFunctions.removeData(key);
+            return true;
+        }
+        return false;
+    }
 }
