@@ -237,13 +237,6 @@ export class WasmMachine {
                     const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
                     return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                 },
-                /*hf_is_callable: (
-                    methodOffset: number,
-                    methodLength: number,
-                ): bigint => {
-                    const calledMethod = Buffer.from(this.readFromWasmMem(methodOffset, methodLength)).toString();
-
-                },*/
                 hf_call: (
                     accountOffset: number,
                     accountLength: number,
@@ -346,7 +339,7 @@ export class WasmMachine {
         try {
             const method_bytes = new Uint8Array(Utils.mpEncode(method));
             const method_bytes_offset = this.writeToWasmMem(method_bytes);
-            return (this.wasmInstance!.exports.is_callabe as CallableFunction)(method_bytes_offset,method_bytes.byteLength);
+            return (this.wasmInstance!.exports.is_callable as CallableFunction)(method_bytes_offset,method_bytes.byteLength);
         } catch(e) {
             console.error(e);
             return false;
