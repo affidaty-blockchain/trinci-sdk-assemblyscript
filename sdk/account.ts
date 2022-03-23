@@ -70,7 +70,7 @@ export class OwnerDB {
     }
     static delete(key:string):boolean {
         if(this.has(key)) {
-            const ret = HostFunctions.removeData(key);
+            HostFunctions.removeData(key);
             return true;
         }
         return false;
