@@ -1,0 +1,8 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig.json",
+    "extends": "./tsconfig.jestenv.json",
+    "compilerOptions": {
+        "outDir": "./jestenv/cjs",
+        "module": "CommonJS"
+    }
+}

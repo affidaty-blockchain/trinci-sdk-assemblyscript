@@ -1,5 +1,5 @@
 import path from 'path';
-import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
+import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/jestenv';
 
 describe('desc1', () => {
     it('it1', async () => {

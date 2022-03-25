@@ -6,7 +6,7 @@
     "files": [
         "boilerplate",
         "sdk",
-        "ts_jest",
+        "jestenv",
         "visitor-as-cjs",
         "index.ts",
         "init.sh",
@@ -15,7 +15,11 @@
         "README.md"
     ],
     "scripts": {
-        "build": "tsc -p visitor-as/tsconfig.json && cp -r visitor-as/as dist/as"
+        "build:visitor": "tsc -p tsconfig.visitor.json && cp -r visitor-as/as visitor-as-cjs/as",
+        "build:jestenv-esm": "tsc -p tsconfig.jestenv.esm.json",
+        "build:jestenv-cjs": "tsc -p tsconfig.jestenv.cjs.json",
+        "build:jestenv": "npm run build:jestenv-esm && npm run build:jestenv-cjs",
+        "build": "npm run build:visitor && npm run build:jestenv"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",

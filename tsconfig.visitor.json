@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../dist",
+    "outDir": "./visitor-as-cjs",
     "inlineSourceMap": true,
     "inlineSources": true,
     "target": "esnext",
@@ -19,5 +19,5 @@
     "strict": true,
     "lib": ["esnext","esnext.string"]
   },
-  "include": ["./**/*"]
+  "include": ["./visitor-as/*"]
 }
