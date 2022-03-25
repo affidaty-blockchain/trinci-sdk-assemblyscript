@@ -1,8 +1,8 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig.json",
-    "extends": "./tsconfig.jestenv.json",
+    "extends": "./tsconfig.tsjest.json",
     "compilerOptions": {
-        "outDir": "./jestenv/cjs",
+        "outDir": "./ts_jest_dist/cjs",
         "module": "CommonJS"
     }
 }

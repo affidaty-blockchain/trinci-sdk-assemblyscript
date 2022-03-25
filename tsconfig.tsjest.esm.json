@@ -2,9 +2,9 @@
     "$schema": "https://json.schemastore.org/tsconfig.json",
     "extends": "./tsconfig.jestenv.json",
     "compilerOptions": {
-        "outDir": "./jestenv/esm",
+        "outDir": "./ts_jest_dist/esm",
         "declaration": true,
         "declarationMap": true,
-        "declarationDir": "./jestenv/types"
+        "declarationDir": "./ts_jest_dist/types"
     }
 }

@@ -1,13 +1,13 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.3.23",
+    "version": "2.3.24",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "main": "index.ts",
     "files": [
         "boilerplate",
         "sdk",
-        "jestenv",
         "visitor-as-cjs",
+        "ts_jest",
         "index.ts",
         "init.sh",
         "LICENSE",
@@ -16,10 +16,10 @@
     ],
     "scripts": {
         "build:visitor": "tsc -p tsconfig.visitor.json && cp -r visitor-as/as visitor-as-cjs/as",
-        "build:jestenv-esm": "tsc -p tsconfig.jestenv.esm.json",
-        "build:jestenv-cjs": "tsc -p tsconfig.jestenv.cjs.json",
-        "build:jestenv": "npm run build:jestenv-esm && npm run build:jestenv-cjs",
-        "build": "npm run build:visitor && npm run build:jestenv"
+        "build:tsjest-esm": "tsc -p tsconfig.tsjest.esm.json",
+        "build:tsjest-cjs": "tsc -p tsconfig.tsjest.cjs.json",
+        "build:tsjest": "npm run build:tsjest-esm && npm run build:tsjest-cjs",
+        "build": "npm run build:visitor"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",
