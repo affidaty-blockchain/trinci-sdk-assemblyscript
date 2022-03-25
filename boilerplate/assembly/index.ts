@@ -1,6 +1,6 @@
 import sdk from './sdk';
     const methodsMap = new Map<string, (ctx: sdk.Types.AppContext, args: u8[])=>sdk.Types.TCombinedPtr>();
-    //####################### Native required function ###############################################################
+    //####################### Native required functions ###############################################################
     // exposing heap.alloc function for host to pass data
     // to this module
     export function alloc(size: i32): i32 {
@@ -21,14 +21,14 @@ import sdk from './sdk';
         // CALL METHOD ASSOCIATED TO STRING
         return methodsMap.get(ctx.method)(ctx, argsU8);
     }
-    export function is_callabe(methodAddress: i32, methodSize: i32): u8 {
+    export function is_callable(methodAddress: i32, methodSize: i32): u8 {
         // decoding method from memory
         const calledMethod:string = sdk.MsgPack.deserializeInternalType<string>(sdk.MemUtils.u8ArrayFromMem(methodAddress, methodSize));
         sdk.HostFunctions.log("Request method:" + calledMethod);
         // ERROR IF METHOD NOT REGISTERED
         return methodsMap.has(calledMethod) ? 1 : 0;
     }
-    //####################### private internal Functionn ###############################################################
+    //####################### private internal Functions ###############################################################
     
 methodsMap.set('test_method', testMethod);
 function testMethod(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.TCombinedPtr {
