@@ -27,7 +27,7 @@ export function is_callable(methodAddress: i32, methodSize: i32): u8 {
     // ERROR IF METHOD NOT REGISTERED
     return methodsMap.has(calledMethod) ? 1 : 0;
 }
-//####################### private internal Functions ###############################################################
+//####################### public Functions ###############################################################
     
 methodsMap.set('test_method', testMethod);
 function testMethod(_ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.WasmResult {
@@ -89,8 +89,13 @@ function mint(ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.WasmResult {
     let config = OwnerDB.getObject<Config>("config"); // retrieve config from db
     if(ctx.origin == config.owner) { // only config.owner can mint, ctx.origin is who signed the transaction
         let args = sdk.MsgPack.deserialize<TransferArgs>(argsU8); // convert generic u8[] that contains bytes of MessagePack of config structure
+        if((args.units + config.total_minted)> config.max_mintable) {
+            return sdk.Return.Error("Token limit exceeded during mint"); // error message must be a string        
+        }
         const toAccount = new AccountAssetU64(args.to); // use AccountAssetU64 class to wrap usesful method around a generic asset in u64
         toAccount.add(args.units); // add take care about previous balance and add token to actual balance
+        config.total_minted += args.units;
+        OwnerDB.setObject("config",config); //update config with new total_minted value
         return sdk.Return.Success<u64>(toAccount.balance()); // in Success<Type>  you must specify native type such as u64,string, bool, ecc...
     }
     return sdk.Return.Error("No right to mint!"); // error message must be a string

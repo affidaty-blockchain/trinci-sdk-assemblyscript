@@ -96,7 +96,9 @@ describe('Test all smart contract functionalities', () => {
         }
         expect(txResult.resultDecoded).toEqual(mintedToken); // check blockchain response, mint return the balance of minted account 
         expect(node.db.balance("#TargetAccount","AnotherAccount") == mintedToken); // check if balance of AnotherAccount is equal to minted tokens
+        expect(node.db.getDataFromOwnerDB("#TargetAccount","config").total_minted == mintedToken); // check if config was updated wit minted tokens
         node.db.printAssets();  // use this tool to print in console the table of KVStore about any account such as TargetAccount
+        node.db.printData("#TargetAccount");  // use this tool to print in console the table of KVStore about any account such as TargetAccount
     });
     it('transfer method', async () => {
         // getting smart contract full path
