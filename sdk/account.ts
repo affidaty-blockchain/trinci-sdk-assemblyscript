@@ -66,7 +66,7 @@ export class OwnerDB {
     }
     static has(key:string):boolean {
         const ret = HostFunctions.getKeys(key);
-        return ret.length > 1;
+        return ret.length > 0;
     }
     static delete(key:string):boolean {
         if(this.has(key)) {
