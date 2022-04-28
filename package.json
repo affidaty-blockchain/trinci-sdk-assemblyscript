@@ -16,10 +16,11 @@
     ],
     "scripts": {
         "build:visitor": "tsc -p tsconfig.visitor.json && cp -r visitor-as/as visitor-as-cjs/as",
+        "build:transformer": "tsc -p tsconfig.transformer.json",
         "build:tsjest-esm": "tsc -p tsconfig.tsjest.esm.json",
         "build:tsjest-cjs": "tsc -p tsconfig.tsjest.cjs.json",
         "build:tsjest": "npm run build:tsjest-esm && npm run build:tsjest-cjs",
-        "build": "npm run build:visitor"
+        "build": "npm run build:visitor && npm run build:transformer"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",
@@ -45,8 +46,8 @@
         "ts-node": "^10.2.1"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "^0.19.11",
-        "assemblyscript": "^0.19.11",
+        "@assemblyscript/loader": "0.19.23",
+        "assemblyscript": "0.19.23",
         "typescript": "^4.4.3"
     }
 }
