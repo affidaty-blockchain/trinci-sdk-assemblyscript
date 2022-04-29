@@ -227,7 +227,6 @@ async function createPreappArchive(zipOutFile, pubTxOutFile) {
 }
 
 async function main() {
-    console.log(argv);
 
     const metadata = loadMetadata(argv.metadataFile);
     const wasmBytes = loadWasmFile(metadata.wasmFile);
