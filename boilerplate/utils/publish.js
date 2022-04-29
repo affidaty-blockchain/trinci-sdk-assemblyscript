@@ -15,6 +15,7 @@ const DEFAULT_PUBLISH_TX_FILE = './publishTx.bin';
 const DEFAULT_PREAPPROVE_ARCHIVE_FILE = './publishTx.bin';
 const DEFAULT_REST_PORT = 8000;
 const DEFAULT_BRIDGE_PORT = 8001;
+const DEFAULT_AFFIDATY_PREAPPROVE_URL = "https://affidaty.io/mainnet/preapprove";
 
 const argv = Yargs(Yargs.hideBin(process.argv))
 .version('1.0.0')
@@ -267,7 +268,7 @@ async function main() {
         throw new Error('Could not verify signed publish transaction.');
     }
 
-    process.stdout.write(`Network:        [${argv.network}]\n`);
+    process.stdout.write(`Network:        [${publishTx.data.networkName}]\n`);
     process.stdout.write(`Publisher:      [${publisherAccount.accountId}]\n`);
     process.stdout.write(`Contract hash:  [${wasmRefHash}]\n`);
     process.stdout.write(`Metadata:\n${JSON.stringify(metadata, null, 4)}\n`);
@@ -295,7 +296,7 @@ async function main() {
             removeFile(txFile);
         }
         if (argv.sendPreapprove) {
-            process.stdout.write(`Sending ${zipFile} to Affidaty...\n`);
+            process.stdout.write(`Sending ${zipFile} to ${DEFAULT_AFFIDATY_PREAPPROVE_URL} ...\n`);
             //TODO: actually send the file
         }
     }
