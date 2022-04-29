@@ -21,7 +21,8 @@
     "dependencies": {
         "@affidaty/t2-lib": "^2.0.15",
         "@affidaty/trinci-sdk-as": "^2.3.5",
-        "yargs": "^17.4.1"
+        "yargs": "^17.4.1",
+        "adm-zip": "^0.5.9"
     },
     "devDependencies": {
         "@assemblyscript/loader": "0.19.23",

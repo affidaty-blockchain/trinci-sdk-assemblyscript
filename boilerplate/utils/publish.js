@@ -5,10 +5,13 @@ const Path = require('path');
 const t2lib = require('@affidaty/t2-lib');
 const HashList = require('./include/hashlist').HashList;
 const Yargs = require("yargs/yargs");
+const AdmZip = require("adm-zip");
 
 const DEFAULT_NETWORK = 'QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ';
-const DEFAULT_PUBLISH_ACC = './publishAccount.json';
+const DEFAULT_PUBLISH_ACC_FILE = './publishAccount.json';
 const DEFAULT_METADATA_FILE = './publishMetadata.json';
+const DEFAULT_PUBLISH_TX_FILE = './publishTx.bin';
+const DEFAULT_PREAPPROVE_ARCHIVE_FILE = './publishTx.bin';
 const DEFAULT_REST_PORT = 8000;
 const DEFAULT_BRIDGE_PORT = 8001;
 
@@ -71,6 +74,12 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     type: 'string',
     demandOption: false,
     description: 'Path. If provided, serialized signed publish transaction will be saved as Base58 string to that path. File will be replaced if already exists.',
+})
+.option('zip', {
+    alias: 'z',
+    type: 'string',
+    demandOption: false,
+    description: 'Allows to create an archive to send to Affidaty for preapproval of the smart contract for it\'s publish in mainnet. Archive will contail following data: \"assembly\" dir with source code; \"test\" dir to better understand your code; your project\'s \"package.json\" for all the dependencies and a file containing publish transaction with your smart contract signed by your publisher private key. As soon as your smart contract is approved for publish to our main network, this transaction will be used to actually publish it.',
 })
 .help()
 .argv;
@@ -182,8 +191,37 @@ async function saveAccountToFile(filePath, account) {
     fs.writeFileSync(absPath, JSON.stringify(jsonObj, null, 4));
 }
 
+/**
+ * 
+ * @param {string} filePath 
+ */
+function removeFile(filePath) {
+    fs.unlinkSync(absolutizePath(filePath));
+}
+
+/**
+ * 
+ * @param {string} zipFilePath 
+ * @param {string} publishTxFilePath 
+ */
+
+async function createPreappArchive(zipOutFile, pubTxOutFile) {
+    const absZipOutFile = absolutizePath(zipOutFile);
+    const zip = new AdmZip();
+    
+    zip.addLocalFolder(absolutizePath('./assembly'), './assembly');
+    zip.addLocalFolder(absolutizePath('./test'), './test');
+
+    zip.addLocalFile(absolutizePath('./package.json'));
+    zip.addLocalFile(absolutizePath(pubTxOutFile));
+
+    zip.writeZip(absZipOutFile);
+
+    process.stdout.write(`Preapprove archive saved to ${absZipOutFile}\n`);
+}
+
 async function main() {
-    // console.log(argv);
+    console.log(argv);
 
     const metadata = loadMetadata(argv.metadataFile);
     const wasmBytes = loadWasmFile(metadata.wasmFile);
@@ -223,10 +261,24 @@ async function main() {
     process.stdout.write(`Contract hash:  [${wasmRefHash}]\n`);
     process.stdout.write(`Metadata:\n${JSON.stringify(metadata, null, 4)}\n`);
     process.stdout.write(`Pub tx hash:    [${ await publishTx.getTicket()}]\n`);
+    const publishTxBytes = Buffer.from(await publishTx.toBytes());
 
     if (argv.txOutFile) {
-        const txBytes = Buffer.from(await publishTx.toBytes());
-        saveBufferToFile(argv.txOutFile, txBytes)
+        saveBufferToFile(argv.txOutFile, publishTxBytes);
+    }
+
+    if (argv.zip) {
+        let txFile = argv.txOutFile;
+        let doRemove = false;
+        if (!txFile) {
+            txFile = DEFAULT_PUBLISH_TX_FILE;
+            saveBufferToFile(txFile, publishTxBytes);
+            doRemove = true;
+        }
+        createPreappArchive(argv.zip, txFile);
+        if (doRemove) {
+            removeFile(txFile);
+        }
     }
 
     if (argv.url) {
