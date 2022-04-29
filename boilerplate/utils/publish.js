@@ -289,7 +289,7 @@ async function main() {
         if (!txFile) {
             txFile = DEFAULT_PUBLISH_TX_FILE;
             saveBufferToFile(txFile, publishTxBytes);
-            doRemove = true;
+            rmTxFile = true;
         }
         createPreappArchive(zipFile, txFile);
         if (rmTxFile) {
