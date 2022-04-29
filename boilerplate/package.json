@@ -14,6 +14,8 @@
         "node:reset": "cd ./utils/docker && make node-reset",
         "node:logs": "cd ./utils/docker && make node-logs",
         "publish": "./utils/publish.js",
+        "publish:zip": "npm run publish -- -z \"./preapprove.trinci\"",
+        "publish:mainnet": "npm run publish -- -s",
         "publish:help": "npm run publish -- --help"
     },
     "author": "",

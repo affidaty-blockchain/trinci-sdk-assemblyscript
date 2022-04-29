@@ -8,6 +8,7 @@ const Yargs = require("yargs/yargs");
 const AdmZip = require("adm-zip");
 
 const DEFAULT_NETWORK = 'QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ';
+const DEFAULT_MAIN_NETWORK = 'mainnet';
 const DEFAULT_PUBLISH_ACC_FILE = './publishAccount.json';
 const DEFAULT_METADATA_FILE = './publishMetadata.json';
 const DEFAULT_PUBLISH_TX_FILE = './publishTx.bin';
@@ -23,7 +24,6 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     type: 'string',
     demandOption: false,
     description: 'Network ID to which publish transaction will be submitted.',
-    default: DEFAULT_NETWORK,
     defaultDescription: `"${DEFAULT_NETWORK}"`,
 })
 .option('publisherAccount', {
@@ -80,6 +80,12 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     type: 'string',
     demandOption: false,
     description: 'Allows to create an archive to send to Affidaty for preapproval of the smart contract for it\'s publish in mainnet. Archive will contail following data: \"assembly\" dir with source code; \"test\" dir to better understand your code; your project\'s \"package.json\" for all the dependencies and a file containing publish transaction with your smart contract signed by your publisher private key. As soon as your smart contract is approved for publish to our main network, this transaction will be used to actually publish it.',
+})
+.option('sendPreapprove', {
+    alias: 's',
+    type: 'boolean',
+    demandOption: false,
+    description: 'Allows to create (same as "-z"/"--zip" option) and automatically send a preapproval archive to Affidaty (see the "-z" optio help for info on it\'s content). ',
 })
 .help()
 .argv;
@@ -241,7 +247,7 @@ async function main() {
     publishTx.data.accountId = 'TRINCI';
     publishTx.data.maxFuel = 1000;
     publishTx.data.genNonce();
-    publishTx.data.networkName = argv.network;
+    publishTx.data.networkName = DEFAULT_NETWORK;
     publishTx.data.smartContractMethod = 'contract_registration';
     publishTx.data.smartContractMethodArgs = {
         name: metadata.name,
@@ -250,6 +256,12 @@ async function main() {
         url: metadata.url,
         bin: wasmBytes,
     };
+    if (argv.sendPreapprove) {
+        publishTx.data.networkName = DEFAULT_MAIN_NETWORK;
+    }
+    if (argv.network) {
+        publishTx.data.networkName = argv.network;
+    }
     await publishTx.sign(publisherAccount.keyPair.privateKey);
 
     if(!await publishTx.verify()) {
@@ -267,17 +279,25 @@ async function main() {
         saveBufferToFile(argv.txOutFile, publishTxBytes);
     }
 
-    if (argv.zip) {
+    if (argv.zip || argv.sendPreapprove) {
+        let zipFile = argv.zip;
+        if (!zipFile) {
+            zipFile = DEFAULT_PREAPPROVE_ARCHIVE_FILE;
+        }
         let txFile = argv.txOutFile;
-        let doRemove = false;
+        let rmTxFile = false;
         if (!txFile) {
             txFile = DEFAULT_PUBLISH_TX_FILE;
             saveBufferToFile(txFile, publishTxBytes);
             doRemove = true;
         }
-        createPreappArchive(argv.zip, txFile);
-        if (doRemove) {
+        createPreappArchive(zipFile, txFile);
+        if (rmTxFile) {
             removeFile(txFile);
+        }
+        if (argv.sendPreapprove) {
+            process.stdout.write(`Sending ${zipFile} to Affidaty...\n`);
+            //TODO: actually send the file
         }
     }
 
