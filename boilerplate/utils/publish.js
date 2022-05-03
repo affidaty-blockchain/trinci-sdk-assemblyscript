@@ -2,10 +2,11 @@
 
 const fs = require('fs');
 const Path = require('path');
+const AdmZip = require("adm-zip");
+const Yargs = require("yargs/yargs");
 const t2lib = require('@affidaty/t2-lib');
 const HashList = require('./include/hashlist').HashList;
-const Yargs = require("yargs/yargs");
-const AdmZip = require("adm-zip");
+const submit = require('./include/submit');
 
 const DEFAULT_NETWORK = 'QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ';
 const DEFAULT_MAIN_NETWORK = 'mainnet';
@@ -15,7 +16,11 @@ const DEFAULT_PUBLISH_TX_FILE = './publishTx.bin';
 const DEFAULT_PREAPPROVE_ARCHIVE_FILE = './preapprove.trinci';
 const DEFAULT_REST_PORT = 8000;
 const DEFAULT_BRIDGE_PORT = 8001;
-const DEFAULT_AFFIDATY_PREAPPROVE_URL = "https://affidaty.io/mainnet/preapprove";
+const AFFIDATY_BASE_URL = "http://localhost:3000";
+const DEFAULT_AFFIDATY_PREAUTH_URL = `${AFFIDATY_BASE_URL}/api/authIn/preAuth`;
+const DEFAULT_AFFIDATY_SIGN_URL = `${AFFIDATY_BASE_URL}/api/authIn/sign`;
+const DEFAULT_AFFIDATY_PREAPPROVE_URL_BASE = `${AFFIDATY_BASE_URL}/api/v1/preappove`;
+
 
 const argv = Yargs(Yargs.hideBin(process.argv))
 .version('1.0.0')
@@ -182,6 +187,15 @@ function saveBufferToFile(filePath, bytes) {
 
 /**
  * 
+ * @param {string} filePath
+ * @returns {Buffer}
+ */
+function getBufferFromFile(filePath) {
+    return fs.readFileSync(absolutizePath(filePath));
+}
+
+/**
+ * 
  * @param {string} filePath 
  * @param {t2lib.Account} account
  */
@@ -215,12 +229,14 @@ function removeFile(filePath) {
 async function createPreappArchive(zipOutFile, pubTxOutFile) {
     const absZipOutFile = absolutizePath(zipOutFile);
     const zip = new AdmZip();
-    
+
     zip.addLocalFolder(absolutizePath('./assembly'), './assembly');
     zip.addLocalFolder(absolutizePath('./test'), './test');
 
+    zip.addLocalFile(absolutizePath('./asconfig.json'));
+    zip.addLocalFile(absolutizePath('./msgpackable.js'));
     zip.addLocalFile(absolutizePath('./package.json'));
-    zip.addLocalFile(absolutizePath(pubTxOutFile));
+    zip.addLocalFile(absolutizePath(pubTxOutFile), undefined, "publishTx.bin");
 
     zip.writeZip(absZipOutFile);
 
@@ -296,8 +312,27 @@ async function main() {
             removeFile(txFile);
         }
         if (argv.sendPreapprove) {
-            process.stdout.write(`Sending ${zipFile} to ${DEFAULT_AFFIDATY_PREAPPROVE_URL} ...\n`);
-            //TODO: actually send the file
+            throw new Error("Cannot submit preapprove request. Service not yet active.");
+            process.stdout.write(`Sending ${zipFile} to ${DEFAULT_AFFIDATY_PREAPPROVE_URL_BASE}/submit ...\n`);
+            const authHeader = await submit.signIn(
+                DEFAULT_AFFIDATY_PREAUTH_URL,
+                DEFAULT_AFFIDATY_SIGN_URL,
+                publisherAccount
+            );
+            const archiveBytes = getBufferFromFile(zipFile);
+            const submitResponse = await submit.submitForPreapproval(
+                `${DEFAULT_AFFIDATY_PREAPPROVE_URL_BASE}/submit`,
+                archiveBytes,
+                authHeader,
+            );
+            const ticket = JSON.parse(Buffer.from(submitResponse).toString());
+            if (typeof ticket !== "string") {
+                process.stdout.write(JSON.stringify(ticket, null, 4));
+                process.stdout.write('\n');
+            } else {
+                process.stdout.write(`Preapprove request ticket:\n[${ticket}]\n`);
+                process.stdout.write(`Check status on the following url:\n${DEFAULT_AFFIDATY_PREAPPROVE_URL_BASE}/status?ticket=${ticket}\n\n`);
+            }
         }
     }
 
