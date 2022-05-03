@@ -4,6 +4,7 @@ import MemUtils from './memutils';
 import HostFunctions from './env';
 import MsgPack from './msgpack';
 import { Return, Response } from './wmio';
+import { AccountAssetU64, OwnerDB } from './account';
 
 export {
     Types,
@@ -12,5 +13,7 @@ export {
     HostFunctions,
     MsgPack,
     Return,
-    Response
+    Response,
+    AccountAssetU64,
+    OwnerDB,
 };

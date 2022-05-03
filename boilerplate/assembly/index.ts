@@ -1,5 +1,4 @@
-import sdk from '../node_modules/@affidaty/trinci-sdk-as';
-import { AccountAssetU64 , OwnerDB } from "../node_modules/@affidaty/trinci-sdk-as/sdk/account";
+import { default as sdk, OwnerDB, AccountAssetU64} from './sdk';
 const methodsMap = new Map<string, (ctx: sdk.Types.AppContext, args: u8[])=>sdk.Types.WasmResult>();
 //####################### Native required functions ###############################################################
 // exposing heap.alloc function for host to pass data to this module

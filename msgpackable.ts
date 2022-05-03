@@ -13,7 +13,7 @@ function getStructure(node: ClassDeclaration): string[][] {
     for (let i = 0; i < node.members.length; i++) {
         if (node.members[i] instanceof FieldDeclaration ) {
             let fieldName = utils.getName(node.members[i]);
-            let fieldType = utils.getName(node.members[i].type);
+            let fieldType = utils.getName((node.members[i] as any).type);
             result.push([fieldName, fieldType]);
         }
     }

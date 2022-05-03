@@ -1,8 +1,9 @@
 {
+  "include": ["msgpackable.ts"],
   "compilerOptions": {
-    "outDir": "./visitor-as-cjs",
-    "inlineSourceMap": true,
-    "inlineSources": true,
+    "outDir": "./boilerplate",
+    "inlineSourceMap": false,
+    "inlineSources": false,
     "target": "ES6",
     "module": "CommonJS",
     "moduleResolution": "Node",
@@ -13,12 +14,11 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noEmitOnError": true,
-    "allowJs": false,
+    "allowJs": true,
     "strictNullChecks": true,
     "experimentalDecorators": true,
-    "declaration": true,
+    "declaration": false,
     "strict": true,
     "lib": ["esnext","esnext.string"]
-  },
-  "include": ["./visitor-as/*"]
+  }
 }
