@@ -36,6 +36,7 @@ function testMethod(_ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.WasmRes
     // Use IntelliSense to explore other methods.
     // This one is for logs. To see those logs launch node with at least debug log level
     sdk.HostFunctions.log('testMethod()');
+    sdk.HostFunctions.emit("testEvent",argsU8);
     return sdk.Return.True(); // return true in MessagePack
 }
 

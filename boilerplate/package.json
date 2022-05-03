@@ -14,12 +14,15 @@
         "compile": "cd ./utils/docker && make smartcontract-build",
         "publish": "./utils/publish.js",
         "exec": "./utils/exec.js",
+        "socket": "node ./utils/socketBridge.js 3000",
         "test": "jest --no-coverage"
     },
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/trinci-sdk-as": "^2.3.5"
+        "@affidaty/t2-lib": "^2.0.18",
+        "@affidaty/trinci-sdk-as": "^2.3.5",
+        "uniqid": "^5.4.0"
     },
     "devDependencies": {
         "@assemblyscript/loader": "^0.19.11",

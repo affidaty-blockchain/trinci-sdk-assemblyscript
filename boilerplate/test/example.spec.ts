@@ -7,7 +7,7 @@ describe('Test all smart contract functionalities', () => {
         const wasmFilePath = path.resolve(__dirname, '../build/release.wasm');
 
         // creating new TrinciNode
-        const node = new TrinciNode();
+        const node = new TrinciNode("3000");
 
         // registering smart contract inside node and getting its reference hash
         const scRefHash = await node.registerContract(wasmFilePath);

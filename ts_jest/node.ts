@@ -3,12 +3,16 @@ import TrinciDB, { IWasmPathWithName } from './db';
 import CTX from './ctx';
 import TX from './tx';
 import WasmMachine, { WasmResult } from './wasmMachine';
+import { Eventdispatcher } from './events';
+
+
 export class TrinciNode {
-
     db: TrinciDB;
-
-    constructor() {
+    eventdispatcher:Eventdispatcher;
+    constructor(socket:string="") {
         this.db = new TrinciDB();
+        this.eventdispatcher = new Eventdispatcher();
+        this.eventdispatcher.socket = socket;
     }
     printDB():void {
         this.db.printAssets();
@@ -45,7 +49,7 @@ export class TrinciNode {
                 throw new Error(Errors.MODULE_NOT_FOUND);
             }
             const forkedDB = this.db.fork();
-            const wasmMachine = new WasmMachine(wasmModule, ctx, this.db, hostFunctionsMock);
+            const wasmMachine = new WasmMachine(wasmModule, ctx, this.db, hostFunctionsMock,this.eventdispatcher);
             let wmRunResult = new WasmResult();
             try {
                 wmRunResult = wasmMachine.run(argsBytes);
@@ -62,16 +66,6 @@ export class TrinciNode {
 
     async runTx(tx:TX, mockHostFunctions = {}):Promise<WasmResult> {
         return this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions);
-        /*
-        return new Promise((resolve,reject) => {
-            this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions).then(wasmResult => {
-                if(wasmResult.isError) {
-                    reject(wasmResult);
-                } else {
-                    resolve(wasmResult);
-                }
-            }).catch(reject);
-        });*/
     }
     async runBulkTxs(txs:TX[], mockHostFunctions = {}):Promise<WasmResult[]> {
         return new Promise((resolve,reject) => {
@@ -87,10 +81,10 @@ export class TrinciNode {
                 this.db = forkedDB;
                 reject(e);
             });
-
-            //const results:WasmResult[] = txs.map(async (tx:TX) => await this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions));
-            
         });
+    }
+    async on(event_name:string,callBack:Function) {
+        this.eventdispatcher.listen(event_name,callBack);
     }
 }
 
