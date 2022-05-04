@@ -3,82 +3,16 @@ import fastSha256 from 'fast-sha256';
 import * as Errors from './errors';
 import * as Defaults from './defaults';
 import * as Utils from './utils';
+import WasmResult from './wasmResult';
 import trinciDB  from './db';
 import CTX from './ctx';
+import WasmEventEmitter from './wasmEventEmitter';
+import { ITxEvent } from '@affidaty/t2-lib';
 
-export class WasmResult {
-    success: boolean;
-    result: Uint8Array;
-
-    constructor(success?: boolean, result?: Uint8Array) {
-        this.success = success ? success : false;
-        this.result = result ? result : new Uint8Array([]);
-    }
-
-    fromBytes(bytes: Uint8Array): WasmResult {
-        const decodedBytes = Utils.mpDecode(bytes) as [boolean, Buffer];
-        this.success = decodedBytes[0];
-        this.result = decodedBytes[1];
-        return this;
-    }
-
-    toBytes(): Uint8Array {
-        const encodedBytes = Utils.mpEncode([
-            this.success,
-            Buffer.from(this.result),
-        ]);
-        return new Uint8Array(encodedBytes);
-    }
-
-    setError(message: string): WasmResult {
-        this.success = false;
-        this.result = new Uint8Array(Buffer.from(message));
-        return this;
-    }
-
-    setSuccess(data: Uint8Array): WasmResult {
-        this.success = true;
-        this.result = data;
-        return this;
-    }
-
-    setTrue(): WasmResult {
-        this.success = true;
-        this.result = new Uint8Array([0xc3]);
-        return this;
-    }
-
-    setFalse(): WasmResult {
-        this.success = true;
-        this.result = new Uint8Array([0xc2]);
-        return this;
-    }
-
-    setNull(): WasmResult {
-        this.success = true;
-        this.result = new Uint8Array([0xc0]);
-        return this;
-    }
-
-    get isError(): boolean {
-        return !this.success;
-    }
-
-    decode():any {
-        return {
-            success : this.success,
-            result: this.success ? Utils.mpDecode(this.result) : this.errorMessage
-        }
-    }
-
-    get errorMessage(): string {
-        return Buffer.from(this.result).toString();
-    }
-
-    get resultDecoded(): any {
-        return Utils.mpDecode(this.result);
-    }
-}
+// interface IHostFunctionMock {
+//     hf_log?(string): string;
+//     hf_load_data?()
+// }
 
 export class WasmMachine {
     wasmModule: WebAssembly.Module;
@@ -87,12 +21,14 @@ export class WasmMachine {
     wasmInstance: WebAssembly.Instance | null = null;
     currentCtx: CTX;
     db:trinciDB;
+    eventEmitter: WasmEventEmitter;
     constructor(
         wasmModule: WebAssembly.Module,
         ctx: CTX = new CTX(),
         trinciDb:trinciDB,
-        mockHostFunctions:any = {}
+        eventEmitter?: WasmEventEmitter,
     ) {
+        this.eventEmitter = eventEmitter || new WasmEventEmitter();
         this.currentCtx = ctx;
         this.wasmModule = wasmModule;
         this.wasmMem = new WebAssembly.Memory(Defaults.defaultWasmMemParams);
@@ -118,9 +54,14 @@ export class WasmMachine {
                     eventDataAddress: number,
                     eventDataLength: number
                 ) => {
-                    const eventName = Buffer.from(this.readFromWasmMem(eventNameAddress, eventNameLength)).toString();
-                    const eventData = this.readFromWasmMem(eventDataAddress, eventDataLength);
-                    console.log(`${eventName}: ${Buffer.from(eventData).toString('hex')}`);
+                    const txEvent: ITxEvent = {
+                        eventTx: "<tx_hash_placeholder>",
+                        emitterAccount: this.currentCtx.owner,
+                        emitterSmartContract: this.db.getAccountContractHash(this.currentCtx.owner)!,
+                        eventName: Buffer.from(this.readFromWasmMem(eventNameAddress, eventNameLength)).toString(),
+                        eventData: this.readFromWasmMem(eventDataAddress, eventDataLength),
+                    };
+                    this.eventEmitter.emit('txEvent', txEvent);
                 },
                 hf_load_data: (keyOffset: number, keyLength: number): bigint => {
                     const key = Buffer.from(this.readFromWasmMem(keyOffset, keyLength)).toString();
@@ -182,7 +123,7 @@ export class WasmMachine {
                     let contractHaseInCalledAccount = this.db.getAccountContractHash(calledAccount);
                     if(contractHaseInCalledAccount) {
                         const moduleToCall = this.db.getAccountContractModule(calledAccount)!;
-                        const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
+                        const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db, this.eventEmitter);
                         if(newWasmMachine.isCallable(calledMethod)) {
                             return 1;
                         }
@@ -200,7 +141,6 @@ export class WasmMachine {
                     dataOffset: number,
                     dataLength: number
                 ) : bigint => {
-                    
                     const calledAccount = Buffer.from(this.readFromWasmMem(accountOffset, accountLength)).toString();
                     const calledMethod = Buffer.from(this.readFromWasmMem(methodOffset, methodLength)).toString();
                     const args = this.readFromWasmMem(dataOffset, dataLength);
@@ -228,7 +168,7 @@ export class WasmMachine {
                                 return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                             }
                             
-                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
+                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db, this.eventEmitter);
                             const runResult = newWasmMachine.run(args);
                             const runResultBytes = runResult.toBytes();
                             return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
@@ -259,7 +199,7 @@ export class WasmMachine {
                         const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
-                    const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
+                    const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db, this.eventEmitter);
                     
                     try {
                         const runResult = newWasmMachine.run(args);
@@ -334,6 +274,7 @@ export class WasmMachine {
         const runResult = (this.wasmInstance!.exports[methodToRun] as CallableFunction)(...args);
         return runResult;
     }
+
     isCallable(method:string):boolean {
         this.instantiate();
         try {
@@ -345,6 +286,7 @@ export class WasmMachine {
             return false;
         }
     }
+
     run(argsBytes: Uint8Array = new Uint8Array([])): WasmResult {
         this.instantiate();
         const ctxBytes = this.currentCtx.toBytes();
@@ -354,6 +296,7 @@ export class WasmMachine {
         const runResult =  this.callExportedMethod('run', ctxOffset, ctxBytes.byteLength, argsOffset, argsBytes.byteLength);
         return (this.decodeResult(runResult));
     }
+
 }
 
 export default WasmMachine;

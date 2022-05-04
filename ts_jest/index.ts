@@ -4,7 +4,9 @@ import * as Utils from './utils';
 import TrinciDb from './db';
 import CTX from './ctx';
 import TX from './tx';
-import {WasmMachine, WasmResult } from './wasmMachine';
+import WasmEventEmitter from './wasmEventEmitter';
+import WasmResult from './wasmResult';
+import WasmMachine from './wasmMachine';
 import TrinciNode from './node';
 
 export {
@@ -14,6 +16,7 @@ export {
     TrinciDb,
     CTX,
     TX,
+    WasmEventEmitter,
     WasmMachine,
     WasmResult,
     TrinciNode,
@@ -26,6 +29,7 @@ export default {
     TrinciDb,
     CTX,
     TX,
+    WasmEventEmitter,
     WasmMachine,
     WasmResult,
     TrinciNode,
