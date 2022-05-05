@@ -55,7 +55,7 @@ export class WasmMachine {
                     eventDataLength: number
                 ) => {
                     const txEvent: ITxEvent = {
-                        eventTx: "<tx_hash_placeholder>",
+                        eventTx: '1220ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
                         emitterAccount: this.currentCtx.owner,
                         emitterSmartContract: this.db.getAccountContractHash(this.currentCtx.owner)!,
                         eventName: Buffer.from(this.readFromWasmMem(eventNameAddress, eventNameLength)).toString(),

@@ -1,13 +1,36 @@
 import path from 'path';
 import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
+import { Message, BridgeClient } from '@affidaty/t2-lib';
+
+const client = new BridgeClient('http://localhost', 0, 8001);
 // remember to run 'npm run asbuild' to compile smart contract
 describe('Test all smart contract functionalities', () => {
+
     it('test method', async () => {
+        await client.connectSocket();
         // getting smart contract full path
-        const wasmFilePath = path.resolve(__dirname, '../build/release.wasm');
+        const wasmFilePath = path.resolve(__dirname, '../build/asd_release.wasm');
 
         // creating new TrinciNode
         const node = new TrinciNode();
+
+        // a way to intercept 
+        node.eventEmitter.on('txEvent', (args) => {
+
+            // const tempArgs = {...args, eventData: `0x${Buffer.from(args.eventData).toString('hex')}`};
+            // console.log(`Caught a transaction event:\n${JSON.stringify(tempArgs, null, 2)}\n`);
+
+            const txEventMsg = Message.stdTrinciMessages.txEvent(
+                args.eventTx,
+                args.emitterAccount,
+                args.emitterSmartContract,
+                args.eventName,
+                args.eventData,
+            );
+            client.writeMessage(txEventMsg);
+            // console.log(`txEventMsgBytes: [${Buffer.from(txEventMsgBytes).toString('hex')}]`);
+            
+        });
 
         // registering smart contract inside node and getting its reference hash
         const scRefHash = await node.registerContract(wasmFilePath);
@@ -17,6 +40,7 @@ describe('Test all smart contract functionalities', () => {
         .target('#TargetAccount')
         .contract(scRefHash) // in this moment #TargetAccount doesn't exist, you must specify the hash to create account and bind it with specific smart contract
         .method('test_method')
+        .args({string:"a string", number: 42})
         .signer('MyDeployAccount'); // in this environment you can use any AccountId as string, in production you must use a private key and Node derives accountId from them
 
         // running transaction
@@ -30,9 +54,9 @@ describe('Test all smart contract functionalities', () => {
         node.db.printData("#TargetAccount");
         
     });
-    it('init method', async () => {
+    it.skip('init method', async () => {
         // getting smart contract full path
-        const wasmFilePath = path.resolve(__dirname, '../build/release.wasm');
+        const wasmFilePath = path.resolve(__dirname, '../build/asd_release.wasm');
 
         // creating new TrinciNode
         const node = new TrinciNode();
@@ -59,9 +83,9 @@ describe('Test all smart contract functionalities', () => {
         expect(node.db.getDataFromOwnerDB("#TargetAccount","init") == true); // check if data was stored in DB
         node.db.printData("#TargetAccount");  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
     });
-    it('mint method', async () => {
+    it.skip('mint method', async () => {
         // getting smart contract full path
-        const wasmFilePath = path.resolve(__dirname, '../build/release.wasm');
+        const wasmFilePath = path.resolve(__dirname, '../build/asd_release.wasm');
 
         // creating new TrinciNode
         const node = new TrinciNode();
@@ -100,9 +124,9 @@ describe('Test all smart contract functionalities', () => {
         node.db.printAssets();  // use this tool to print in console the table of KVStore about any account such as TargetAccount
         node.db.printData("#TargetAccount");  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
     });
-    it('transfer method', async () => {
+    it.skip('transfer method', async () => {
         // getting smart contract full path
-        const wasmFilePath = path.resolve(__dirname, '../build/release.wasm');
+        const wasmFilePath = path.resolve(__dirname, '../build/asd_release.wasm');
 
         // creating new TrinciNode
         const node = new TrinciNode();
