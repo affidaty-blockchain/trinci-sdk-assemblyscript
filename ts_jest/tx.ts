@@ -52,6 +52,9 @@ export class TX {
     }
 
     getArgsBytes(): Uint8Array {
+        if (typeof this._args === 'undefined') {
+            return new Uint8Array([]);
+        }
         return new Uint8Array(mpEncode(this._args));
     }
 
