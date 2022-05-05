@@ -14,29 +14,17 @@
         "node:reset": "cd ./utils/docker && make node-reset",
         "node:logs": "cd ./utils/docker && make node-logs",
         "publish": "./utils/publish.js",
-<<<<<<< HEAD
-        "exec": "./utils/exec.js",
-        "socket": "node ./utils/socketBridge.js 3000",
-        "test": "jest --no-coverage"
-=======
         "publish:zip": "npm run publish -- -z \"./preapprove.trinci\"",
         "publish:mainnet": "npm run publish -- -s",
         "publish:help": "npm run publish -- --help"
->>>>>>> bc35192e8e29f221739068b83fde82ef13fd15f0
     },
     "author": "",
     "license": "",
     "dependencies": {
-<<<<<<< HEAD
-        "@affidaty/t2-lib": "^2.0.18",
-        "@affidaty/trinci-sdk-as": "^2.3.5",
-        "uniqid": "^5.4.0"
-=======
         "@affidaty/t2-lib": "^2.0.15",
         "@affidaty/trinci-sdk-as": "^2.3.5",
         "yargs": "^17.4.1",
         "adm-zip": "^0.5.9"
->>>>>>> bc35192e8e29f221739068b83fde82ef13fd15f0
     },
     "devDependencies": {
         "@assemblyscript/loader": "0.19.23",

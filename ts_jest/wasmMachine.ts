@@ -5,7 +5,7 @@ import * as Defaults from './defaults';
 import * as Utils from './utils';
 import trinciDB  from './db';
 import CTX from './ctx';
-import { Eventdispatcher } from './events';
+
 export class WasmResult {
     success: boolean;
     result: Uint8Array;
@@ -87,19 +87,16 @@ export class WasmMachine {
     wasmInstance: WebAssembly.Instance | null = null;
     currentCtx: CTX;
     db:trinciDB;
-    eventdispatcher:Eventdispatcher;
     constructor(
         wasmModule: WebAssembly.Module,
         ctx: CTX = new CTX(),
         trinciDb:trinciDB,
-        mockHostFunctions:any = {},
-        eventdispatcher:Eventdispatcher,
+        mockHostFunctions:any = {}
     ) {
         this.currentCtx = ctx;
         this.wasmModule = wasmModule;
         this.wasmMem = new WebAssembly.Memory(Defaults.defaultWasmMemParams);
         this.db = trinciDb;
-        this.eventdispatcher = eventdispatcher;
         this.imports = {
             index: {},
             env: {
@@ -123,7 +120,6 @@ export class WasmMachine {
                 ) => {
                     const eventName = Buffer.from(this.readFromWasmMem(eventNameAddress, eventNameLength)).toString();
                     const eventData = this.readFromWasmMem(eventDataAddress, eventDataLength);
-                    this.eventdispatcher.emit(eventName,eventData,{eventTx:"todo:HashTX???",emitterAccount : this.currentCtx.owner,emitterSmartContract:"todo:HashSmartContract???"});
                     console.log(`${eventName}: ${Buffer.from(eventData).toString('hex')}`);
                 },
                 hf_load_data: (keyOffset: number, keyLength: number): bigint => {
@@ -186,7 +182,7 @@ export class WasmMachine {
                     let contractHaseInCalledAccount = this.db.getAccountContractHash(calledAccount);
                     if(contractHaseInCalledAccount) {
                         const moduleToCall = this.db.getAccountContractModule(calledAccount)!;
-                        const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db,{},this.eventdispatcher);
+                        const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
                         if(newWasmMachine.isCallable(calledMethod)) {
                             return 1;
                         }
@@ -232,7 +228,7 @@ export class WasmMachine {
                                 return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                             }
                             
-                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db,{},this.eventdispatcher);
+                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
                             const runResult = newWasmMachine.run(args);
                             const runResultBytes = runResult.toBytes();
                             return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
@@ -263,7 +259,7 @@ export class WasmMachine {
                         const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
-                    const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db,{},this.eventdispatcher);
+                    const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
                     
                     try {
                         const runResult = newWasmMachine.run(args);
