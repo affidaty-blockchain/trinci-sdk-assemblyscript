@@ -3,42 +3,23 @@ import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
 import { Message, BridgeClient } from '@affidaty/t2-lib';
 
 const wasmPath = '../build/release.wasm';
-const client = new BridgeClient('http://localhost', 0, 8001);
 // remember to run 'npm run asbuild' to compile smart contract
 describe('Test all smart contract functionalities', () => {
 
     it('test method', async () => {
-        let socketConnected = false;
-        client.on('error', (error) => {
-        })
-        try {
-            await client.connectSocket();
-            socketConnected = true;
-        } catch (error) {
-        }
         // getting smart contract full path
         const wasmFilePath = path.resolve(__dirname, wasmPath);
 
         // creating new TrinciNode
         const node = new TrinciNode();
 
-        // a way to intercept transaction events
-        node.eventEmitter.on('txEvent', (args) => {
+        await node.connectToSocket('localhost', 8001);
 
+        // another way to intercept transaction events
+        node.eventEmitter.on('txEvent', (args) => {
+            // converting binary data to a "0x..." string
             const tempArgs = {...args, eventData: `0x${Buffer.from(args.eventData).toString('hex')}`};
             console.log(`Caught a transaction event:\n${JSON.stringify(tempArgs, null, 2)}\n`);
-
-            if(socketConnected) {
-                const txEventMsg = Message.stdTrinciMessages.txEvent(
-                    args.eventTx,
-                    args.emitterAccount,
-                    args.emitterSmartContract,
-                    args.eventName,
-                    args.eventData,
-                );
-                client.writeMessage(txEventMsg);
-            }
-            
         });
 
         // registering smart contract inside node and getting its reference hash

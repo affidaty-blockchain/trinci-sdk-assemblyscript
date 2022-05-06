@@ -5,15 +5,38 @@ import TX from './tx';
 import WasmEventEmitter from './wasmEventEmitter';
 import WasmResult from './wasmResult';
 import WasmMachine from './wasmMachine';
+import { BridgeClient, Message } from '@affidaty/t2-lib';
 export class TrinciNode {
 
     db: TrinciDB;
 
     eventEmitter: WasmEventEmitter;
 
+    client?: BridgeClient;
+
     constructor() {
         this.eventEmitter = new WasmEventEmitter();
         this.db = new TrinciDB();
+    }
+
+    async connectToSocket(address: string, port: number) {
+        const tempAddress = address.startsWith('http') ? address : `http://${address}`;
+        this.client = new BridgeClient(tempAddress, 0, port);
+        try {
+            await this.client.connectSocket();
+        } catch (error) {
+            throw error;
+        }
+        this.eventEmitter.on('txEvent', (args) => {
+            const txEventMsg = Message.stdTrinciMessages.txEvent(
+                args.eventTx,
+                args.emitterAccount,
+                args.emitterSmartContract,
+                args.eventName,
+                args.eventData,
+            );
+            this.client!.writeMessage(txEventMsg);
+        });
     }
 
     test(arg: any) {
