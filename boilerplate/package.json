@@ -17,7 +17,7 @@
         "publish:zip": "npm run publish -- -z \"./preapprove.trinci\"",
         "publish:mainnet": "npm run publish -- -s",
         "publish:help": "npm run publish -- --help",
-        "relay": "./utils/socketRelay.js",
+        "relay": "./utils/socketRelay.js"
     },
     "author": "",
     "license": "",

@@ -1,11 +1,35 @@
 #!/usr/bin/env node
 
 const net = require('net');
+const Yargs = require("yargs/yargs");
 const server = net.createServer();
 
-const PORT = 8001;
-const ADDRESS = '127.0.0.1';
-const FULL_ADDRESS = `${ADDRESS}:${PORT}`;
+const DEFAULT_ADDRESS = '127.0.0.1';
+const DEFAULT_PORT = 8001;
+
+const argv = Yargs(Yargs.hideBin(process.argv))
+.version('1.0.0')
+.locale('en')
+.option('address', {
+    alias: 'a',
+    type: 'string',
+    demandOption: false,
+    description: 'Interface to listen to.',
+    default: DEFAULT_ADDRESS,
+    defaultDescription: DEFAULT_ADDRESS
+})
+.option('port', {
+    alias: 'p',
+    type: 'number',
+    demandOption: false,
+    description: 'TCP port to listen to.',
+    default: DEFAULT_PORT,
+    defaultDescription: DEFAULT_PORT,
+})
+.help()
+.argv;
+
+const FULL_ADDRESS = `${argv.address}:${argv.port}`;
 
 function genId(length) {
     const charPool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -31,11 +55,11 @@ server.on('connection', (socket) => {
 
     socket.on('close', (hadErrors) => {
         delete socketList[socket.id];
-        console.log(`Closed ${socket.id} with${hadErrors ? '' : 'out'} errors.`);
+        console.log(`Closed ${socket.id} with${hadErrors ? '' : 'out'} errors.\n`);
     })
 
     socket.on('error', (error) => {
-        console.log(`Error: ${socket.id}\n`, error);
+        console.log(`Error: ${socket.id}\n`, error, '\n');
     })
 
     socket.on('data', (data) => {
@@ -55,7 +79,7 @@ const printBanner = () => {
 };
 
 server.listen(
-    PORT,
-    ADDRESS,
+    argv.port,
+    argv.address,
     printBanner,
 );
