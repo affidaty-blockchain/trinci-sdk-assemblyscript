@@ -37,10 +37,10 @@ declare function hf_call(
 declare function hf_s_call(
     accountIdAddress: u32,
     accountIdLength: u32,
-    methodAddress: u32,
-    methodLength: u32,
     hashAddress: u32,
     hashLength: u32,
+    methodAddress: u32,
+    methodLength: u32,
     dataAddress: u32,
     dataLength: u32,
 ): Types.TCombinedPtr;
@@ -106,10 +106,10 @@ export namespace HostFunctions {
         let combPtr = hf_s_call(
             targetIdAddress,
             targetId.length,
-            methodAddress,
-            method.length,
             hashAdress,
             hash.length,
+            methodAddress,
+            method.length,
             dataAddress,
             data.length,
         );

@@ -131,13 +131,13 @@ export class WasmMachine {
                     }
                     return 0;
                 },
-                hf_scall : (
+                hf_s_call : (
                     accountOffset: number,
                     accountLength: number,
-                    methodOffset: number,
-                    methodLength: number,
                     hashOffset: number,
                     hashLength : number,
+                    methodOffset: number,
+                    methodLength: number,
                     dataOffset: number,
                     dataLength: number
                 ) : bigint => {
@@ -146,36 +146,36 @@ export class WasmMachine {
                     const args = this.readFromWasmMem(dataOffset, dataLength);
                     const hashContract = Buffer.from(this.readFromWasmMem(hashOffset, hashLength)).toString();
                     // lookiing for hash of callerAccount
-                    let contractHaseInCalledAccount = this.db.getAccountContractHash(calledAccount);
-                    if(contractHaseInCalledAccount == null || contractHaseInCalledAccount == hashContract) {
-                        this.db.accountBindings.set(calledAccount, hashContract);
-                        contractHaseInCalledAccount = hashContract;
+                    let calledAccountContract = this.db.getAccountContractHash(calledAccount);
+                    if (!calledAccountContract) {
+                        this.db.bindContractToAccount(calledAccount, hashContract);
+                        calledAccountContract = hashContract;
+                    } else if (calledAccountContract === hashContract) {
+                        // all ok
                     } else {
-                        // impossible to bind an account already tampered
-                        const result = new WasmResult().setError(Errors.ACCOUNT_ALREADY_BINDED).toBytes();
+                        // cannot bind an already bound account
+                        const result = new WasmResult().setError(Errors.ACCOUNT_ALREADY_BOUND).toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
-                    if(contractHaseInCalledAccount) { // if exists, chack if hash === hashContract
-                            //TODO: return ptrcombinde with specific error
-                       
-                            // tamper account with hashContract
-                            this.db.bindContractToAccount(calledAccount,hashContract);
-                            // same CALL logic
-                            const moduleToCall = this.db.getAccountContractModule(calledAccount);
-                            console.log("Enter in scall");
-                            if (!moduleToCall) {
-                                const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
-                                return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
-                            }
-                            
-                            const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db, this.eventEmitter);
-                            const runResult = newWasmMachine.run(args);
-                            const runResultBytes = runResult.toBytes();
-                            return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
-                        
+
+                    if (calledAccountContract) {
+                        // same logic as call
+                        const moduleToCall = this.db.getAccountContractModule(calledAccount);
+                        console.log("Enter in scall");
+                        if (!moduleToCall) {
+                            const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
+                            return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
+                        }
+
+                        const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
+                        const runResult = newWasmMachine.run(args);
+                        const runResultBytes = runResult.toBytes();
+                        return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
+
                     }
                     const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
                     return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
+
                 },
                 hf_call: (
                     accountOffset: number,
@@ -185,11 +185,6 @@ export class WasmMachine {
                     dataOffset: number,
                     dataLength: number,
                 ): bigint => {
-                    // if(typeof mockHostFunctions.hf_call == "function") {
-                    //     const mockResult:WasmResult = mockHostFunctions.hf_call(calledAccount,calledMethod,args);
-                    //     const mockResultBytes = mockResult.toBytes();
-                    //     return Utils.combinePointer(this.writeToWasmMem(mockResultBytes), mockResultBytes.byteLength);
-                    // }
                     const calledAccount = Buffer.from(this.readFromWasmMem(accountOffset, accountLength)).toString();
                     const calledMethod = Buffer.from(this.readFromWasmMem(methodOffset, methodLength)).toString();
                     const args = this.readFromWasmMem(dataOffset, dataLength);
@@ -269,7 +264,6 @@ export class WasmMachine {
         if (!this.wasmInstance) {
             throw new Error(Errors.WM_NOT_INST);
         }
-        this.currentCtx.method
         //console.log("IsCallable:",this.currentCtx.method,this.isCallable(this.currentCtx.method));
         const runResult = (this.wasmInstance!.exports[methodToRun] as CallableFunction)(...args);
         return runResult;
@@ -292,7 +286,6 @@ export class WasmMachine {
         const ctxBytes = this.currentCtx.toBytes();
         const ctxOffset = this.writeToWasmMem(ctxBytes);
         const argsOffset = this.writeToWasmMem(argsBytes);
-        //console.log("IsCallable",this.currentCtx.method,this.isCallable(this.currentCtx.method));
         const runResult =  this.callExportedMethod('run', ctxOffset, ctxBytes.byteLength, argsOffset, argsBytes.byteLength);
         return (this.decodeResult(runResult));
     }

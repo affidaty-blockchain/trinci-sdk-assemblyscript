@@ -9,11 +9,12 @@ describe('Test all smart contract functionalities', () => {
 
     it('test method', async () => {
         let socketConnected = false;
+        client.on('error', (error) => {
+        })
         try {
             await client.connectSocket();
             socketConnected = true;
         } catch (error) {
-            socketConnected = false;
         }
         // getting smart contract full path
         const wasmFilePath = path.resolve(__dirname, wasmPath);
@@ -21,13 +22,13 @@ describe('Test all smart contract functionalities', () => {
         // creating new TrinciNode
         const node = new TrinciNode();
 
-        if(socketConnected) {
-            // a way to intercept 
-            node.eventEmitter.on('txEvent', (args) => {
+        // a way to intercept transaction events
+        node.eventEmitter.on('txEvent', (args) => {
 
-                // const tempArgs = {...args, eventData: `0x${Buffer.from(args.eventData).toString('hex')}`};
-                // console.log(`Caught a transaction event:\n${JSON.stringify(tempArgs, null, 2)}\n`);
+            const tempArgs = {...args, eventData: `0x${Buffer.from(args.eventData).toString('hex')}`};
+            console.log(`Caught a transaction event:\n${JSON.stringify(tempArgs, null, 2)}\n`);
 
+            if(socketConnected) {
                 const txEventMsg = Message.stdTrinciMessages.txEvent(
                     args.eventTx,
                     args.emitterAccount,
@@ -36,10 +37,9 @@ describe('Test all smart contract functionalities', () => {
                     args.eventData,
                 );
                 client.writeMessage(txEventMsg);
-                // console.log(`txEventMsgBytes: [${Buffer.from(txEventMsgBytes).toString('hex')}]`);
-                
-            });
-        }
+            }
+            
+        });
 
         // registering smart contract inside node and getting its reference hash
         const scRefHash = await node.registerContract(wasmFilePath);
