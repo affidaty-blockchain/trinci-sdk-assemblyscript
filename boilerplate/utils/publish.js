@@ -355,7 +355,7 @@ async function main() {
             process.stdout.write('Execution successful.\n');
             hashString = t2lib.Utils.bytesToObject(publishReceipt.result);
             const hashList = new HashList();
-            hashList.save(scName, hashString);
+            hashList.save(metadata.name, hashString);
         } else {
             process.stdout.write('Execution error.\n');
             hashString = Buffer.from(publishReceipt.result).toString();
