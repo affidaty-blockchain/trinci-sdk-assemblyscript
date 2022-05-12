@@ -341,7 +341,7 @@ async function main() {
         process.stdout.write(`Url:            [${argv.url}]\n`);
         process.stdout.write(`Rest:           [${argv.restPort}]\n`);
         process.stdout.write(`Bridge:         [${argv.bridgePort}]\n`);
-        const client = new t2lib.BridgeClient(argv.url, argv.restPort, argv.bridgePort, argv.network);
+        const client = new t2lib.BridgeClient(argv.url, argv.restPort, argv.bridgePort, publishTx.data.networkName);
         await client.connectSocket();
         await client.subscribe('SDK_PUBLISH_SCRIPT', ['block']);
         await testConnection(client);
