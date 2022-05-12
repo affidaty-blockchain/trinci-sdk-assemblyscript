@@ -360,7 +360,7 @@ async function main() {
             process.stdout.write('Execution error.\n');
             hashString = Buffer.from(publishReceipt.result).toString();
         }
-        console.log(`${scName}: ${hashString}`);
+        console.log(`${metadata.name}: ${hashString}`);
     }
     return true;
 }
