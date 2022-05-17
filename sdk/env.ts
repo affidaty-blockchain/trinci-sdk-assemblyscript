@@ -18,6 +18,8 @@ declare function hf_load_asset(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 
 declare function hf_store_asset(idAddr: u32, idLength: u32, valueAddr: u32, valueLength: u32): void;
 
+declare function hf_remove_asset(idAddr: u32, idLength: u32): void;
+
 declare function hf_get_account_contract(idAddr: u32, idLength: u32): Types.TCombinedPtr;
 
 declare function hf_sha256(dataAddress: u32, dataLength: u32): Types.TCombinedPtr;
@@ -207,6 +209,12 @@ export namespace HostFunctions {
         let combinedPtr = hf_load_asset(idAddress, sourceId.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
         return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
+    }
+
+    /** Allows to completely remove asset-specific data from an account. */
+    export function removeAsset(accountId: string): void {
+        let idAddr = MemUtils.stringToMem(accountId);
+        hf_remove_asset(idAddr, accountId.length);
     }
 
     /**
