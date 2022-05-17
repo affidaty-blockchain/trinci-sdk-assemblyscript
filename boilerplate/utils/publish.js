@@ -52,22 +52,6 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     description: 'Path to file containig smart contract metadata.',
     defaultDescription: `"${DEFAULT_METADATA_FILE}"`
 })
-.option('restPort', {
-    alias: 'r',
-    type: 'number',
-    demandOption: false,
-    description: 'Rest interface port of the node specified in the "url" option. Must be set along with "url" option.',
-    default: DEFAULT_REST_PORT,
-    defaultDescription: DEFAULT_REST_PORT,
-})
-.option('bridgePort', {
-    alias: 'b',
-    type: 'number',
-    demandOption: false,
-    description: 'Bridge(socket) interface port of the node specified in the "url" option. Must be set along with "url" option.',
-    default: DEFAULT_BRIDGE_PORT,
-    defaultDescription: DEFAULT_BRIDGE_PORT,
-})
 .option('url', {
     alias: 'u',
     type: 'string',
@@ -339,18 +323,14 @@ async function main() {
     if (argv.url) {
         process.stdout.write("Connecting to TRINCI node...\n");
         process.stdout.write(`Url:            [${argv.url}]\n`);
-        process.stdout.write(`Rest:           [${argv.restPort}]\n`);
-        process.stdout.write(`Bridge:         [${argv.bridgePort}]\n`);
-        const client = new t2lib.BridgeClient(argv.url, argv.restPort, argv.bridgePort, publishTx.data.networkName);
-        await client.connectSocket();
-        await client.subscribe('SDK_PUBLISH_SCRIPT', ['block']);
+        const client = new t2lib.Client(argv.url, publishTx.data.networkName);
         await testConnection(client);
         process.stdout.write("Connection successful.\n");
         process.stdout.write('\n');
         const publishTicket = await client.submitTx(publishTx);
         process.stdout.write(`Pub tx ticket:  [${publishTicket}]\n`);
         process.stdout.write('Waiting for transaction to be executed...\n');
-        let publishReceipt = await client.waitForTicket(publishTicket);
+        let publishReceipt = await client.waitForTicket(publishTicket, 100, 1000);
         if (publishReceipt.success) {
             process.stdout.write('Execution successful.\n');
             hashString = t2lib.Utils.bytesToObject(publishReceipt.result);
