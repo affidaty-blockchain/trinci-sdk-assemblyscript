@@ -57,7 +57,6 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     type: 'string',
     demandOption: false,
     description: 'If provided, this script will try to submit the transaction to a node on the specified url. Implies that "port" and "bridgePort" options are also set.',
-    implies: ['restPort', 'bridgePort'],
 })
 .option('txOutFile', {
     alias: 't',
