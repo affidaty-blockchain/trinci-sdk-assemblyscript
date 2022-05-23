@@ -65,8 +65,8 @@ export class OwnerDB {
         return valSer;
     }
     static has(key:string):boolean {
-        const ret = HostFunctions.getKeys(key);
-        return ret.length > 0;
+        const ret = HostFunctions.getKeys(`${key}*`);
+        return ret.indexOf(key) >= 0;
     }
     static delete(key:string):boolean {
         if(this.has(key)) {
