@@ -100,16 +100,16 @@ export namespace HostFunctions {
      * @param hash - expected smart contract bound to target
      * @param data - data to pass as call arguments
     */
-    export function scall(targetId: string, method: string, hash: string, data: u8[]): Types.AppOutput {
+    export function scall(targetId: string, method: string, contractHash: u8[], data: u8[]): Types.AppOutput {
         let targetIdAddress = MemUtils.stringToMem(targetId);
         let methodAddress = MemUtils.stringToMem(method);
         let dataAddress = MemUtils.u8ArrayToMem(data);
-        let hashAdress = MemUtils.stringToMem(hash);
+        let contractHashAdress = MemUtils.u8ArrayToMem(contractHash);
         let combPtr = hf_s_call(
             targetIdAddress,
             targetId.length,
-            hashAdress,
-            hash.length,
+            contractHashAdress,
+            contractHash.length,
             methodAddress,
             method.length,
             dataAddress,
