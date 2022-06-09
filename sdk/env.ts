@@ -28,6 +28,8 @@ declare function hf_drand(max: u64): Types.TCombinedPtr;
 
 declare function hf_is_callable(accountIdAddress: u32,accountIdLength: u32,methodAddress: u32,methodLength: u32): u8;
 
+declare function hf_get_block_time(): u64;
+
 declare function hf_call(
     accountIdAddress: u32,
     accountIdLength: u32,
@@ -65,6 +67,12 @@ declare function hf_emit(
 ): void;
 
 export namespace HostFunctions {
+
+    /** TODO: description */
+    export function getBlockTime(): u64 {
+        return hf_get_block_time();
+    }
+
     /** check if method is callable in targetId account */
     export function is_callable(targetId: string, method: string): bool {
         let targetIdAddress = MemUtils.stringToMem(targetId);

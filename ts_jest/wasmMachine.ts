@@ -195,7 +195,6 @@ export class WasmMachine {
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
                     const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db, this.eventEmitter);
-                    
                     try {
                         const runResult = newWasmMachine.run(args);
                         const runResultBytes = runResult.toBytes();
@@ -204,7 +203,6 @@ export class WasmMachine {
                         const result = new WasmResult().setError(Errors.METHOD_NOT_FOUND).toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
-                    
                 },
                 hf_verify: (
                     pubKeyAddress: number,
@@ -217,6 +215,15 @@ export class WasmMachine {
                     console.log('called hf_verify() function. returning true;');
                     return 1;
                 },
+                hf_drand: (
+                    max: BigInt
+                ): BigInt => {
+                    const maxN: number = (Number(max) + 1) * Math.random();
+                    return BigInt(Math.floor(maxN));
+                },
+                hf_get_block_time: (): bigint => {
+                    return BigInt(Math.ceil(new Date().getTime()/1000))
+                }
             },
         };
         Object.assign(this.imports.env,this.imports.hostfunctions);
