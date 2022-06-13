@@ -257,6 +257,14 @@ export class trinciDB {
         return;
     }
 
+    removeAccountAsset(ownerAccountId: string, assetAccountId: string): void {
+        let accountAssetDb = this.assetDb.get(ownerAccountId);
+        if (this.assetDb.has(assetAccountId)) {
+            this.assetDb.delete(assetAccountId)
+        }
+        return;
+    }
+
     getAccountAsset(ownerAccountId: string, assetAccountId: string): Uint8Array | null {
         if (!this.assetDb.has(ownerAccountId)) {
             return null;
