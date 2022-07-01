@@ -36,7 +36,9 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     alias: 'p',
     type: 'string',
     demandOption: false,
+    default: DEFAULT_PUBLISH_ACC_FILE,
     description: 'Path. If specified, account from this file will be used to sign the publish transaction. If missing, a random account will be generated.',
+    defaultDescription: `"${DEFAULT_PUBLISH_ACC_FILE}"`
 })
 .option('savePublisher', {
     alias: 'P',
