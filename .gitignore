@@ -1,5 +1,5 @@
 node_modules
 package-lock.json
 .vscode
-visitor-as-cjs
+visitor-as
 boilerplate/msgpackable.js

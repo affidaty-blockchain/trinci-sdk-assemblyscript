@@ -2,8 +2,8 @@
   "compilerOptions": {
     "inlineSourceMap": true,
     "inlineSources": true,
-    "target": "ES6",
-    "module": "CommonJS",
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "downlevelIteration": true,
     "preserveConstEnums": true,
@@ -20,9 +20,8 @@
     "declaration": true,
     "strict": true,
     "lib": ["esnext","esnext.string"],
-    "outDir": "./visitor-as-cjs"
-    
+    "outDir": "./visitor-as"
   },
-  "include": ["./visitor-as/**/*"],
+  "include": ["./visitor-as-ts/**/*"],
   "exclude": ["node_modules/**/*"]
 }
