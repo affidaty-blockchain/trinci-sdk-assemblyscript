@@ -23,13 +23,13 @@
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/t2-lib": "^2.0.15",
-        "@affidaty/trinci-sdk-as": "^2.3.5",
+        "@affidaty/t2-lib": "^2.0.36",
+        "@affidaty/trinci-sdk-as": "^2.3.61",
         "yargs": "^17.4.1",
         "adm-zip": "^0.5.9"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "0.19.23",
-        "assemblyscript": "0.19.23"
+        "@assemblyscript/loader": "0.21.6",
+        "assemblyscript": "0.21.6"
     }
 }
