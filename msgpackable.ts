@@ -1,35 +1,39 @@
-// import { ClassDecorator, registerDecorator } from './src/decorator';
-// import { getName, getTypeName, toString } from './src/utils';
-import { ClassDecorator, registerDecorator, utils, SimpleParser } from "@affidaty/trinci-sdk-as/visitor-as-cjs";
+import {
+    ClassDecorator,
+    registerDecorator,
+    utils,
+    SimpleParser,
+} from '@affidaty/trinci-sdk-as/visitor-as/index.js';
 import {
     FieldDeclaration,
     MethodDeclaration,
-    ClassDeclaration,
-} from "@affidaty/trinci-sdk-as/visitor-as-cjs/as";
+    ClassDeclaration
+} from 'assemblyscript/dist/assemblyscript.js';
 
+// ==== Helper functions ====
 
-function getStructure(node: ClassDeclaration): string[][] {
+function getStructure(node: any): string[][] {
     let result: string[][] = [];
     for (let i = 0; i < node.members.length; i++) {
-        if (node.members[i] instanceof FieldDeclaration ) {
-            let fieldName = utils.getName(node.members[i]);
-            let fieldType = utils.getName((node.members[i] as any).type);
+        if (node.members[i] instanceof FieldDeclaration) {
+            let fieldName: string = utils.getName(node.members[i]);
+            let fieldType: string = utils.getName(node.members[i].type);
             result.push([fieldName, fieldType]);
         }
     }
-    return result
+    return result;
 }
 
-function getSetters(structure: string[][], node: ClassDeclaration): string[] {
+function getSetters(structure: string[][], node: any): string[] {
     let result: string[] = [];
     for (let i = 0; i < structure.length; i++) {
-        let setterCode = `changetype<usize>((c:${utils.getName(node)}, v:${structure[i][1]}):void=>{c.${structure[i][0]}=v;})`;
+        let setterCode: string = `changetype<usize>((c:${utils.getName(node)}, v:${structure[i][1]}):void=>{c.${structure[i][0]}=v;})`;
         result.push(setterCode);
     }
     return result;
 }
 
-function getGetters(structure: string[][], node: ClassDeclaration): string[] {
+function getGetters(structure: string[][], node: any): string[] {
     let result: string[] = [];
     for (let i = 0; i < structure.length; i++) {
         let getterCode = `changetype<usize>((c:${utils.getName(node)}):${structure[i][1]}=>{return c.${structure[i][0]};})`;
@@ -38,18 +42,23 @@ function getGetters(structure: string[][], node: ClassDeclaration): string[] {
     return result;
 }
 
+// ==== Actual decorator class ====
+
 class MsgPackable extends ClassDecorator {
-    visitFieldDeclaration(node: FieldDeclaration) {
+    visitFieldDeclaration(node: any) {
     }
-    visitMethodDeclaration(node: MethodDeclaration) {
+    visitMethodDeclaration(node: any) {
     }
-    visitClassDeclaration(node: ClassDeclaration) {
-        let structure: string[][] = getStructure(node);
-        // console.log(structure);
-        let structureMemberCode: string = '__structure: string[][] = [';
+    visitClassDeclaration(node: any) {
+        // getting class structure to use for code generation below
+        let structure = getStructure(node);
+
+        // adding '__structure' member to class. It contains names and types of
+        // all members of the class.
+        let structureMemberCode = '__structure: string[][] = [';
         for (let i = 0; i < structure.length; i++) {
             if (i > 0) {
-                structureMemberCode += ','
+                structureMemberCode += ',';
             }
             structureMemberCode += '[\'';
             structureMemberCode += structure[i][0];
@@ -61,11 +70,12 @@ class MsgPackable extends ClassDecorator {
         let structureMember = SimpleParser.parseClassMember(structureMemberCode, node); //parse StaticArray.fromArray expression
         node.members.push(structureMember);
 
-        let setters: string[] = getSetters(structure, node);
-        let settersMemberCode: string = '__setters: usize[] = [';
+        // '__setters' member will allow to set value of any class member
+        let setters = getSetters(structure, node);
+        let settersMemberCode = '__setters: usize[] = [';
         for (let i = 0; i < structure.length; i++) {
             if (i > 0) {
-                settersMemberCode += ','
+                settersMemberCode += ',';
             }
             settersMemberCode += setters[i];
         }
@@ -73,11 +83,12 @@ class MsgPackable extends ClassDecorator {
         let settersMember = SimpleParser.parseClassMember(settersMemberCode, node); //parse StaticArray.fromArray expression
         node.members.push(settersMember);
 
-        let getters: string[] = getGetters(structure, node);
-        let gettersMemberCode: string = '__getters: usize[] = [';
+        // '__getters' member will allow to get value of any class member
+        let getters = getGetters(structure, node);
+        let gettersMemberCode = '__getters: usize[] = [';
         for (let i = 0; i < structure.length; i++) {
             if (i > 0) {
-                gettersMemberCode += ','
+                gettersMemberCode += ',';
             }
             gettersMemberCode += getters[i];
         }
@@ -86,6 +97,9 @@ class MsgPackable extends ClassDecorator {
         node.members.push(gettersMember);
         return node;
     }
+
+    // use '@<name_given_here>' to call decorator
     get name() { return "msgpackable"; }
 }
-module.exports = registerDecorator(new MsgPackable());
+
+export default registerDecorator(new MsgPackable());

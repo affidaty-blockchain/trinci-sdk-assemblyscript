@@ -1,12 +1,25 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.3.59",
+    "version": "2.3.60",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
-    "main": "index.ts",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./sdk": {
+            "import": "./sdk/sdk.ts"
+        },
+        "./visitor-as": {
+            "import": "./visitor-as/index.js",
+            "types": "./visitor-as/index.d.ts"
+        },
+        "./*": "./*"
+    },
     "files": [
         "boilerplate",
         "sdk",
-        "visitor-as-cjs",
+        "visitor-as",
         "ts_jest",
         "index.ts",
         "init.sh",
@@ -32,8 +45,8 @@
         "smart contract"
     ],
     "dependencies": {
-        "@affidaty/t2-lib": "^2.0.18",
-        "@affidaty/trinci-sdk-as": "^2.3.38",
+        "@affidaty/t2-lib": "^2.0.0",
+        "@affidaty/trinci-sdk-as": "^2.3.0",
         "@types/cli-table": "^0.3.0",
         "@types/jest": "^29.1.2",
         "@types/lodash.clonedeep": "^4.5.7",
