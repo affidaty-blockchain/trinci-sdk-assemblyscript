@@ -78,9 +78,9 @@ import {
   IndexSignatureNode,
   TemplateLiteralExpression,
   util,
-} from "./as";
-import { BaseVisitor } from "./base";
-import { indent } from "./utils";
+} from "assemblyscript/dist/assemblyscript.js";
+import { BaseVisitor } from "./base.js";
+import { indent } from "./utils.js";
 
 // declare function i64_to_string(i: I64): string;
 // import { i64_to_string } from "../../../src/glue/i64"
@@ -1066,7 +1066,9 @@ export class ASTBuilder extends BaseVisitor {
       sb.push("declare ");
     }
     var members = node.members;
-    if (members != null && members.length > 0) {
+    if (members == null) {
+      sb.push("export *");
+    } else if (members.length > 0) {
       let numMembers = members.length;
       sb.push("export {\n");
       let indentLevel = ++this.indentLevel;

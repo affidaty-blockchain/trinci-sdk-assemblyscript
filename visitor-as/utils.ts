@@ -17,10 +17,11 @@ import {
   NamedTypeNode,
   Range,
   util,
-} from "./as";
-import { ASTBuilder } from "./astBuilder";
+} from "assemblyscript/dist/assemblyscript.js";
+import { ASTBuilder } from "./astBuilder.js";
+import cloneDeep from "lodash.clonedeep";
 
-const cloneDeep: <T>(t: T) => T = require("lodash.clonedeep") as any;
+// const cloneDeep: <T>(t: T) => T = require("lodash.clonedeep") as any;
 
 export function decorates(node: DecoratorNode, name: string): boolean {
   return (<IdentifierExpression>node.name).text === name;
@@ -68,6 +69,8 @@ interface Named {
   name: IdentifierExpression;
 }
 
+const OR_NULL = /\|.*null/;
+
 
 export function getName(node: Node & Named | TypeNode): string {
   if (node instanceof TypeNode) {
@@ -77,6 +80,9 @@ export function getName(node: Node & Named | TypeNode): string {
       if (typeParameters && typeParameters.length > 0) {
         name += `<${typeParameters.map(getName).join(", ")}>`;
       }
+      if (node.isNullable && !OR_NULL.test(name)) {
+        name = `${name} | null`;
+      }
       return name
     } else if (node instanceof TypeName) {
       return toString(node.identifier)
@@ -85,18 +91,19 @@ export function getName(node: Node & Named | TypeNode): string {
   }
   if (node instanceof ClassDeclaration || node instanceof InterfaceDeclaration || node instanceof FunctionDeclaration) {
     return className(node);
-  } 
+  }
   return toString(node.name);
 }
 
 
 export function getTypeName(node: TypeName): string {
-  let name = toString(node.identifier);
-  if (node.next) {
-    name += getTypeName(node.next);
+  const partNames = [];
+  let currentNode: TypeName | null = node;
+  while (currentNode) {
+    partNames.push(toString(currentNode.identifier));
+    currentNode = currentNode.next;
   }
-  return name;
-  
+  return partNames.join(".");
 }
 
 export function cloneNode<T extends Node>(node: T): T {

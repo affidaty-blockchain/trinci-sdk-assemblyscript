@@ -235,7 +235,7 @@ async function main() {
     const wasmRefHash = getWasmRefHash(wasmBytes);
 
     let publisherAccount = new t2lib.Account();
-    if (argv.publisherAccount) {
+    if (argv.publisherAccount && argv.publisherAccount.length > 0) {
         publisherAccount = await loadPublisherAccount(argv.publisherAccount);
     } else {
         await publisherAccount.generate();

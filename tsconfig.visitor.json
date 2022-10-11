@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "outDir": "./visitor-as-cjs",
     "inlineSourceMap": true,
     "inlineSources": true,
     "target": "ES6",
@@ -16,9 +15,14 @@
     "allowJs": false,
     "strictNullChecks": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop":true,
     "declaration": true,
     "strict": true,
-    "lib": ["esnext","esnext.string"]
+    "lib": ["esnext","esnext.string"],
+    "outDir": "./visitor-as-cjs"
+    
   },
-  "include": ["./visitor-as/*"]
+  "include": ["./visitor-as/**/*"],
+  "exclude": ["node_modules/**/*"]
 }
