@@ -32,7 +32,8 @@ const argv = Yargs(Yargs.hideBin(process.argv))
 const FULL_ADDRESS = `${argv.address}:${argv.port}`;
 
 function genId(length) {
-    const charPool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    // const charPool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charPool = 'abcdefghijklmnopqrstuvwxyz0123456789';
     const charPoolLen = charPool.length;
     let result = '';
     for ( let i = 0; i < length; i++ ) {
@@ -46,7 +47,7 @@ let socketList = {};
 server.on('connection', (socket) => {
     socket.id = genId(5);
     socketList[socket.id] = socket;
-    console.log(`Connection from ${socket.remoteAddress}:${socket.remotePort}. Saved as ${socket.id}\n`);
+    console.log(`Connection from ${socket.remoteAddress}:${socket.remotePort}. Assigned ID: ${socket.id}\n`);
 
     socket.on('end', () => {
         console.log(`Closing: ${socket.id}`);

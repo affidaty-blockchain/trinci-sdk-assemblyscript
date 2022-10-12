@@ -22,12 +22,16 @@ export class WasmMachine {
     currentCtx: CTX;
     db:trinciDB;
     eventEmitter: WasmEventEmitter;
+    possibleMallocNames: string[];
+    currMallocName: string | null;
     constructor(
         wasmModule: WebAssembly.Module,
         ctx: CTX = new CTX(),
         trinciDb:trinciDB,
         eventEmitter?: WasmEventEmitter,
     ) {
+        this.possibleMallocNames = ['alloc', 'malloc'];
+        this.currMallocName = null;
         this.eventEmitter = eventEmitter || new WasmEventEmitter();
         this.currentCtx = ctx;
         this.wasmModule = wasmModule;
@@ -238,11 +242,13 @@ export class WasmMachine {
     instantiate():void {
         this.wasmInstance = new WebAssembly.Instance(this.wasmModule, this.imports);
         this.wasmMem = this.wasmInstance.exports.memory as WebAssembly.Memory;
+        this.currMallocName = null;
         return;
     }
 
     reset(): void {
         this.wasmInstance = null;
+        this.currMallocName = null;
         return;
     }
 
@@ -260,10 +266,28 @@ export class WasmMachine {
         if (data.byteLength <= 0) {
             return 0;
         }
-        const offset: number = (this.wasmInstance.exports.alloc as CallableFunction)(data.byteLength);
+        const offset: number = (this.wasmInstance.exports[this.getCurrMallocName()] as CallableFunction)(data.byteLength);
         const wasmMemView = new Uint8Array(this.wasmMem.buffer);
         wasmMemView.set(data, offset);
         return offset;
+    }
+
+    public getCurrMallocName(forceRescan: boolean = false): string {
+        if (!this.wasmInstance) {
+            this.currMallocName = null;
+            throw new Error(Errors.WM_NOT_INST);
+        }
+        if (this.currMallocName && this.currMallocName.length && !forceRescan) {
+            return this.currMallocName;
+        }
+        const wasmInstanceExports = Object.keys(this.wasmInstance.exports);
+        for (const mallocName of this.possibleMallocNames) {
+            if (wasmInstanceExports.includes(mallocName)) {
+                this.currMallocName = mallocName;
+                return this.currMallocName;
+            }
+        }
+        throw new Error(Errors.ALLOC_NOT_FOUND);
     }
 
     private decodeResult(runResult: bigint): WasmResult {
