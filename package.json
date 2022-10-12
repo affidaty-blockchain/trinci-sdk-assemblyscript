@@ -1,6 +1,6 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.3.62",
+    "version": "2.3.63",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "type": "module",
     "exports": {
