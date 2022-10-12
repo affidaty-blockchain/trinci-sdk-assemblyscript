@@ -5,3 +5,4 @@ export const ACCOUNT_NOT_BOUND = 'This account is not bound to any smart contrac
 export const ACCOUNT_ALREADY_BOUND = 'Account already bound';
 export const MODULE_NOT_FOUND = 'Could not find required wasm module.';
 export const METHOD_NOT_FOUND = 'Method not found';
+export const ALLOC_NOT_FOUND = 'Memory allocation method not found or not exported.';
