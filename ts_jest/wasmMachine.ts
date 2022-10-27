@@ -109,7 +109,7 @@ export class WasmMachine {
                 },
                 hf_remove_asset: (accountOffset: number, accountLength: number): void => {
                     const account = Buffer.from(this.readFromWasmMem(accountOffset, accountLength)).toString();
-                    this.db.removeAccountData(account, this.currentCtx.owner);
+                    this.db.removeAccountAsset(account, this.currentCtx.owner);
                     return;
                 },
                 hf_get_account_contract: (accountOffset: number, accountLength: number): bigint => {
