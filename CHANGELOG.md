@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- SDK now works with assemblyscript 0.20+
+- SDK now works with assemblyscript v0.20.0 to v0.21.7
 - `serializeInternalType<>()` and `deserializeInternalType<>()` functions to easily (de)serialize internal assemblyscript types (`bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `f32`, `f64`, `string`, `ArrayBuffer`) and arrays of those types.
 - added possibility to test compiled smart contracts(.wasm) directly with jest without need to set up a full TRINCI node.
 - added a sample jest test for sample smart contract. Try it with `npm run test` after compiling example smart contract with `npm run asbuild`.

@@ -62,8 +62,8 @@
         "ts-node": "^10.9.1"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "0.22.0",
-        "assemblyscript": "0.22.0",
+        "@assemblyscript/loader": "0.21.7",
+        "assemblyscript": "0.21.7",
         "typescript": "^4.4.3"
     }
 }
