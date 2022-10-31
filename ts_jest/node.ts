@@ -87,7 +87,6 @@ export class TrinciNode {
                 return reject(error);
             }
             if(wmRunResult.isError) {
-                //console.log(this.db,forkedDB);
                 this.db = forkedDB;
             }
             return resolve(wmRunResult);

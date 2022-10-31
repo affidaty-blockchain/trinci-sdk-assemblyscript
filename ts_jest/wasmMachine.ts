@@ -170,7 +170,6 @@ export class WasmMachine {
                     if (calledAccountContract) {
                         // same logic as call
                         const moduleToCall = this.db.getAccountContractModule(calledAccount);
-                        console.log("Enter in scall");
                         if (!moduleToCall) {
                             const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
                             return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
@@ -221,7 +220,7 @@ export class WasmMachine {
                     signatureAddress: number,
                     signatureLength: number,
                 ): number => {
-                    console.log('called hf_verify() function. returning true;');
+                    console.log('Wasm called hf_verify(). Returning true by default.');
                     return 1;
                 },
                 hf_drand: (
@@ -300,7 +299,6 @@ export class WasmMachine {
         if (!this.wasmInstance) {
             throw new Error(Errors.WM_NOT_INST);
         }
-        //console.log("IsCallable:",this.currentCtx.method,this.isCallable(this.currentCtx.method));
         const runResult = (this.wasmInstance!.exports[methodToRun] as CallableFunction)(...args);
         return runResult;
     }
