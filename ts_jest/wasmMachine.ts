@@ -153,7 +153,7 @@ export class WasmMachine {
                     const calledAccount = Buffer.from(this.readFromWasmMem(accountOffset, accountLength)).toString();
                     const calledMethod = Buffer.from(this.readFromWasmMem(methodOffset, methodLength)).toString();
                     const args = this.readFromWasmMem(dataOffset, dataLength);
-                    const hashContract = Buffer.from(this.readFromWasmMem(hashOffset, hashLength)).toString();
+                    const hashContract = Buffer.from(this.readFromWasmMem(hashOffset, hashLength)).toString('hex');
                     // lookiing for hash of callerAccount
                     let calledAccountContract = this.db.getAccountContractHash(calledAccount);
                     if (!calledAccountContract) {
