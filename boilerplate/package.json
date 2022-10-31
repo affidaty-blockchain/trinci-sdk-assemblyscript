@@ -1,7 +1,7 @@
 {
-    "name": "as_smart_contract",
+    "name": "trinci_smart_contract",
     "version": "0.0.1",
-    "description": "",
+    "description": "A smart contract made for TRINCI blockchain.",
     "scripts": {
         "asbuild:debug": "asc assembly/index.ts --config asconfig.json --target debug --transform ./msgpackable.mjs --use abort=",
         "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./msgpackable.mjs --use abort=",
@@ -23,13 +23,13 @@
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/t2-lib": "^2.0.36",
-        "@affidaty/trinci-sdk-as": "^2.3.61",
-        "yargs": "^17.4.1",
+        "@affidaty/t2-lib": "^2.1.0",
+        "@affidaty/trinci-sdk-as": "^2.4.0",
+        "yargs": "^17.6.0",
         "adm-zip": "^0.5.9"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "0.21.6",
-        "assemblyscript": "0.21.6"
+        "@assemblyscript/loader": "0.22.0",
+        "assemblyscript": "0.22.0"
     }
 }

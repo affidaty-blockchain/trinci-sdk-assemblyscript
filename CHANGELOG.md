@@ -5,13 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.4.0] - UNPUBLISHED
+## [2.4.0] - 2022-10-31
 
 ### Added
 
+- SDK now works with assemblyscript 0.20+
 - `serializeInternalType<>()` and `deserializeInternalType<>()` functions to easily (de)serialize internal assemblyscript types (`bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `u64`, `i64`, `f32`, `f64`, `string`, `ArrayBuffer`) and arrays of those types.
 - added possibility to test compiled smart contracts(.wasm) directly with jest without need to set up a full TRINCI node.
 - added a sample jest test for sample smart contract. Try it with `npm run test` after compiling example smart contract with `npm run asbuild`.
+- account class for better account data management.
+- methods for node db exploration.
+- new Host functions supported: hf_s_call, hf_emit, is_callable. hf_verify, hf_get_block_time, hf_remove_asset
+- BulkTX simulation
+- js script for smart contract publication in blockchain ("utils" directory). Run it with "--help" to get usage help.
+- added EventEmitter no node simulator, which fires events emitted by smart contracts(node.EventEmitter.on('txEvent', ()=>{}))
+- added SocketRelay to simulate node socket connection. Launch it before test and do ```node.connectToSocket('<relayInterface>', <relayPort>);``` in your jest test to relay all emitted events as if you were connected to a real TRINCI node. Then you'll be able to connect with your software to that relay as if it was a real TRINCI node with socket connection. Launch it with "utils/socketRelay.js --help" to get help.
+
+### Changed
+
+- host functions are now expected to be imported in "env" namespace instead of "hostfunctions"
+
+### Fixed
+- node db visualization functions fixed.
 
 ## [2.3.6] - 2022-03-14
 
@@ -111,8 +126,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - HostFunctions.call() now returns a named structure (Types.AppOutput) instead of raw bytes.
-
-```plantuml
-Bob -> Alice : hello
-Alice -> Bob : hi
-```
