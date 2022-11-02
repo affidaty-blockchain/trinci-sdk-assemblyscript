@@ -37,8 +37,14 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     type: 'string',
     demandOption: false,
     default: DEFAULT_PUBLISH_ACC_FILE,
-    description: 'Path. If specified, account from this file will be used to sign the publish transaction. If missing, a random account will be generated.',
+    description: 'Path. If specified, account from this file will be used to sign the publish transaction.',
     defaultDescription: `"${DEFAULT_PUBLISH_ACC_FILE}"`
+})
+.option('generatePublisher', {
+    alias: 'G',
+    type: 'boolean',
+    demandOption: false,
+    description: 'If set, a random one-time account will be generated to be used during publication. If set, this option overrides the given publisher key, if any. To save for a later use, set the --savePublisher(a.k.a "-P") option with desired path.',
 })
 .option('savePublisher', {
     alias: 'P',
@@ -87,7 +93,7 @@ async function testConnection(client) {
 
 /**
  * 
- * @param {string} path 
+ * @param {string} path
  * @returns {string}
  */
 function absolutizePath(filePath) {
@@ -104,8 +110,11 @@ function absolutizePath(filePath) {
  */
 async function loadPublisherAccount(filePath) {
     const absPath = absolutizePath(filePath);
+    if (!fs.existsSync(absPath)) {
+        throw new Error(`File \"${absPath}\" not found.`);
+    }
     const accDataObj = JSON.parse(fs.readFileSync(absPath));
-    if (!accDataObj.privateKey || typeof accDataObj.privateKey !== "string") {
+    if (!accDataObj.privateKey || typeof accDataObj.privateKey !== "string" || !accDataObj.privateKey.length) {
         throw new Error(`\"privateKey\" member not found or not a string in ${absPath}.`);
     }
     const privKeyBytes = new Uint8Array(t2lib.binConversions.base58ToArrayBuffer(accDataObj.privateKey));
@@ -235,12 +244,16 @@ async function main() {
     const wasmRefHash = getWasmRefHash(wasmBytes);
 
     let publisherAccount = new t2lib.Account();
-    if (argv.publisherAccount && argv.publisherAccount.length > 0) {
-        publisherAccount = await loadPublisherAccount(argv.publisherAccount);
+    let genPublisherSaveFile = './generatedPublisher.json';
+    if (!argv.generatePublisher && argv.publisherAccount && argv.publisherAccount.length > 0) {
+        publisherAccount = loadPublisherAccount(argv.publisherAccount);
     } else {
         await publisherAccount.generate();
-        if (argv.savePublisher) {
-            await saveAccountToFile(argv.savePublisher, publisherAccount);
+        if(typeof argv.savePublisher === 'string') {
+            if (argv.savePublisher.length > 0) {
+                genPublisherSaveFile = argv.savePublisher;
+            }
+            saveAccountToFile(genPublisherSaveFile, publisherAccount);
         }
     }
 
@@ -341,7 +354,7 @@ async function main() {
             process.stdout.write('Execution error.\n');
             hashString = Buffer.from(publishReceipt.result).toString();
         }
-        console.log(`${metadata.name}: ${hashString}`);
+        process.stdout.write(`\n${metadata.name}: ${hashString}\n`);
     }
     return true;
 }
