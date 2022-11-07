@@ -115,6 +115,9 @@ async function loadPublisherAccount(filePath) {
     }
     const accDataObj = JSON.parse(fs.readFileSync(absPath));
     if (!accDataObj.privateKey || typeof accDataObj.privateKey !== "string" || !accDataObj.privateKey.length) {
+        process.stderr.write(`Unable to get publisher private key from ${absPath}\n`);
+        process.stderr.write(`Check if file exists, is readable and contains a valid JSON object with "privateKey" member.\n`);
+        process.stderr.write(`Otherwise it is possible to generate a new key on-site using "-G" option.\nSave generated key using "-P" option\n\n`);
         throw new Error(`\"privateKey\" member not found or not a string in ${absPath}.`);
     }
     const privKeyBytes = new Uint8Array(t2lib.binConversions.base58ToArrayBuffer(accDataObj.privateKey));
@@ -355,6 +358,9 @@ async function main() {
             hashString = Buffer.from(publishReceipt.result).toString();
         }
         process.stdout.write(`\n${metadata.name}: ${hashString}\n`);
+    } else {
+        process.stdout.write('\nPublish transaction won\'t be submitted as url was not provided.');
+        process.stdout.write('\nPlease provide node url ("-u" or "--url" option) to submit publish transaction.\n\n');
     }
     return true;
 }

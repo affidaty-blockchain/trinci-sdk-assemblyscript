@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.4.3] - UNPUBLISHED
+## [2.4.3] - 2022-11-07
 
 ### Changed
 - Slightly better publication script management.
+- More verbose messagges in publish script
 
 ## [2.4.2] - 2022-11-02
 

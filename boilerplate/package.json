@@ -23,7 +23,7 @@
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/t2-lib": "^2.1.0",
+        "@affidaty/t2-lib": "^2.0.0",
         "@affidaty/trinci-sdk-as": "^2.4.0",
         "yargs": "^17.6.0",
         "adm-zip": "^0.5.9"
