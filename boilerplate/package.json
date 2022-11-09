@@ -14,16 +14,17 @@
         "node:reset": "cd ./utils/docker && make node-reset",
         "node:logs": "cd ./utils/docker && make node-logs",
         "publish": "./utils/publish.js",
-        "publish:local": "npm run publish -- -u \"http://localhost\"",
+        "publish:local": "npm run publish -- -n \"QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ\" -u \"http://localhost:8000\"",
         "publish:zip": "npm run publish -- -z \"./preapprove.trinci\"",
         "publish:mainnet": "npm run publish -- -s",
+        "publish:testnet": "npm run publish -- -n \"QmcvHfPC6XYpgxvJSZQCVBd7QAMEHnLbbK1ytA4McWx5UY\" -u \"https://testnet.trinci.net\"",
         "publish:help": "npm run publish -- --help",
         "relay": "./utils/socketRelay.js"
     },
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/t2-lib": "^2.0.0",
+        "@affidaty/t2-lib": "^2.1.0",
         "@affidaty/trinci-sdk-as": "^2.4.0",
         "yargs": "^17.6.0",
         "adm-zip": "^0.5.9"
