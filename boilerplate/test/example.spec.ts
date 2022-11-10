@@ -1,6 +1,5 @@
 import path from 'path';
 import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
-import { Message, BridgeClient } from '@affidaty/t2-lib';
 
 const wasmPath = '../build/release.wasm';
 // remember to run 'npm run asbuild' to compile smart contract
@@ -13,9 +12,15 @@ describe('Test all smart contract functionalities', () => {
         // creating new TrinciNode
         const node = new TrinciNode();
 
+        // Uncomment next line if you need to test a smart contract
+        // with a backend software listening for emitted events via socket
+        // interface (e.g. t2lib.BridgeClient()) directly on TRINCI node.
+        // Also utils/socketRelay.js can be used. It receives data from here
+        // and relays them to every connected client.
+        // 1-start relay; 2-connect to it with your software; 3-launch this test;
         await node.connectToSocket('localhost', 8001);
 
-        // another way to intercept transaction events
+        // events can also be 
         node.eventEmitter.on('txEvent', (args) => {
             // converting binary data to a "0x..." string
             const tempArgs = {...args, eventData: `0x${Buffer.from(args.eventData).toString('hex')}`};
@@ -42,7 +47,6 @@ describe('Test all smart contract functionalities', () => {
         }
         expect(txResult.resultDecoded).toEqual(true);
         node.db.printData("#TargetAccount");
-        
     });
     it('init method', async () => {
         // getting smart contract full path
