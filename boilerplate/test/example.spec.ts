@@ -18,7 +18,7 @@ describe('Test all smart contract functionalities', () => {
         // Also utils/socketRelay.js can be used. It receives data from here
         // and relays them to every connected client.
         // 1-start relay; 2-connect to it with your software; 3-launch this test;
-        await node.connectToSocket('localhost', 8001);
+        // await node.connectToSocket('localhost', 8001);
 
         // events can also be 
         node.eventEmitter.on('txEvent', (args) => {
