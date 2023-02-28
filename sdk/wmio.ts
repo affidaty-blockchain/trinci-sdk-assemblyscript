@@ -12,7 +12,7 @@ export namespace Return {
      * @param message - Error message
      */
     export function Error(message:string):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(false, Utils.stringtoU8Array(message));
+        return MsgPack.appOutputEncode(false, Utils.stringToU8Array(message));
     }
 
     /**
@@ -27,7 +27,7 @@ export namespace Return {
     }
 
     /**
-     * Returns combined pointer to an array of byteswrapped in a Success response;
+     * Returns combined pointer to an array of bytes wrapped in a Success response;
      * Useful when, for example, you need to use your own serialization format.
      * @param bytes - bytes you want to return
     */

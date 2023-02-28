@@ -59,14 +59,15 @@ function init(_ctx: sdk.Types.AppContext, argsU8: u8[]): sdk.Types.WasmResult {
     sdk.HostFunctions.log('init()');
     let config = sdk.MsgPack.deserialize<Config>(argsU8);  // you must specify the <Type> for help deserialize function to create output
 
-    if(!OwnerDB.has("init")) { // check if account is already initialized to prevent multiple initializations, has function check if key "init" is present in OwnerDB
-        sdk.HostFunctions.log(`owner: [${config.owner}].`);
-        sdk.HostFunctions.log(`max_mintable: [${config.max_mintable}].`);
-        OwnerDB.set<bool>("init",true); // native types must be stored using set<Type>
-        OwnerDB.setObject("config",config); // you can store any @msgpackable Object with a string key
-        return sdk.Return.True();
+    if(OwnerDB.has("init")) { // check if account is already initialized to prevent multiple initializations, has function check if key "init" is present in OwnerDB
+        return sdk.Return.Error("Account is already initializated!");
     }
-    return sdk.Return.Error("Account is already initializated!"); // error message must be a string
+
+    sdk.HostFunctions.log(`owner: [${config.owner}].`);
+    sdk.HostFunctions.log(`max_mintable: [${config.max_mintable}].`);
+    OwnerDB.set<bool>("init",true); // native types must be stored using set<Type>
+    OwnerDB.setObject("config",config); // you can store any @msgpackable Object with a string key
+    return sdk.Return.True();
 }
 methodsMap.set('get_config', get_config);
 function get_config(_ctx: sdk.Types.AppContext, _argsU8: u8[]): sdk.Types.TCombinedPtr {

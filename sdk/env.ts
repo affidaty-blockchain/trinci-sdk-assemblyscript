@@ -38,6 +38,7 @@ declare function hf_call(
     dataAddress: u32,
     dataLength: u32,
 ): Types.TCombinedPtr;
+
 declare function hf_s_call(
     accountIdAddress: u32,
     accountIdLength: u32,
@@ -68,17 +69,21 @@ declare function hf_emit(
 
 export namespace HostFunctions {
 
-    /** TODO: description */
+    /** Returns current block time as UNIX Epoch. */
     export function getBlockTime(): u64 {
         return hf_get_block_time();
     }
 
-    /** check if method is callable in targetId account */
-    export function is_callable(targetId: string, method: string): bool {
+    /** Check if a method is callable on targetId account.
+     * @param targetId - account you want to call
+     * @param method - method you want to call
+    */
+    export function isCallable(targetId: string, method: string): bool {
         let targetIdAddress = MemUtils.stringToMem(targetId);
         let methodAddress = MemUtils.stringToMem(method);
         return (hf_is_callable(targetIdAddress,targetId.length,methodAddress,method.length) ==1);
     }
+
     /** Calls another smart contract method from within a smart contract.
      * @param targetId - account to call
      * @param method - method to call
@@ -112,11 +117,11 @@ export namespace HostFunctions {
         let targetIdAddress = MemUtils.stringToMem(targetId);
         let methodAddress = MemUtils.stringToMem(method);
         let dataAddress = MemUtils.u8ArrayToMem(data);
-        let contractHashAdress = MemUtils.u8ArrayToMem(contractHash);
+        let contractHashAddress = MemUtils.u8ArrayToMem(contractHash);
         let combPtr = hf_s_call(
             targetIdAddress,
             targetId.length,
-            contractHashAdress,
+            contractHashAddress,
             contractHash.length,
             methodAddress,
             method.length,
@@ -150,7 +155,7 @@ export namespace HostFunctions {
     }
 
     /**
-     * A template wrapper for storeData host function. Performs automatic serialization of classes defined witd '@msgpackable' decorator.
+     * A template wrapper for storeData host function. Performs automatic serialization of classes defined with '@msgpackable' decorator.
      * @template T - a type decorated with `@msgpackable` decorator.
      * @param key - key under which data will be saved.
      * @param object - object of a class defined with `@msgpackable` decorator.
@@ -169,7 +174,7 @@ export namespace HostFunctions {
     }
 
     /**
-     * A template wrapper for loadData host function. Performs automatic deserialization of classes decorated witd `@msgpackable`.
+     * A template wrapper for loadData host function. Performs automatic deserialization of classes decorated with `@msgpackable`.
      * @template T - a type decorated with `@msgpackable` decorator.
      * @param key - key under which data were be saved.
      */
@@ -184,7 +189,49 @@ export namespace HostFunctions {
         hf_remove_data(keyAddr, key.length);
     }
 
-    /** Get keys list from smart contract owner's accout.
+    /** Stores asset-specific data as raw bytes into destination account. */
+    export function storeAsset(destId: string, value: u8[]): void {
+        let idAddress = MemUtils.stringToMem(destId);
+        let valueAddress = MemUtils.u8ArrayToMem(value);
+        hf_store_asset(idAddress, destId.length, valueAddress, value.length);
+    }
+
+    /**
+     * A template wrapper for storeAsset host function. Performs automatic serialization of classes defined with `@msgpackable` decorator.
+     * @template T - a type decorated with `@msgpackable` decorator.
+     * @param accountId - Account under which you want to store asset-specific data.
+     * @param object - object of a class defined with `@msgpackable` decorator.
+     */
+    export function storeAssetT<T>(accountId: string, object: T): void {
+        const objectBytes = MsgPack.serialize<T>(object);
+        return HostFunctions.storeAsset(accountId, objectBytes);    
+    }
+
+    /** Loads asset-specific data from source account. */
+    export function loadAsset(sourceId: string): u8[] {
+        let idAddress = MemUtils.stringToMem(sourceId);
+        let combinedPtr = hf_load_asset(idAddress, sourceId.length);
+        let ptrTuple = Utils.splitPtr(combinedPtr);
+        return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
+    }
+
+    /**
+     * A template wrapper for loadAsset host function. Performs automatic deserialization of classes defined with `@msgpackable` decorator.
+     * @template T - a type decorated with `@msgpackable` decorator.
+     * @param accountId - Account from which you want to load asset-specific data.
+     */
+    export function loadAssetT<T>(accountId: string): T {
+        const resultBytes = loadAsset(accountId);
+        return MsgPack.deserialize<T>(resultBytes);
+    }
+
+    /** Allows to completely remove asset-specific data from an account. */
+    export function removeAsset(accountId: string): void {
+        let idAddr = MemUtils.stringToMem(accountId);
+        hf_remove_asset(idAddr, accountId.length);
+    }
+
+    /** Get keys list from smart contract owner's account.
      * @param pattern - pattern string to search. Currently only prefixes are supported. If not empty, has to end with a '\*'. if empty, '*' is assumed, which shows all the keys.
      */
     export function getKeys(pattern: string = '*'): string[] {
@@ -211,56 +258,16 @@ export namespace HostFunctions {
         return result;
     }
 
-    /** Loads asset-specific data from source account. */
-    export function loadAsset(sourceId: string): u8[] {
-        let idAddress = MemUtils.stringToMem(sourceId);
-        let combinedPtr = hf_load_asset(idAddress, sourceId.length);
-        let ptrTuple = Utils.splitPtr(combinedPtr);
-        return MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
-    }
-
-    /** Allows to completely remove asset-specific data from an account. */
-    export function removeAsset(accountId: string): void {
-        let idAddr = MemUtils.stringToMem(accountId);
-        hf_remove_asset(idAddr, accountId.length);
-    }
-
-    /**
-     * A template wrapper for loadAsset host function. Performs automatic deserialization of classes defined witd `@msgpackable` decorator.
-     * @template T - a type decorated with `@msgpackable` decorator.
-     * @param accountId - Account from which you want to load asset-specific data.
-     */
-    export function loadAssetT<T>(accountId: string): T {
-        const resultBytes = loadAsset(accountId);
-        return MsgPack.deserialize<T>(resultBytes);
-    }
-
-    /** Stores asset-specific data as raw bytes into destination account. */
-    export function storeAsset(destId: string, value: u8[]): void {
-        let idAddress = MemUtils.stringToMem(destId);
-        let valueAddress = MemUtils.u8ArrayToMem(value);
-        hf_store_asset(idAddress, destId.length, valueAddress, value.length);
-    }
-
-    /**
-     * A template wrapper for storeAsset host function. Performs automatic serialization of classes defined witd `@msgpackable` decorator.
-     * @template T - a type decorated with `@msgpackable` decorator.
-     * @param accountId - Account under which you want to store asset-specific data.
-     * @param object - object of a class defined with `@msgpackable` decorator.
-     */
-    export function storeAssetT<T>(accountId: string, object: T): void {
-        const objectBytes = MsgPack.serialize<T>(object);
-        return HostFunctions.storeAsset(accountId, objectBytes);    
-    }
-
     /** Returns smart contract associated with given account. */
     export function getAccountContract(accountId: string): string {
         let idAddress = MemUtils.stringToMem(accountId);
         let combinedPtr = hf_get_account_contract(idAddress, accountId.length);
         let ptrTuple = Utils.splitPtr(combinedPtr);
+        if (ptrTuple.length <= 0) {
+            return '';
+        }
         let resultBytesU8 = MemUtils.u8ArrayFromMem(ptrTuple.offset, ptrTuple.length);
-        let resultBytesHex = Utils.arrayBufferToHexString(Utils.u8ArrayToArrayBuffer(resultBytesU8));
-        return resultBytesHex;
+        return Utils.arrayBufferToHexString(Utils.u8ArrayToArrayBuffer(resultBytesU8));
     }
 
     /** Computes sha256 from given bytes. */

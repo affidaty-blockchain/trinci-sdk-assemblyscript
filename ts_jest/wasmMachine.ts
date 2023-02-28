@@ -308,6 +308,9 @@ export class WasmMachine {
         try {
             const method_bytes = new Uint8Array(Utils.mpEncode(method));
             const method_bytes_offset = this.writeToWasmMem(method_bytes);
+            if (typeof this.wasmInstance!.exports.is_callable === 'undefined') {
+                return false;
+            }
             return (this.wasmInstance!.exports.is_callable as CallableFunction)(method_bytes_offset,method_bytes.byteLength);
         } catch(e) {
             console.error(e);

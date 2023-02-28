@@ -13,7 +13,7 @@ export namespace Utils {
         return cPtr;
     }
 
-    /** Splist a 64bit number into array of two 32bit*/
+    /** Splits a 64bit number into array of two 32bit*/
     export function splitPtr(combinedPtr: Types.TCombinedPtr): Types.TCombinedPtrTuple {
         const ptrTuple: Types.TCombinedPtrTuple = {
             offset: (combinedPtr >> 32) as u32,
@@ -23,7 +23,7 @@ export namespace Utils {
     }
 
     /** Converts string into an array of bytes */
-    export function stringtoU8Array(str: string): u8[] {
+    export function stringToU8Array(str: string): u8[] {
         let vec: u8[] = new Array<u8>(str.length);
         for (let i = 0; i < str.length; i++) {
             vec[i] = str.charCodeAt(i) as u8;
@@ -88,6 +88,36 @@ export namespace Utils {
             }
             result += byteStr;
         }
+        return result;
+    }
+
+    /**
+     * Method that allows to split an amount into multiple parts according to passed proportions.
+     * @param value - value to split
+     * @param partsArray - array representing proportion values. [3, 3, 5] means that total amount will be divided in 3 parts: 3/11, 3/11 and 5/11
+     * @returns array representing amounts relative to each member of the "partsArray" in the same order. If fractionsArray sum causes overflow (sum is greater than U64.MAX_VALUE) then an empty array is returned.
+     * @example divideAmount(200, [9, 6, 15]) => [60, 40, 100]
+     */
+    export function divideAmount(amount: u64, fractionsArray: u64[]): u64[] {
+        let result: u64[] = [];
+
+        // check for overflow (fractions sum exceeds U64.MAX_VALUE)
+        let remMax: u64 = U64.MAX_VALUE;
+        for (let i: i32 = 0; i < fractionsArray.length; i++) {
+            if (fractionsArray[i]> remMax) {
+                return result;
+            }
+            remMax -= fractionsArray[i];
+        }
+
+        const fractionsSum = fractionsArray.reduce((acc: u64, next: u64) => acc + next, 0);
+        result = new Array<u64>(fractionsArray.length);
+        for(let i: i32 = 0; i < fractionsArray.length; i++) {
+            result[i] = (amount * fractionsArray[i]) / fractionsSum;
+        }
+        const resultSum: u64 = result.reduce((acc: u64, next: u64) => acc + next, 0);
+        const remainder: u64 = amount - resultSum;
+        result[0] += remainder;
         return result;
     }
 }

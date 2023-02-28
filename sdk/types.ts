@@ -20,17 +20,17 @@ namespace Types {
     /** Application context */
     export class AppContext {
         /** Internal smart contract call depth */
-        public depth: u16;
+        public depth: u16 = 0;
         /** Transaction target network */
-        public network: string;
+        public network: string = '';
         /** Account ID, on which smart contract code is getting executed */
-        public owner: string;
+        public owner: string = '';
         /** Changes with each hop of the "call" host function */
-        public caller: string;
+        public caller: string = '';
         /** Called smart contract method */
-        public method: string;
+        public method: string = '';
         /** Original transaction submitter */
-        public origin: string;
+        public origin: string = '';
     }
 
      /** Alias of Application context */
