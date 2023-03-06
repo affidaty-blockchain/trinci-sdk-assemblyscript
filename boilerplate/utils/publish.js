@@ -249,6 +249,9 @@ async function main() {
     let publisherAccount = new t2lib.Account();
     let genPublisherSaveFile = './generatedPublisher.json';
     if (!argv.generatePublisher && argv.publisherAccount && argv.publisherAccount.length > 0) {
+        if (Array.isArray(argv.publisherAccount)) {
+            argv.publisherAccount = argv.publisherAccount[argv.publisherAccount.length - 1]
+        }
         publisherAccount = await loadPublisherAccount(argv.publisherAccount);
     } else {
         await publisherAccount.generate();
