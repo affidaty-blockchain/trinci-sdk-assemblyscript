@@ -30,7 +30,7 @@ export class WasmMachine {
         trinciDb:trinciDB,
         eventEmitter?: WasmEventEmitter,
     ) {
-        this.possibleMallocNames = ['alloc', 'malloc'];
+        this.possibleMallocNames = ['alloc'];
         this.currMallocName = null;
         this.eventEmitter = eventEmitter || new WasmEventEmitter();
         this.currentCtx = ctx;
@@ -271,7 +271,7 @@ export class WasmMachine {
         return offset;
     }
 
-    public getCurrMallocName(forceRescan: boolean = false): string {
+    getCurrMallocName(forceRescan: boolean = false): string {
         if (!this.wasmInstance) {
             this.currMallocName = null;
             throw new Error(Errors.WM_NOT_INST);
