@@ -28,6 +28,28 @@ Below are some basic concepts which apply to every smart contract on TRINCI plat
 
 - [Wrappers](#wrappers)
 
+   - [`log()`](#logmessage-string-void)
+   - [`storeData()`](#storedatakey-string-data-u8-void)
+   - [`storeDataT<T>()`](#storedatattkey-string-object-t-void)
+   - [`loadData()`](#loaddatakey-string-u8)
+   - [`loadDataT<T>()`](#loaddatattkey-string-t)
+   - [`removeData()`](#removedatakey-string-void)
+   - [`storeAsset()`](#storeassetaccountid-string-value-u8-void)
+   - [`storeAssetT<T>()`](#storeassetttaccountid-string-object-t-void)
+   - [`loadAsset()`](#loadassetaccountid-string-u8)
+   - [`loadAssetT<T>()`](#loadassetttaccountid-string-t)
+   - [`removeAsset()`](#removeassetaccountid-string-void)
+   - [`getKeys()`](#getkeyspattern-string---string)
+   - [`isCallable()`](#iscallabletargetid-string-method-string-bool)
+   - [`call()`](#calltargetid-string-method-string-data-u8-typesappoutput)
+   - [`scall()`](#scalltargetid-string-method-string-contracthash-u8-data-u8-typesappoutput)
+   - [`emit()`](#emiteventname-string-eventdata-u8-void)
+   - [`getAccountContract()`](#getaccountcontractaccountid-string-string)
+   - [`sha256()`](#sha256data-u8-u8)
+   - [`verify()`](#verifypublickey-typespublickey-data-u8-signature-u8-bool)
+   - [`drand()`](#drandmax-u64-u64)
+   - [`getBlockTime()`](#getblocktime-u64)
+
 ---
 [^UP](#host-functions)
 ## Imports
