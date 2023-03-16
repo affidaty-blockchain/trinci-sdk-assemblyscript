@@ -2,62 +2,95 @@ import { mpEncode, mpDecode } from './utils';
 import CTX from './ctx';
 
 export class TX {
-    _network:string;
-    _target : string;
-    _contract: string;
-    _method: string;
-    _args: any = {};
-    _signer:string = '';
+    private _network: string;
+    private _target : string;
+    private _contract: string;
+    private _method: string;
+    private _args: Uint8Array;
+    private _signer: string;
 
     constructor(target: string = '', contractRefHash: string = '', method: string = '', network: string = '') {
         this._network = network;
         this._target = target;
         this._contract = contractRefHash;
         this._method = method;
+        this._args = new Uint8Array([]);
+        this._signer = '';
     }
 
-    network(network: string) {
+    network(network: string = '') {
         this._network = network;
         return this;
     }
 
-    target(target:string ) {
+    getNetwork(): string {
+        return this._network
+    }
+
+    target(target:string = '') {
         this._target = target;
         return this;
     }
 
-    contract(contractRefHash:string ) {
+    getTarget(): string {
+        return this._target;
+    }
+
+    contract(contractRefHash: string = '') {
         this._contract = contractRefHash;
         return this;
     }
 
-    method(method: string) {
+    getContract(): string {
+        return this._contract;
+    }
+
+    method(method: string = '') {
         this._method = method;
         return this;
     }
 
-    args(args: any = {}) {
-        this._args = args;
+    getMethod(): string {
+        return this._method;
+    }
+
+    /** Performs automatic MessagePack encoding */
+    args(args: any) {
+        if (typeof args !== 'undefined') {
+            this._args = new Uint8Array(mpEncode(args));
+        }
         return this;
     }
 
+    /** Performs automatic MessagePack decoding */
+    getArgs(): any | undefined {
+        if (this._args.length <= 0) {
+            return undefined;
+        }
+        return mpDecode(this._args);
+    }
+
+    /** Accepts raw bytes */
     argsBytes(bytes: Uint8Array) {
-        this._args = mpDecode(bytes);
+        this._args = bytes;
         return this;
     }
 
-    signer(accountId: string) {
+    /** returns raw bytes */
+    getArgsBytes(): Uint8Array {
+        return this._args;
+    }
+
+    signer(accountId: string = '') {
         this._signer = accountId;
         return this;
     }
 
-    getArgsBytes(): Uint8Array {
-        if (typeof this._args === 'undefined') {
-            return new Uint8Array([]);
-        }
-        return new Uint8Array(mpEncode(this._args));
+    getSigner(): string {
+        return this._signer;
     }
 
+    /** Creates CTX from current transaction */
     toCTX(): CTX {
         const ctx = new CTX();
         ctx.network = this._network;

@@ -6,6 +6,8 @@ import WasmEventEmitter from './wasmEventEmitter';
 import WasmResult from './wasmResult';
 import WasmMachine from './wasmMachine';
 import { BridgeClient, Message } from '@affidaty/t2-lib';
+
+/**  */
 export class TrinciNode {
 
     db: TrinciDB;
@@ -19,6 +21,7 @@ export class TrinciNode {
         this.db = new TrinciDB();
     }
 
+    /** Connecting to a socket makes so that all emitted transaction events get propagated to the connected socket. */
     async connectToSocket(address: string, port: number) {
         const tempAddress = address.startsWith('http') ? address : `http://${address}`;
         this.client = new BridgeClient(tempAddress, 0, port);
@@ -39,14 +42,17 @@ export class TrinciNode {
         });
     }
 
-    test(arg: any) {
-        process.stdout.write(`"test" method called. args:\n${JSON.stringify(arg, null, 4)}\n\n`)
-    }
-
     printDB():void {
         this.db.printAssets();
     }
 
+    /**
+     * Reads smart contract file and stores it's compiled wasm module linked to it's hash. Can be accessed using getContractModule() method
+     *
+     * @param wasmFilePath - can be a plain string containing path to wasm file or an object \{ path: string, name?: string \} where a custom alias name can be specified.
+     * @param bindAccount - specify this if newly registered smart contract needs to be immediately bound to an account.
+     * @returns - newly registered smart contract hash
+     */
     async registerContract(wasmFilePath: string | IWasmPathWithName, bindAccount?:string ):Promise<string> {
         return new Promise<string>((resolve, reject) => {
             this.db.registerContract(wasmFilePath, bindAccount)
