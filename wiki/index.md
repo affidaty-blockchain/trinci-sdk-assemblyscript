@@ -13,8 +13,8 @@ Assemblyscript is a relatively new language and some of the features could be mi
 
 ## WIKI Index
 
-- [Basic concepts](basic)
-- [Project setup](new_project)
-- [Host functions](host_functions)
-- [MessagePack](messagepack)
-- [Building and testing](build_and_test)
+- [Basic concepts](basic.md)
+- [Project setup](new_project.md)
+- [Host functions](host_functions.md)
+- [MessagePack](messagepack.md)
+- [Building and testing](build_and_test.md)

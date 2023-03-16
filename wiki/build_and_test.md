@@ -1,4 +1,4 @@
-[<BACK](index)
+[<BACK](index.md)
 ## Build
 
 To compile your smart contract as a WASM file you can either run an npm script

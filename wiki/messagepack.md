@@ -1,4 +1,4 @@
-[<BACK](index)
+[<BACK](index.md)
 # MessagePack
 
 ## External resources

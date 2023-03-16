@@ -1,4 +1,4 @@
-[<BACK](index)
+[<BACK](index.md)
 # Basic concepts
 
 Below are some basic concepts which apply to every smart contract on TRINCI platform independently of programming languages those contracts are written in.
@@ -112,7 +112,7 @@ In order for a smart contract to work properly a number of functions must be exp
 ## Imports
 
 These functions are implemented by the host (TRINCI core in our case) and declared as external functions inside smart contract code (`<package_install_dir>/@affidaty/trinci-sdk-as/sdk/env.ts`).
-More in dedicated [Host functions](host_functions) section
+More in dedicated [Host functions](host_functions.md) section
 
 &nbsp;
 
@@ -121,7 +121,7 @@ More in dedicated [Host functions](host_functions) section
 ## Data structures
 
 Following are data structures passed to/expected by the core in order to communicate with the smart contract.  
-> All special data structures used in WASM<->core communications are serialized using MessagePack format. For more info and serialization examples see [MessagePack](messagepack) section of the wiki.
+> All special data structures used in WASM<->core communications are serialized using MessagePack format. For more info and serialization examples see [MessagePack](messagepack.md) section of the wiki.
 
 ### CTX
 
@@ -129,7 +129,7 @@ This structure is passed to the exported `run()` function (first two arguments) 
 
 | Elem index | Type | Name | Description |
 |------------|------|------|-------------|
-| 0 | u16 | Depth | Initial value is `0`, which means that this smart contract execution was initiated directly by a transaction. Depth gets increased automatically by the core each time a sub call occurs (see [`call()`]() and [`scall()`]() host functions). |
+| 0 | u16 | Depth | Initial value is `0`, which means that this smart contract execution was initiated directly by a transaction. Depth gets increased automatically by the core each time a sub call occurs (see [`call()`](./host_functions.md#calltargetid-string-method-string-data-u8-typesappoutput) and [`scall()`](./host_functions.md#scalltargetid-string-method-string-contracthash-u8-data-u8-typesappoutput) host functions). |
 | 1 | string | Network | Transaction target network name. |
 | 2 | string | Owner | This value represents the account id on which current smart contract execution takes place. (For depth=0 it's the target account of the transaction) |
 | 3 | string | Caller | Account which initiated the current smart contract execution. On every sub call the current `owner` becomes next caller and the depth is increased by 1. When `depth` is `0` this value is same as `origin`. |

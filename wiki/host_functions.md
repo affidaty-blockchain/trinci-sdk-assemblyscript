@@ -1,4 +1,4 @@
-[<BACK](index)
+[<BACK](index.md)
 # Host Functions
 
 Below are some basic concepts which apply to every smart contract on TRINCI platform independently of programming languages those contracts are written in.
