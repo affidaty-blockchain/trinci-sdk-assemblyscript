@@ -33,7 +33,10 @@
         "build:tsjest-esm": "tsc -p tsconfig.tsjest.esm.json",
         "build:tsjest-cjs": "tsc -p tsconfig.tsjest.cjs.json",
         "build:tsjest": "npm run build:tsjest-esm && npm run build:tsjest-cjs",
-        "build": "npm run build:visitor && npm run build:transformer"
+        "build": "npm run build:visitor && npm run build:transformer",
+        "docs:sdk": "typedoc --options sdk.typedoc.json --skipErrorChecking",
+        "docs:testenv": "typedoc --options testenv.typedoc.json --skipErrorChecking",
+        "docs": "npm run docs:sdk && npm run docs:testenv"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",
@@ -64,6 +67,8 @@
     "devDependencies": {
         "@assemblyscript/loader": "0.22.0",
         "assemblyscript": "0.22.0",
+        "typedoc": "^0.23.27",
+        "typedoc-plugin-missing-exports": "^1.0.0",
         "typescript": "^4.4.3"
     }
 }
