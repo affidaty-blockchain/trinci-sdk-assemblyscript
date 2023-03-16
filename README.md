@@ -2,11 +2,11 @@
 
 Official Trinci 2 smart contract SDK library for assemblyscript
 
-- [Changelog](./CHANGELOG.md)
+- [Changelog](https://github.com/affidaty-blockchain/trinci-sdk-assemblyscript/blob/master/CHANGELOG.md)
 
-- [WIKI](./wiki/index.md)
-- [Generated SDK documentation]()
-- [Generated test suite documentation]()
+- [WIKI](https://github.com/affidaty-blockchain/trinci-sdk-assemblyscript/blob/master/wiki/index.md)
+- [Generated SDK documentation](https://htmlpreview.github.io/?https://raw.githubusercontent.com/affidaty-blockchain/trinci-sdk-assemblyscript/master/docs/sdk/modules.html)
+- [Generated test suite documentation](https://htmlpreview.github.io/?https://github.com/affidaty-blockchain/trinci-sdk-assemblyscript/blob/master/docs/testenv/modules.html)
 
 ## Description
 
