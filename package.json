@@ -36,7 +36,8 @@
         "build": "npm run build:visitor && npm run build:transformer",
         "docs:sdk": "typedoc --options sdk.typedoc.json --skipErrorChecking",
         "docs:testenv": "typedoc --options testenv.typedoc.json --skipErrorChecking",
-        "docs": "npm run docs:sdk && npm run docs:testenv"
+        "docs": "npm run docs:sdk && npm run docs:testenv",
+        "publish": "npm run build && npm run docs && npm publish"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",
