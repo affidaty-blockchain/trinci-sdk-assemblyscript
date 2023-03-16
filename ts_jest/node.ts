@@ -100,29 +100,19 @@ export class TrinciNode {
     }
 
     async runTx(tx:TX):Promise<WasmResult> {
-        return this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract);
-        /*
-        return new Promise((resolve,reject) => {
-            this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions).then(wasmResult => {
-                if(wasmResult.isError) {
-                    reject(wasmResult);
-                } else {
-                    resolve(wasmResult);
-                }
-            }).catch(reject);
-        });*/
+        return this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx.getContract());
     }
 
     async runBulkTxs(txs:TX[]):Promise<WasmResult[]> {
         return new Promise((resolve,reject) => {
             // fork db
             const forkedDB = this.db.fork();
-            Promise.all(txs.map(async (tx:TX) => this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract))).then(results => {
+            Promise.all(txs.map(async (tx:TX) => this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx.getContract()))).then(results => {
                 if(results.find(wasmResult => wasmResult.isError)) {
                     this.db = forkedDB;
                     return reject(results);
                 }
-                resolve(results);
+                return resolve(results);
             }).catch(e => {
                 this.db = forkedDB;
                 reject(e);

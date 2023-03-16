@@ -16,7 +16,7 @@ export function run(ctxAddress: u32, ctxSize: u32, argsAddress: u32, argsSize: u
     // Error if method is not registered
     if (!methodsMap.has(ctx.method)) {
         let success = false;
-        let resultBytes = sdk.Utils.stringtoU8Array('method not found');
+        let resultBytes = sdk.Utils.stringToU8Array('method not found');
         return sdk.MsgPack.appOutputEncode(success, resultBytes);
     }
 

@@ -126,7 +126,7 @@ export class TrinciDB {
         return module;
     }
 
-    /** Allows to set account data */
+    /** Allows to save data on an account under a specific key */
     setAccountData(ownerAccountId: string, dataKey: string, data: Uint8Array): void {
         let accountDataDb = this.dataDb.has(ownerAccountId)
             ? this.dataDb.get(ownerAccountId)!
@@ -137,7 +137,7 @@ export class TrinciDB {
         return;
     }
 
-    /** Serializes a value using MessagePack and saves it as asset data on an account */
+    /** Serializes a value using MessagePack and saves it as data on an account under a specific key */
     setAccountDataPacked(ownerAccountId: string, dataKey: string, data: any): void {
         const dataBytes = new Uint8Array(mpEncode(data));
         return this.setAccountData(ownerAccountId, dataKey, dataBytes);
@@ -153,9 +153,9 @@ export class TrinciDB {
         return this.dataDb.get(ownerAccountId)!.get(dataKey)!;
     }
 
-    /** Loads specific asset data from an account and decodes it using MessagePack*/
+    /** Loads account data saved under a specific key and decodes it using MessagePack*/
     getAccountDataPacked(ownerAccountId: string, dataKey: string): any {
-        const dataBytes = this.getAccountAsset(ownerAccountId, dataKey);
+        const dataBytes = this.getAccountData(ownerAccountId, dataKey);
         if (dataBytes === null || dataBytes.length <= 0) {
             return undefined;
         }
@@ -303,14 +303,15 @@ export class TrinciDB {
     }
 
     printAssets() {
-        const {allAccounts,table,headAccounts} = this._preparePrint();
-        const allAccountsArray:string[] = Array.from(allAccounts);
+        const { allAccounts, table, headAccounts } = this._preparePrint();
+        const allAccountsArray: string[] = Array.from(allAccounts);
         for(let rowAccount of allAccountsArray) {
             const amounts = headAccounts.map((colAccount:string) => {
                 if(this.assetDb.has(rowAccount)) {
                     const assetMap = this.assetDb.get(rowAccount)!;
                     if(assetMap.has(colAccount)) {
-                        return JSON.stringify(this.getAccountAssetPacked(colAccount,rowAccount));
+                        const assetData = this.getAccountAssetPacked(rowAccount, colAccount);
+                        return JSON.stringify(typeof assetData === 'undefined' ? 'undefined' : assetData);
                     } else {
                         return "--";
                     }
