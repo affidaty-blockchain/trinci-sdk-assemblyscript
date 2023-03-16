@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./visitor-as",
     "inlineSourceMap": true,
     "inlineSources": true,
     "target": "ESNext",
@@ -7,6 +8,8 @@
     "moduleResolution": "Node",
     "downlevelIteration": true,
     "preserveConstEnums": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop":true,
     "alwaysStrict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -15,12 +18,9 @@
     "allowJs": false,
     "strictNullChecks": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop":true,
     "declaration": true,
     "strict": true,
-    "lib": ["esnext","esnext.string"],
-    "outDir": "./visitor-as"
+    "lib": ["esnext","esnext.string"]
   },
   "include": ["./visitor-as-ts/**/*"],
   "exclude": ["node_modules/**/*"]

@@ -1,6 +1,6 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.4.7",
+    "version": "2.5.0",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "type": "module",
     "exports": {
@@ -65,8 +65,8 @@
         "ts-node": "^10.9.1"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "0.22.0",
-        "assemblyscript": "0.22.0",
+        "@assemblyscript/loader": "0.27.1",
+        "assemblyscript": "0.27.1",
         "typedoc": "^0.23.27",
         "typedoc-plugin-missing-exports": "^1.0.0",
         "typescript": "^4.4.3"
