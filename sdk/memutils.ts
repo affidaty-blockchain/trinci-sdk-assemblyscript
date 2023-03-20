@@ -21,9 +21,9 @@ namespace MemUtils {
         for (let i: u32 = 0; i < length; i++) {
             vec.push(load<u8>(address + i));
         }
-        if (doFree) {
+        if (doFree && vec.length > 0) {
             heap.free(address);
-        } 
+        }
         return vec;
     }
 

@@ -1,6 +1,6 @@
 {
     "name": "@affidaty/trinci-sdk-as",
-    "version": "2.5.4",
+    "version": "2.5.5",
     "description": "Trinci SDK for Assemblyscript smart contract development.",
     "type": "module",
     "exports": {
@@ -37,7 +37,7 @@
         "docs:sdk": "typedoc --options sdk.typedoc.json --skipErrorChecking",
         "docs:testenv": "typedoc --options testenv.typedoc.json --skipErrorChecking",
         "docs": "npm run docs:sdk && npm run docs:testenv",
-        "publish": "npm run build && npm run docs && npm publish"
+        "pre-publish": "npm run build && npm run docs"
     },
     "author": "Affidaty S.p.A",
     "license": "AGPL-3.0-only",
@@ -50,7 +50,7 @@
     ],
     "dependencies": {
         "@affidaty/t2-lib": "^2.3.0",
-        "@affidaty/trinci-sdk-as": "^2.5.4",
+        "@affidaty/trinci-sdk-as": "^2.5.5",
         "@types/cli-table": "^0.3.1",
         "@types/jest": "^29.2.2",
         "@types/lodash.clonedeep": "^4.5.7",
