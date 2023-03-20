@@ -12,7 +12,7 @@ export default class WasmResult {
     fromBytes(bytes: Uint8Array): WasmResult {
         const decodedBytes = Utils.mpDecode(bytes) as [boolean, Buffer];
         this.success = decodedBytes[0];
-        this.result = decodedBytes[1];
+        this.result = new Uint8Array(decodedBytes[1]);
         return this;
     }
 
