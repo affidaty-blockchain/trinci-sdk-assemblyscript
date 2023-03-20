@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.5.4] - 2023-03-20
+
+### Fixed
+- WasmResult.fromBytes()
+
 ## [2.5.3] - 2023-03-16
 
 ### Fixed
