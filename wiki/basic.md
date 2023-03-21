@@ -28,36 +28,7 @@ Below are some basic concepts which apply to every smart contract on TRINCI plat
 
 ## WASM environment overview
 
-```plantuml
-@startuml
-allowmixing
-frame "WASM Machine" as wasm #gray {
-   database "Heap" as wasm_heap
-   component "Code" as wasm_code #white {
-      interface "Exports" as wasm_exp
-      wasm_exp : alloc()
-      wasm_exp : run()
-      wasm_exp : is_callable()
-      interface "Imports (externally defined)" as wasm_imp
-      wasm_imp : hf_store_data()
-      wasm_imp : hf_load_data()
-      wasm_imp : hf_remove_data()
-      wasm_imp : ...()
-   }
-}
-frame CORE as core #gray {
-   interface "Host functions" as hf
-   hf : hf_store_data()
-   hf : hf_load_data()
-   hf : hf_remove_data()
-   hf : ...()
-}
-core <--> wasm_heap : rw access
-core --> wasm_exp : core to wasm calls
-wasm_heap <--> wasm_code : rw access
-hf <-- wasm_imp : wasm to core calls
-@enduml
-```
+![WASM Environment](./assets/wasm_env.svg)
 
 &nbsp;
 
@@ -200,24 +171,7 @@ All data of an account is seen by TRINCI node as raw byte arrays. This way a bet
 
 Each TRINCI account has two separate containers for data storage:
 
-```plantuml
-@startuml
-allowmixing
-package "Account <U+0022><U+0023>MyTestAccount<U+0022>" {
-   component "linked smart contract, if any"
-   frame Data {
-         json Owner_Data {
-         "dataKey1":"0xC3...",
-         "dataKey2":"0xFF..."
-      }
-      json Asset_Data {
-         "<U+0023>Account1":"0xC2...",
-         "<U+0023>Account2":"0x00..."
-      }
-   }
-}
-@enduml
-```
+![Account](./assets/account.svg)
 
 &nbsp;
 
@@ -254,59 +208,4 @@ Asset data are managed using following host functions:
 [^UP](#basic-concepts)
 ## Transaction lifecycle
 
-```plantuml
-@startuml
-
-actor       User       as user
-participant Core       as core
-box Wasm Machine
-database    "Memory" as mem
-participant "Contract"       as wasm
-end box
-user -> core : Transaction
-hnote over core
-Transaction validation
-endhnote
-== Initial service operations ==
-hnote over core
-ctx creation and encoding
-endhnote
-group CTX
-core -> wasm : alloc(bytes) for CTX
-wasm --> core : memory offset
-core -> mem  : writing CTX bytes to\nwasm mem starting from\noffset
-end
-|||
-group args
-core -> wasm : alloc(bytes) for args
-wasm --> core : memory offset
-core -> mem  : writing args bytes to\nwasm mem starting from\noffset
-end
-== Contract execution ==
-core -> wasm : run(ctxOffset, ctxSize, argsOffset, argsSize)
-activate wasm #FFBBBB
-mem -> wasm  : reading and decoding CTX and args
-hnote over wasm
-contract code execution with
-potential subsequent calls,
-host functions invocation
-and database changes
-endhnote
-wasm -> core : return 64-bit number
-== Contract return evaluation ==
-deactivate wasm
-hnote over core
-split return into
-two 32-bit numbers
-(retOffset and retSize)
-endhnote
-mem -> core  : reading ret data from wasm mem\nusing retOffset and retSize
-hnote over core
-decoding obtained data
-if (ret.success)
-    apply all db changes
-else
-    discard
-endhnote
-@enduml
-```
+![Transaction lifecycle](./assets/tx_lifecycle.svg)
