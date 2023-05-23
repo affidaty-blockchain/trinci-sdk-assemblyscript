@@ -230,7 +230,8 @@ export class WasmMachine {
                     return BigInt(Math.floor(maxN));
                 },
                 hf_get_block_time: (): bigint => {
-                    return BigInt(Math.ceil(new Date().getTime()/1000))
+                    const time = this.db.time ? this.db.time : Math.ceil(new Date().getTime()/1000);
+                    return BigInt(time);
                 }
             },
         };

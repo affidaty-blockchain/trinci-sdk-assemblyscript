@@ -121,6 +121,17 @@ export class TrinciNode {
             //const results:WasmResult[] = txs.map(async (tx:TX) => await this.runCtx(tx.toCTX(),tx.getArgsBytes(), tx._contract, mockHostFunctions));
         });
     }
+
+    getTime() {
+        if (typeof this.db.time === 'undefined') {
+            return Math.ceil(new Date().getTime()/1000);
+        }
+        return this.db.time;
+    }
+
+    setTime(time?: number) {
+        this.db.time = time;
+    }
 }
 
 export default TrinciNode;

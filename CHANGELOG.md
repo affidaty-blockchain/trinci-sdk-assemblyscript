@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.5.6] - 2023-05-22
+
+### Added
+- `node.db.printAccountData('<accId>')` and `node.db.printAccountAssets('<accId>')` methods in jest test environment;
+- `node.setTime()` and `node.getTime()`;
+
 ## [2.5.5] - 2023-03-20
 
 ### Fixed

@@ -11,6 +11,8 @@ export interface IWasmPathWithName { path: string, name?: string };
 
 /** Mocked trinci node database */
 export class TrinciDB {
+    time?: number;
+
     /** Database containing key-value pairs collection for each account accessible only by the account's own smart contract. */
     dataDb: Map<string, Map<string, Uint8Array>>; // <AccountId, Map<dataKey,val>>
 
@@ -253,7 +255,7 @@ export class TrinciDB {
         return;
     }
 
-    printData(accountId: string) {
+    printAccountData(accountId: string) {
         const table :Table= new Table({
             head: ["#key",accountId].map(t => {
                 if(t == "#key") return "";
@@ -264,12 +266,34 @@ export class TrinciDB {
                 } else return t + "\n( -- )";
             })
         });
-        table.push(["Key","MessagePackDecode(data)"]);
+        table.push(["Data key","MessagePackDecode(data)"]);
         if (this.dataDb.has(accountId)) {
             const accountData = this.dataDb.get(accountId);
             const keys:string[] = [...accountData!.keys()];
             for(let k of keys) {
                 table.push([k,JSON.stringify(mpDecode(accountData!.get(k) as Uint8Array))]);
+            }
+        }
+        console.log(table.toString());
+    }
+
+    printAccountAssets(accountId: string) {
+        const table :Table= new Table({
+            head: ["#key",accountId].map(t => {
+                if(t == "#key") return "";
+                else if(this.accountBindings.has(t)) {
+                    const hash =this.accountBindings.get(t)!;
+                    const fileName = this.wasmFilesRef.get(hash)!.split("/").pop();
+                    return t + "\n(" + fileName + ")";
+                } else return t + "\n( -- )";
+            })
+        });
+        table.push(["Asset account","MessagePackDecode(asset)"]);
+        if (this.assetDb.has(accountId)) {
+            const accountAssets = this.assetDb.get(accountId);
+            const keys:string[] = [...accountAssets!.keys()];
+            for(let k of keys) {
+                table.push([k,JSON.stringify(mpDecode(accountAssets!.get(k) as Uint8Array))]);
             }
         }
         console.log(table.toString());
