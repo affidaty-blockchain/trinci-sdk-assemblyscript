@@ -24,14 +24,14 @@
     "author": "",
     "license": "",
     "dependencies": {
-        "@affidaty/t2-lib": "^2.3.0",
-        "@affidaty/trinci-sdk-as": "^2.5.5",
+        "@affidaty/t2-lib": "^2.3.3",
+        "@affidaty/trinci-sdk-as": "^2.5.9",
         "@types/yargs": "^17.0.13",
-        "adm-zip": "^0.5.9",
-        "yargs": "^17.6.2"
+        "adm-zip": "^0.5.10",
+        "yargs": "^17.7.2"
     },
     "devDependencies": {
-        "@assemblyscript/loader": "0.27.1",
-        "assemblyscript": "0.27.1"
+        "@assemblyscript/loader": "0.27.9",
+        "assemblyscript": "0.27.9"
     }
 }

@@ -46,7 +46,7 @@ describe('Test all smart contract functionalities', () => {
             console.log(`Error: ${txResult.errorMessage}`)
         }
         expect(txResult.resultDecoded).toEqual(true);
-        node.db.printData('#TargetAccount');
+        node.db.printAccountData('#TargetAccount');
     });
     it('init method', async () => {
         // getting smart contract full path
@@ -75,7 +75,7 @@ describe('Test all smart contract functionalities', () => {
         }
         expect(txResult.resultDecoded).toEqual(true); // check blockchain response
         expect(node.db.getAccountDataPacked('#TargetAccount','init')).toBeTruthy(); // check if data was stored in DB
-        node.db.printData('#TargetAccount');  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
+        node.db.printAccountData('#TargetAccount');  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
     });
     it('mint method', async () => {
         // getting smart contract full path
@@ -116,7 +116,7 @@ describe('Test all smart contract functionalities', () => {
         expect(node.db.getAccountAssetPacked('AnotherAccount', '#TargetAccount')).toEqual(mintedToken); // check if balance of AnotherAccount is equal to minted tokens
         expect(node.db.getAccountDataPacked('#TargetAccount','config').total_minted).toEqual(mintedToken); // check if config was updated with minted tokens
         node.db.printAssets();  // use this tool to print in console the table of KVStore about any account such as TargetAccount
-        node.db.printData('#TargetAccount');  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
+        node.db.printAccountData('#TargetAccount');  // use this tool to print in console the table of KVStore about any account such as #TargetAccount
     });
     it('transfer method', async () => {
         // getting smart contract full path
