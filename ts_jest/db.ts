@@ -3,30 +3,42 @@ import Table from 'cli-table';
 
 import {
     getRefHash,
-    mpDecode,
-    mpEncode,
+    bytesToObject,
+    objectToBytes,
 } from "./utils";
+import { binConversions } from "@affidaty/t2-lib";
 
 export interface IWasmPathWithName { path: string, name?: string };
+export interface IWasmBinWithName { bin: Uint8Array, name?: string };
+
+type TRemoteAccountsCache = Map<string, {assets: Map<string, Uint8Array>, data: Map<string, Uint8Array>}>
+type TDataDb = Map<string, Map<string, Uint8Array>>;
+type TAssetsDb = Map<string, Map<string, Uint8Array>>;
+type TWasmModulesIndex = Map<string, { module: WebAssembly.Module, name: string }>;
+type TAccountBindings = Map<string, string>;
+type TWasmFilesRef = Map<string, string>;
 
 /** Mocked trinci node database */
 export class TrinciDB {
     time?: number;
 
     /** Database containing key-value pairs collection for each account accessible only by the account's own smart contract. */
-    dataDb: Map<string, Map<string, Uint8Array>>; // <AccountId, Map<dataKey,val>>
+    dataDb: TDataDb; // <AccountId, Map<dataKey,val>>
 
     /** Database containing asset data collection for each account accessible by smart contracts from other accounts. */
-    assetDb: Map<string, Map<string, Uint8Array>>; // <AccountId, Map(<assetAccount,val>)>
+    assetDb: TAssetsDb; // <AccountId, Map(<assetAccount,val>)>
 
     /** Map containing HexHash->WASM pair for each registered contract */
-    wasmModulesIndex: Map<string, { module: WebAssembly.Module, name: string }>; // <refHash, {name, wasmModule}>
+    wasmModulesIndex: TWasmModulesIndex; // <refHash, {name, wasmModule}>
 
     /** Links between accounts and smart contracts */
-    accountBindings: Map<string, string>; // <AccountId, ContractRefHash>
+    accountBindings: TAccountBindings; // <AccountId, ContractRefHash>
 
     /** Links between contract hashes and paths to wasm files.*/
-    wasmFilesRef: Map<string, string>; // <RefHashHex, contractWasmFilePath>
+    wasmFilesRef: TWasmFilesRef; // <RefHashHex, contractWasmFilePath>
+
+    /** When cloning an account from remote TRINCi node, it's data will be saved here for eventual subsequent clone q */
+    remoteAccountsCache: TRemoteAccountsCache;
 
     constructor() {
         this.dataDb = new Map<string, Map<string, Uint8Array>>();
@@ -34,6 +46,7 @@ export class TrinciDB {
         this.wasmModulesIndex = new Map<string, { module: WebAssembly.Module, name: string }>();
         this.accountBindings = new Map<string, string>();
         this.wasmFilesRef = new Map<string, string>();
+        this.remoteAccountsCache = new Map<string, {assets: Map<string, Uint8Array>, data: Map<string, Uint8Array>}>
     }
 
     /** Returns a copy of db.*/
@@ -58,16 +71,51 @@ export class TrinciDB {
      *
      * @param wasmFilePath - can be a plain string containing path to wasm file or an object \{ path: string, name?: string \} where a custom alias name can be specified.
      * @param accountId - specify this if newly registered smart contract needs to be immediately bound to an account.
-     * @returns - newly registered smart contract hash
+     * @returns - newly registered smart contract reference hash
      */
     async registerContract(wasmFilePath: string | IWasmPathWithName, accountId?: string): Promise<string> {
-        const wasmSource = typeof wasmFilePath == 'string' ? wasmFilePath : wasmFilePath.path;
-        const wasmBuffer = fs.readFileSync(wasmSource);
-        const refHash = getRefHash(wasmBuffer);
+        let wasmSource: string;
+        let name: string | undefined;
+        if (typeof wasmFilePath === 'string') {
+            wasmSource = wasmFilePath
+        } else {
+            wasmSource = wasmFilePath.path;
+            if ( typeof wasmFilePath.name === 'string') name = wasmFilePath.name
+        }
+        const contractCode = new Uint8Array(fs.readFileSync(wasmSource));
+        const refHash = getRefHash(contractCode);
         this.wasmFilesRef.set(refHash,wasmSource);
-        const module = await WebAssembly.compile(wasmBuffer);
-        const name = typeof wasmFilePath == 'string' ? '' : (wasmFilePath.name ? wasmFilePath.name : '');
-        this.wasmModulesIndex.set(refHash, { module, name });
+        const module = await WebAssembly.compile(contractCode);
+        this.saveContractModule(module, refHash, name);
+        if (typeof accountId == 'string' && accountId.length > 0) {
+            this.bindContractToAccount(accountId, refHash);
+        }
+        return refHash;
+    }
+
+    /**
+     * Compiles smart contract raw binary to a wasm module and links it to it's hash. Can be accessed using getContractModule() method
+     *
+     * @param wasmBin - can be a plain WebAssembly binary code or an object \{ bin: Uint8Array, name?: string \} where a custom alias name can be specified.
+     * @param accountId - specify this if newly registered smart contract needs to be immediately bound to an account.
+     * @returns - newly registered smart contract reference hash
+     */
+    async registerContractBin(wasmBin: Uint8Array | IWasmBinWithName, accountId?: string): Promise<string> {
+
+        let name: string | undefined;
+        let contractCode: Uint8Array;
+
+        if (ArrayBuffer.isView(wasmBin)) {
+            contractCode = wasmBin
+        } else {
+            contractCode = wasmBin.bin;
+            if (typeof wasmBin.name === 'string') name = wasmBin.name
+        }
+
+        const refHash = getRefHash(contractCode);
+        this.wasmFilesRef.set(refHash, 'from_binary');
+        const module = await WebAssembly.compile(contractCode);
+        this.saveContractModule(module, refHash, name);
         if (typeof accountId == 'string' && accountId.length > 0) {
             this.bindContractToAccount(accountId, refHash);
         }
@@ -83,6 +131,16 @@ export class TrinciDB {
         return this.wasmModulesIndex.has(refHash);
     }
 
+    /**
+     * Returns compiled wasm module(if any) relative to a passed hash.
+     * @param refHash - smart contract hash returned by registerContract() method
+     */
+    saveContractModule(module: WebAssembly.Module, refHash: string, name?: string) {
+        if (this.contractRegistered(refHash)) {
+            return;
+        }
+        this.wasmModulesIndex.set(refHash, { module, name: typeof name !== 'undefined' ? name : refHash });
+    }
 
     /**
      * Returns compiled wasm module(if any) relative to a passed hash.
@@ -141,7 +199,7 @@ export class TrinciDB {
 
     /** Serializes a value using MessagePack and saves it as data on an account under a specific key */
     setAccountDataPacked(ownerAccountId: string, dataKey: string, data: any): void {
-        const dataBytes = new Uint8Array(mpEncode(data));
+        const dataBytes = objectToBytes(data);
         return this.setAccountData(ownerAccountId, dataKey, dataBytes);
     }
 
@@ -161,7 +219,7 @@ export class TrinciDB {
         if (dataBytes === null || dataBytes.length <= 0) {
             return undefined;
         }
-        return mpDecode(dataBytes);
+        return bytesToObject(dataBytes);
     }
 
     /** Clears account data under a specific key. */
@@ -225,7 +283,7 @@ export class TrinciDB {
 
     /** Serializes a value using MessagePack and saves it as asset data on an account */
     setAccountAssetPacked(ownerAccountId: string, assetAccountId: string, assetData: any): void {
-        const assetBytes = new Uint8Array(mpEncode(assetData));
+        const assetBytes = objectToBytes(assetData);
         return this.setAccountAsset(ownerAccountId, assetAccountId, assetBytes);
     }
 
@@ -243,7 +301,7 @@ export class TrinciDB {
         if (assetBytes === null || assetBytes.length <= 0) {
             return undefined;
         }
-        return mpDecode(assetBytes);
+        return bytesToObject(assetBytes);
     }
 
     /** Removes specific asset data from an account */
@@ -255,7 +313,7 @@ export class TrinciDB {
         return;
     }
 
-    printAccountData(accountId: string) {
+    printAccountData(accountId: string, printRawData: boolean = false) {
         const table :Table= new Table({
             head: ["#key",accountId].map(t => {
                 if(t == "#key") return "";
@@ -266,18 +324,19 @@ export class TrinciDB {
                 } else return t + "\n( -- )";
             })
         });
-        table.push(["Data key","MessagePackDecode(data)"]);
+        table.push(['Data key', printRawData ? 'Raw data(hex)' : 'Decoded data']);
         if (this.dataDb.has(accountId)) {
             const accountData = this.dataDb.get(accountId);
             const keys:string[] = [...accountData!.keys()];
             for(let k of keys) {
-                table.push([k,JSON.stringify(mpDecode(accountData!.get(k) as Uint8Array))]);
+                const data = accountData!.get(k)!;
+                table.push([k, (printRawData ? Buffer.from(data).toString('hex') : JSON.stringify(bytesToObject(data)))]);
             }
         }
         console.log(table.toString());
     }
 
-    printAccountAssets(accountId: string) {
+    printAccountAssets(accountId: string, printRawData: boolean = false) {
         const table :Table= new Table({
             head: ["#key",accountId].map(t => {
                 if(t == "#key") return "";
@@ -288,12 +347,13 @@ export class TrinciDB {
                 } else return t + "\n( -- )";
             })
         });
-        table.push(["Asset account","MessagePackDecode(asset)"]);
+        table.push(['Asset account', printRawData ? 'Raw data(hex)' : 'Decoded data']);
         if (this.assetDb.has(accountId)) {
             const accountAssets = this.assetDb.get(accountId);
             const keys:string[] = [...accountAssets!.keys()];
             for(let k of keys) {
-                table.push([k,JSON.stringify(mpDecode(accountAssets!.get(k) as Uint8Array))]);
+                const data = accountAssets!.get(k)!;
+                table.push([k, (printRawData ? Buffer.from(data).toString('hex') : JSON.stringify(bytesToObject(data)))]);
             }
         }
         console.log(table.toString());
@@ -347,6 +407,55 @@ export class TrinciDB {
             table.push([rowAccount,...amounts]);
         }
         console.log(table.toString());
+    }
+
+    /** Clears remote accounts cache.
+     * @param accountToClear - If defined, only cache relative to that account (if any) will be cleared. otherwise the whole cache will be cleared
+    */
+    clearRemoteAccountsCache(accountToClear?: string) {
+        if (typeof accountToClear === 'string') {
+            // clear onlyu that account
+            if (this.remoteAccountsCache.has(accountToClear)) {
+                this.remoteAccountsCache.delete(accountToClear)
+            }
+            return;
+        }
+        this.remoteAccountsCache.clear();
+    }
+
+    remoteAccountIsCached(account: string) {
+        if (this.remoteAccountsCache.has(account)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /** If chache for the remote account is present, that account will be restored to the state saved in cache */
+    restoreAccountFromCache(accountId: string) {
+        const accountCache = this.remoteAccountsCache.get(accountId)
+        if (typeof accountCache === 'undefined') {
+            return;
+        }
+        const newAccountAssets = new Map<string, Uint8Array>();
+        accountCache.assets.forEach((sourceValue, key) => {
+            const copyValue = new Uint8Array(new ArrayBuffer(sourceValue.byteLength));
+            copyValue.set(sourceValue);
+            newAccountAssets.set(key, copyValue)
+        });
+        const newAccountData = new Map<string, Uint8Array>();
+        accountCache.data.forEach((sourceValue, key) => {
+            const copyValue = new Uint8Array(new ArrayBuffer(sourceValue.byteLength));
+            copyValue.set(sourceValue);
+            newAccountData.set(key, copyValue)
+        });
+        this.assetDb.set(accountId, newAccountAssets);
+        this.dataDb.set(accountId, newAccountData)
+    }
+
+    /** If chache for the remote account is present, that account will be restored to the state saved in cache */
+    updateAccountCache(accountId: string, assets: Map<string, Uint8Array>, data: Map<string, Uint8Array>) {
+        this.remoteAccountsCache.set(accountId, {assets, data});
     }
 }
 

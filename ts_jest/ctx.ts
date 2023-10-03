@@ -89,7 +89,7 @@ export class CTX {
 
     /** Serialization using messagepack */
     toBytes(): Uint8Array {
-        const bytes = Utils.mpEncode(
+        const bytes = Utils.objectToBytes(
             [
                 this.depth,
                 this.network,
@@ -104,7 +104,7 @@ export class CTX {
 
     /** Deserialization using messagepack */
     fromBytes(bytes: Uint8Array): CTX {
-        const decodedObj = Utils.mpDecode(bytes) as TCTXDecoded;
+        const decodedObj = Utils.bytesToObject(bytes) as TCTXDecoded;
         this.depth = decodedObj[0];
         this.network = decodedObj[1];
         this.owner = decodedObj[2];

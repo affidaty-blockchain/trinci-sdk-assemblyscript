@@ -10,18 +10,17 @@ export default class WasmResult {
     }
 
     fromBytes(bytes: Uint8Array): WasmResult {
-        const decodedBytes = Utils.mpDecode(bytes) as [boolean, Buffer];
+        const decodedBytes = Utils.bytesToObject(bytes) as [boolean, Buffer];
         this.success = decodedBytes[0];
         this.result = new Uint8Array(decodedBytes[1]);
         return this;
     }
 
     toBytes(): Uint8Array {
-        const encodedBytes = Utils.mpEncode([
+        return Utils.objectToBytes([
             this.success,
             Buffer.from(this.result),
         ]);
-        return new Uint8Array(encodedBytes);
     }
 
     setError(message: string): WasmResult {
@@ -61,7 +60,7 @@ export default class WasmResult {
     decode():any {
         return {
             success : this.success,
-            result: this.success ? Utils.mpDecode(this.result) : this.errorMessage
+            result: this.success ? Utils.bytesToObject(this.result) : this.errorMessage
         }
     }
 
@@ -70,6 +69,6 @@ export default class WasmResult {
     }
 
     get resultDecoded(): any {
-        return Utils.mpDecode(this.result);
+        return Utils.bytesToObject(this.result);
     }
 }

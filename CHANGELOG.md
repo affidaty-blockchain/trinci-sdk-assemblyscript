@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.6.0] - 2023-11-03
+
+### Added
+- Added a way to connect test suite node to a real TRINCI node via `.connectToBlockchain()` method. Used only for cloning. No data/transaction gets sent to the remote TRINCI node.
+- Added a way to clone an account (data and assets) from remote TRINCI node via `.cloneRemoteAccount()` and `.cloneRemoteAccountWithContract()` methods.
+    Connect to a TRINCI node with `.connectToBlockchain()` method before cloning.
+- Cloned account data get stored into an internal cache to be used in case of subsequent cloning of the same account.
+- `.clearRemoteAccountsCache()` method completely empties the cache. Passing an accountId to that method clears only the relative accounts cache (if any).
+- `.restoreAccountFromCache()` method to restore an account to the state saved in cache(if any).
+
+### Fixed
+- If an exception is thrown for `hf_s_call` or `hf_call` an appropriate error message is displayed instead of "method not found"
+
 ## [2.5.6] - 2023-05-22
 
 ### Added
