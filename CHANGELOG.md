@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.6.0] - 2023-11-03
+## [2.6.0] - 2023-10-04
 
 ### Added
 - Added a way to connect test suite node to a real TRINCI node via `.connectToBlockchain()` method. Used only for cloning. No data/transaction gets sent to the remote TRINCI node.
