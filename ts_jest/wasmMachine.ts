@@ -89,7 +89,7 @@ export class WasmMachine {
                 hf_get_keys: (patternOffset: number, patternLength: number): bigint => {
                     const pattern = Buffer.from(this.readFromWasmMem(patternOffset, patternLength)).toString();
                     const keysList: string[] = this.db.getAccountDataKeys(this.currentCtx.owner, pattern);
-                    const encodedKeysList = new Uint8Array(Utils.mpEncode(keysList));
+                    const encodedKeysList = Utils.objectToBytes(keysList);
                     const encodedAppOutput = Utils.encodeAppOutput(true, encodedKeysList);
                     return Utils.combinePointer(this.writeToWasmMem(encodedAppOutput), encodedAppOutput.byteLength);
                 },
@@ -176,9 +176,14 @@ export class WasmMachine {
                         }
 
                         const newWasmMachine = new WasmMachine(moduleToCall, this.currentCtx.derive(calledAccount, calledMethod), this.db);
-                        const runResult = newWasmMachine.run(args);
-                        const runResultBytes = runResult.toBytes();
-                        return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
+                        try {
+                            const runResult = newWasmMachine.run(args);
+                            const runResultBytes = runResult.toBytes();
+                            return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
+                        } catch(e) {
+                            const result = new WasmResult().setError(Errors.WASM_EXEC_ERROR).toBytes();
+                            return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
+                        }
 
                     }
                     const result = new WasmResult().setError(Errors.ACCOUNT_NOT_BOUND).toBytes();
@@ -208,7 +213,7 @@ export class WasmMachine {
                         const runResultBytes = runResult.toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(runResultBytes), runResultBytes.byteLength);
                     } catch(e) {
-                        const result = new WasmResult().setError(Errors.METHOD_NOT_FOUND).toBytes();
+                        const result = new WasmResult().setError(Errors.WASM_EXEC_ERROR).toBytes();
                         return Utils.combinePointer(this.writeToWasmMem(result), result.byteLength);
                     }
                 },
@@ -307,7 +312,7 @@ export class WasmMachine {
     isCallable(method:string):boolean {
         this.instantiate();
         try {
-            const method_bytes = new Uint8Array(Utils.mpEncode(method));
+            const method_bytes = Utils.objectToBytes(method);
             const method_bytes_offset = this.writeToWasmMem(method_bytes);
             if (typeof this.wasmInstance!.exports.is_callable === 'undefined') {
                 return false;

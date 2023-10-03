@@ -1,7 +1,12 @@
-import { encode as mpEncode, decode as mpDecode } from 'msgpack-lite';
+import {
+    encode as mpEnc,
+    EncoderOptions,
+    decode as mpDec,
+    DecoderOptions,
+} from '@msgpack/msgpack';
 import fastSha256 from 'fast-sha256';
-
-export { mpEncode, mpDecode };
+import { toHex } from './binConversions';
+import { defMsgPackOptions } from './defaults';
 
 export function padHexStr(s: string, bytes: number, cutIflonger: boolean = false): string {
     while ( s.length < ( bytes || 2 )) { s = "0" + s;}
@@ -32,10 +37,28 @@ export function combinePointer(offset: number, length: number): bigint {
 }
 
 export function encodeAppOutput(success: boolean, result: Uint8Array): Uint8Array {
-    return new Uint8Array(mpEncode([success, Buffer.from(result)]))
+    return new Uint8Array(mpEnc([success, result], defMsgPackOptions))
 }
 
-export function getRefHash(dataBuffer: Buffer): string {
-    let refHash = `1220${Buffer.from(fastSha256(new Uint8Array(dataBuffer))).toString('hex')}`;
+export function getRefHash(data: Uint8Array): string {
+    let refHash = `1220${toHex(fastSha256(data))}`;
     return refHash;
+}
+
+/** Serializes any javascript object into an array of bytes using MsgPack */
+export function objectToBytes(obj: any, options: EncoderOptions = defMsgPackOptions): Uint8Array {
+    if (typeof obj === 'undefined') {
+        throw new Error('Cannot encode "undefined"');
+    }
+    const result = mpEnc(obj, options);
+    return result;
+}
+
+/** Deserializes an array of bytes into a plain javascript
+ * object using MsgPack */
+export function bytesToObject(bytes: Uint8Array, options: DecoderOptions = defMsgPackOptions): any {
+    if (!bytes.length) {
+        throw new Error('Cannot decode empty byte array.');
+    }
+    return mpDec(bytes, options);
 }

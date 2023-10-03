@@ -1,4 +1,4 @@
-import { mpEncode, mpDecode } from './utils';
+import { objectToBytes, bytesToObject } from './utils';
 import CTX from './ctx';
 
 export class TX {
@@ -57,7 +57,7 @@ export class TX {
     /** Performs automatic MessagePack encoding */
     args(args: any) {
         if (typeof args !== 'undefined') {
-            this._args = new Uint8Array(mpEncode(args));
+            this._args = objectToBytes(args);
         }
         return this;
     }
@@ -67,7 +67,7 @@ export class TX {
         if (this._args.length <= 0) {
             return undefined;
         }
-        return mpDecode(this._args);
+        return bytesToObject(this._args);
     }
 
     /** Accepts raw bytes */
