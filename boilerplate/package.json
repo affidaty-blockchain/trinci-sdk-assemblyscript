@@ -3,8 +3,8 @@
     "version": "0.0.1",
     "description": "A smart contract made for TRINCI blockchain.",
     "scripts": {
-        "asbuild:debug": "asc assembly/index.ts --config asconfig.json --target debug --transform ./msgpackable.mjs --use abort=",
-        "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./msgpackable.mjs --use abort=",
+        "asbuild:debug": "asc assembly/index.ts --config asconfig.json --target debug --transform ./transformer.mjs --use abort=",
+        "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./transformer.mjs --use abort=",
         "asbuild": "npm run asbuild:release",
         "asbuild:docker": "cd ./utils/docker && make smartcontract-build",
         "test": "jest --no-coverage",
@@ -25,6 +25,7 @@
     "license": "",
     "dependencies": {
         "@affidaty/t2-lib": "^2.3.3",
+        "@affidaty/t2-lib-core": "^2.4.4",
         "@affidaty/trinci-sdk-as": "^2.5.9",
         "@types/yargs": "^17.0.13",
         "adm-zip": "^0.5.10",

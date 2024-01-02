@@ -3,6 +3,21 @@ import Types from './types';
 import Utils from './utils';
 import MemUtils from './memutils';
 
+import hf from './env';
+
+let errOccured: bool = false;
+let errMessage: string = '';
+
+function setMsgPackError(msg: string): void {
+    errOccured = true;
+    errMessage = msg;
+}
+
+function clearMsgPackError(): void {
+    errOccured = false;
+    errMessage = '';
+}
+
 // "value" argument is used here only to determine the return type, as a string
 // containing type name cannot be used to denote a type directly.
 function getMember<VT, CT>(classObj: CT, memberName:string, value: VT): VT {
@@ -168,16 +183,20 @@ function setMember<VT, CT>(classObj: CT, memberName:string, value: VT): void {
 function readDecorated<T>(decoder: Decoder): T {
     let classObj = instantiate<T>();
     let typesMap = new Map<string, string>();
+    let isFieldSetMap = new Map<string, bool>();
     //@ts-ignore
     for (let i = 0; i < classObj.__structure.length; i++) {
         //@ts-ignore
         typesMap.set(classObj.__structure[i][0], classObj.__structure[i][1]);
+        //@ts-ignore
+        isFieldSetMap.set(classObj.__structure[i][0], classObj.__isFieldSet[i]);
     }
     let numFields = decoder.readMapSize() as i32;
     for (let idx = 0; idx < numFields; idx++) {
         let fieldName = decoder.readString();
         if (!typesMap.has(fieldName)) {
-            throw new Error(`Unknown field: ${fieldName}`);
+            setMsgPackError(`Unknown field: ${fieldName}`);
+            return classObj;
         }
         let fieldType = typesMap.get(fieldName);
         if (fieldType == 'bool') {
@@ -263,10 +282,28 @@ function readDecorated<T>(decoder: Decoder): T {
                     return decoder.readByteArray();
                 }));
             } else {
-                throw new Error(`Type not supported: ${fieldType}`);
+                setMsgPackError(`Type not supported: ${fieldType}`);
+                break;
             }
         } else {
-            throw new Error(`Type not supported: ${fieldType}`);
+            setMsgPackError(`Type not supported: ${fieldType}`);
+            break;
+        }
+
+        if (decoder.error()) {
+            setMsgPackError(`"${fieldName}" field error: ${(decoder.error() as Error).message}`);
+            return classObj;
+        }
+
+        // mark this field as set
+        isFieldSetMap.set(fieldName, true);
+    }
+    // check if all filds have been set
+    const isFieldSetKeys = isFieldSetMap.keys();
+    for (let i = 0; i < isFieldSetKeys.length; i++) {
+        if (!isFieldSetMap.get(isFieldSetKeys[i])) {
+            setMsgPackError(`Missing required field \"${isFieldSetKeys[i]}\"`);
+            return classObj;
         }
     }
     return classObj;
@@ -343,6 +380,16 @@ function writePubKey(writer: Writer, pubKey: Types.PublicKey): void {
 
 /** Contains ready-to-use serialization functions for most common use cases. */
 namespace MsgPack {
+
+    export function isError(): bool {
+        return errOccured;
+    }
+    export function errorMessage(): string {
+        return errMessage;
+    }
+    export function clearError(): void {
+        clearMsgPackError();
+    }
     /** Specific unnamed public key encode. */
     export function pubKeyEncode(pubKey: Types.PublicKey): u8[] {
         const sizer = new Sizer();

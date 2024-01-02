@@ -1,0 +1,350 @@
+// TODO: make public method signature type checks more dynamic (rn you have to import the whole sdk as "sdk" in order for everything to work)
+// search for "TODO-typecheck"
+
+import path from 'path';
+import { TransformVisitor, utils, SimpleParser } from '@affidaty/trinci-sdk-as/visitor-as/index.js';
+import {
+    Parser,
+    Tokenizer,
+    Source,
+    FunctionDeclaration,
+    ClassDeclaration,
+    FieldDeclaration,
+    Statement,
+    ImportStatement,
+} from 'assemblyscript/dist/assemblyscript.js';
+
+const pubMethodDecoratorName = 'publicMethod';
+const msgpackableDecoratorName = 'msgpackable';
+const optClassFieldDecoratorName = 'optional';
+
+const reservedClassFields = [
+    '__structure',
+    '__setters',
+    '__getters',
+    '__isFieldSet',
+];
+const internalTypesList = [
+    'f32', 'f64', 'bool',
+    'u8', 'u16', 'u32', 'u64',
+    'i8', 'i16', 'i32', 'i64',
+    'string', 'String', '~lib/string/String',
+    'ArrayBuffer', '~lib/arraybuffer/ArrayBuffer',
+    'Array<f32>', 'Array<f64>', 'Array<bool>',
+    'Array<u8>', 'Array<u16>', 'Array<u32>', 'Array<u64>',
+    'Array<i8>', 'Array<i16>', 'Array<i32>', 'Array<i64>',
+    'Array<string>', 'Array<String>', 'Array<~lib/string/String>',
+    'Array<ArrayBuffer>', 'Array<~lib/arraybuffer/ArrayBuffer>',
+]
+/** @type {{[key: string]: {args: [string, string][], return: string}}} */
+let publicMethods = {};
+/** @type {string[]} */
+let msgpackableClasses = [];
+let isMainAllocDefined = false;
+let isMainIsCallableDefined = false;
+let isMainRunDefined = false;
+
+// ==== Helper functions ====
+/**
+ * @param {string} typeName
+ * @returns {boolean}
+ */
+function isInternalType(typeName) {
+    return internalTypesList.includes(typeName);
+}
+
+/** @param {FunctionDeclaration} node */
+function checkCustomRunFunction(node) {
+    // exported == 2, so we isolate 2nd lsb value
+    if ((node.flags & 0x02) == 0) {
+        throw new Error('Custom "run" must have "export" modifier');
+    }
+    const signatureErrorMessage = 'custom "run" function must have one of two signatures: (u32, u32, u32, u32) => sdk.Types.WasmResult or (u32, u32, u32, u32) => u64'
+    if (utils.getName(node.signature.returnType) != 'sdk.Types.WasmResult'
+        && utils.getName(node.signature.returnType) != 'u64'
+    ) throw new Error(signatureErrorMessage);
+    if (!node.signature.parameters || node.signature.parameters.length != 4) throw new Error(signatureErrorMessage);
+    node.signature.parameters.forEach((param) => {
+        if (utils.getName(param.type) != 'u32') throw new Error(signatureErrorMessage);
+    })
+}
+
+/** @param {FunctionDeclaration} node */
+function checkCustomAllocFunction(node) {
+    if ((node.flags & 0x02) == 0) {
+        throw new Error('Custom "alloc" must have "export" modifier');
+    }
+    const signatureErrorMessage = 'custom "alloc" function must have exacly this signature: (u32) => u32'
+    if (utils.getName(node.signature.returnType) != 'u32') throw new Error(signatureErrorMessage);
+    if (!node.signature.parameters || node.signature.parameters.length != 1) throw new Error(signatureErrorMessage);
+    node.signature.parameters.forEach((param) => {
+        if (utils.getName(param.type) != 'u32') throw new Error(signatureErrorMessage);
+    })
+}
+
+/** @param {FunctionDeclaration} node */
+function checkCustomIsCallableFunction(node) {
+    if ((node.flags & 0x02) == 0) {
+        throw new Error('Custom "is_callable" must have "export" modifier');
+    }
+    const signatureErrorMessage = 'custom "is_callable" function must have exacly this signature: (u32, u32) => u8'
+    if (utils.getName(node.signature.returnType) != 'u8') throw new Error(signatureErrorMessage);
+    if (!node.signature.parameters || node.signature.parameters.length != 2) throw new Error(signatureErrorMessage);
+    node.signature.parameters.forEach((param) => {
+        if (utils.getName(param.type) != 'u32') throw new Error(signatureErrorMessage);
+    })
+}
+/**
+ * @param {string} sourcePath
+ * @param {string} stmtStr
+ * @returns {Statement}
+ */
+function parseTopLevelStatement(sourcePath, stmtStr) {
+    const stmt = new Parser().parseTopLevelStatement(new Tokenizer(new Source(0, sourcePath, stmtStr)));
+    if (!stmt) throw new Error(`Error parsing top level statement; Source path "${sourcePath}"; Statement string: ${stmtStr}`);
+    return stmt;
+}
+/**
+ * 
+ * @param {*} node 
+ * @returns {[string, string, boolean][]}
+ */
+function getStructure(node) {
+    let result = [];
+    for (let memderIdx = 0; memderIdx < node.members.length; memderIdx++) {
+        if (node.members[memderIdx] instanceof FieldDeclaration) {
+            let fieldName = utils.getName(node.members[memderIdx]);
+            if (reservedClassFields.includes(fieldName)) {
+                throw new Error(`Cannot have \"${fieldName}\" field in a msgpackable class. This is a reserved internal name.`)
+            }
+            let fieldType = utils.getName(node.members[memderIdx].type);
+            let isOptional = false;
+            if (node.members[memderIdx].decorators && node.members[memderIdx].decorators.length > 0) {
+                for (let fieldDecIdx = 0; fieldDecIdx < node.members[memderIdx].decorators.length; fieldDecIdx++) {
+                    if (utils.getName(node.members[memderIdx].decorators[fieldDecIdx]) === optClassFieldDecoratorName){
+                        isOptional = true;
+                    }
+                }
+            }
+            result.push([fieldName, fieldType, isOptional]);
+        }
+    }
+    return result;
+}
+
+function getSetters(structure, node) {
+    let result = [];
+    for (let i = 0; i < structure.length; i++) {
+        let setterCode = `changetype<usize>((c:${utils.getName(node)}, v:${structure[i][1]}):void=>{c.${structure[i][0]}=v;})`;
+        result.push(setterCode);
+    }
+    return result;
+}
+
+function getGetters(structure, node) {
+    let result = [];
+    for (let i = 0; i < structure.length; i++) {
+        let getterCode = `changetype<usize>((c:${utils.getName(node)}):${structure[i][1]}=>{return c.${structure[i][0]};})`;
+        result.push(getterCode);
+    }
+    return result;
+}
+
+class Transformer extends TransformVisitor {
+    // /**
+    //  * @param {ImportStatement} node 
+    //  * @returns {ImportStatement}
+    //  */
+    // visitImportStatement(node) {
+    //     // console.log(`import `);
+    //     return super.visitImportStatement(node);
+    // }
+    /**
+     * @param {ClassDeclaration} node
+     * @returns {ClassDeclaration}
+     */
+    visitClassDeclaration(node) {
+        if (node.decorators && node.decorators.length > 0) {
+            for (let decoratorIdx = 0; decoratorIdx < node.decorators.length; decoratorIdx++) {
+                if (utils.getName(node.decorators[decoratorIdx]) === msgpackableDecoratorName) {
+                    msgpackableClasses.push(utils.getName(node))
+                    // getting class structure to use for code generation below
+                    let structure = getStructure(node);
+                    // adding '__structure' member to class. It contains names and types of
+                    // all members of the class.
+                    let structureMemberCode = '__structure: string[][] = [';
+                    for (let i = 0; i < structure.length; i++) {
+                        if (i > 0) {
+                            structureMemberCode += ',';
+                        }
+                        structureMemberCode += '[\'';
+                        structureMemberCode += structure[i][0];
+                        structureMemberCode += '\',\'';
+                        structureMemberCode += structure[i][1];
+                        structureMemberCode += '\']';
+                    }
+                    structureMemberCode += '];';
+                    node.members.push(SimpleParser.parseClassMember(structureMemberCode, node));
+
+                    // '__setters' member will allow to set value of any class member
+                    let setters = getSetters(structure, node);
+                    let settersMemberCode = '__setters: usize[] = [';
+                    for (let i = 0; i < structure.length; i++) {
+                        if (i > 0) {
+                            settersMemberCode += ',';
+                        }
+                        settersMemberCode += setters[i];
+                    }
+                    settersMemberCode += '];';
+                    node.members.push(SimpleParser.parseClassMember(settersMemberCode, node)); //parse StaticArray.fromArray expression
+
+                    // '__getters' member will allow to get value of any class member
+                    let getters = getGetters(structure, node);
+                    let gettersMemberCode = '__getters: usize[] = [';
+                    for (let i = 0; i < structure.length; i++) {
+                        if (i > 0) {
+                            gettersMemberCode += ',';
+                        }
+                        gettersMemberCode += getters[i];
+                    }
+                    gettersMemberCode += '];';
+                    node.members.push(SimpleParser.parseClassMember(gettersMemberCode, node));//parse StaticArray.fromArray expression
+
+                    // this one keeps track of which field has been set and which not during deserialization. Optional fields get marked as set right away.
+                    // if any field is marked as not set after the deserialization ends, then a deserialization faillure error is set.
+                    let isFieldSetCode = '__isFieldSet: bool[] = [';
+                    for (let i = 0; i < structure.length; i++) {
+                        if (i > 0) {
+                            isFieldSetCode += ',';
+                        }
+                        // if structure[i][2] is "true", then this field is optional and must be marked as set right away
+                        isFieldSetCode += structure[i][2] ? 'true' : 'false';
+                    }
+                    isFieldSetCode += '];';
+                    node.members.push(SimpleParser.parseClassMember(isFieldSetCode, node));//parse StaticArray.fromArray expression
+                }
+            }
+        }
+        return super.visitClassDeclaration(node);
+    }
+
+    /**
+     * @param {FunctionDeclaration} node
+     * @returns {FunctionDeclaration}
+     */
+    visitFunctionDeclaration(node) {
+        // first check if this is one of custom run/allor/is_callable functions (only in main index file)
+        if (node.range.source.normalizedPath == 'assembly/index.ts') {
+            const name = utils.getName(node);
+            if (name == 'alloc') {
+                checkCustomAllocFunction(node);
+                isMainAllocDefined = true;
+                console.log('Found custom "alloc"');
+            } else if (name == 'is_callable') {
+                checkCustomIsCallableFunction(node);
+                isMainIsCallableDefined = true;
+                console.log('Found custom "is_callable"');
+            } else if (name == 'run') {
+                checkCustomRunFunction(node);
+                isMainRunDefined = true;
+                console.log('Found custom "run"');
+            }
+        }
+        if (node.decorators && node.decorators.length > 0) {
+            for (let decoratorIdx = 0; decoratorIdx < node.decorators.length; decoratorIdx++) {
+                if (utils.getName(node.decorators[decoratorIdx]) === pubMethodDecoratorName) {
+                    /** @type {{args: [string, string][], return: string}} */
+                    const publicMethodName = utils.getName(node);
+                    const publicMethodSignature = {
+                        args: [],
+                        return: '',
+                    }
+                    if (!node.signature.parameters || node.signature.parameters.length != 2)
+                        throw new Error(`public method "${publicMethodName}" must have exactly 2 arguments; received: ${node.signature.parameters ? node.signature.parameters.length : 0}`);
+                    for (let paramIdx = 0; paramIdx < node.signature.parameters.length; paramIdx++) {
+                        const parameter = node.signature.parameters[paramIdx];
+                        const paramName = utils.getName(parameter);
+                        const paramType = utils.getName(parameter.type);
+                        // TODO-dynamic-typecheck
+                        if (paramIdx == 0 && paramType !== 'sdk.Types.AppContext')
+                            throw new Error(`first parameter of public method "${publicMethodName}" must be of type "sdk.Types.AppContext"`);
+                        publicMethodSignature.args.push([paramName, paramType]);
+                    }
+                    publicMethodSignature.return = utils.getName(node.signature.returnType)
+                    // TODO-dynamic-typecheck
+                    if (publicMethodSignature.return !== 'sdk.Types.WasmResult')
+                            throw new Error(`return of public method "${publicMethodName}" must be of type "sdk.Types.WasmResult"`);
+                    publicMethods[publicMethodName] = publicMethodSignature;
+                }
+            }
+        }
+        return super.visitFunctionDeclaration(node);
+    }
+
+    /**
+     * @param {Parser} _ 
+     */
+    afterParse(_) {
+        let sources = _.sources.filter(utils.not(utils.isLibrary));
+        this.visit(sources);
+        sources.forEach((source) => {
+            if (source.normalizedPath === 'assembly/index.ts') {
+                const publicMethodsNames = Object.keys(publicMethods);
+                // append automatic functions only if they haven't already been defined by the user
+                // alloc
+                if (!isMainAllocDefined) {
+                    const allocStr = 'export function alloc(size: u32):u32 { return heap.alloc(size) as u32; }';
+                    source.statements.push(parseTopLevelStatement(source.normalizedPath, allocStr));
+                }
+
+                //is_callable
+                if (!isMainIsCallableDefined) {
+                    let isCallableStr = "export function is_callable(methodAddress:u32,methodSize:u32):u8{const methodsList:string[]=[";
+                    for (let nameIdx = 0; nameIdx < publicMethodsNames.length; nameIdx++) {
+                        if (nameIdx > 0) isCallableStr += ',';
+                        isCallableStr += `'${publicMethodsNames[nameIdx]}'`;
+                    }
+                    isCallableStr += "];const calledMethod:string=sdk.MsgPack.deserializeInternalType<string>(sdk.MemUtils.u8ArrayFromMem(methodAddress,methodSize));return methodsList.includes(calledMethod)?1:0;}";
+                    source.statements.push(parseTopLevelStatement(source.normalizedPath, isCallableStr));
+                }
+
+                //run
+                if (!isMainRunDefined) {
+                    let runStr = "export function run(ctxAddress:u32,ctxSize:u32,argsAddress:u32,argsSize:u32):sdk.Types.WasmResult{let ctxU8Arr:u8[]=sdk.MemUtils.u8ArrayFromMem(ctxAddress,ctxSize);let ctx=sdk.MsgPack.ctxDecode(ctxU8Arr);let argsU8:u8[]=sdk.MemUtils.u8ArrayFromMem(argsAddress,argsSize);"
+                    for (let methodIdx = 0; methodIdx < publicMethodsNames.length; methodIdx++) {
+                        const publicMethodName = publicMethodsNames[methodIdx];
+                        const publicMethod = publicMethods[publicMethodName];
+                        // console.log(publicMethod);
+                        if (methodIdx > 0) runStr += 'else ';
+                        runStr += `if(ctx.method=='${publicMethodName}'){`;
+                        // at this time we know there are exactly 2 args: [[name0, type0],[name1, type1]]
+                        const secondArgType = publicMethod.args[1][1];
+                        if (secondArgType == 'ArrayBuffer' || secondArgType == '~lib/arraybuffer/ArrayBuffer') {
+                            // console.log(`No deserialization (${secondArgType}) for public method "${publicMethodName}"`);
+                            runStr += 'const args=sdk.Utils.u8ArrayToArrayBuffer(argsU8);'
+                        } else if (secondArgType == 'Array<u8>') {
+                            // console.log(`No deserialization (${secondArgType}) for public method "${publicMethodName}"`);
+                            runStr += `const args=argsU8;`;
+                        } else if (isInternalType(secondArgType)) {
+                            // console.log(`internal type deserialization (${secondArgType}) for public method "${publicMethodName}"`);
+                            runStr += `const args=sdk.MsgPack.deserializeInternalType<${secondArgType}>(argsU8);`;
+                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
+                        } else if (msgpackableClasses.includes(secondArgType)) {
+                            // console.log(`msgpackable deserialization (${secondArgType}) for public method "${publicMethodName}"`);
+                            runStr += `const args=sdk.MsgPack.deserialize<${secondArgType}>(argsU8);`;
+                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
+                        } else {
+                            throw new Error(`Unknown deserialization method for type "${secondArgType}", second argument of public method "${publicMethodName}"`);
+                        }
+                        runStr += `return ${publicMethodName}(ctx, args);}`;
+                    }
+                    runStr += "return sdk.Return.Error('method not found');}";
+                    // console.log(runStr);
+                    source.statements.push(parseTopLevelStatement(source.normalizedPath, runStr));
+                }
+            }
+        })
+    }
+}
+
+export default new Transformer();
