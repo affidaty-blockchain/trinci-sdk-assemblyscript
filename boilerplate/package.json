@@ -26,7 +26,7 @@
     "dependencies": {
         "@affidaty/t2-lib": "^2.3.3",
         "@affidaty/t2-lib-core": "^2.4.4",
-        "@affidaty/trinci-sdk-as": "^3.0.0-beta2",
+        "@affidaty/trinci-sdk-as": "^3.0.0-beta3",
         "@types/yargs": "^17.0.13",
         "adm-zip": "^0.5.10",
         "yargs": "^17.7.2"

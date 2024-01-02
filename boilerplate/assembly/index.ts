@@ -1,4 +1,4 @@
-import * as sdk from './sdk';
+import sdk from './sdk';
 
 //####################### Native required functions ################################################
 // export function alloc(size: u32):u32 {

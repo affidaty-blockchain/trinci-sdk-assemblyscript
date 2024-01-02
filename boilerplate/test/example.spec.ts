@@ -2,7 +2,7 @@ import path from 'path';
 import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
 import t2libcore from '@affidaty/t2-lib-core';
 
-const wasmPath = '../build/release.wasm';
+const wasmPath = './build/release.wasm';
 let wasmFileHash = '';
 describe('d1', () => {
     test('t1', async () => {
