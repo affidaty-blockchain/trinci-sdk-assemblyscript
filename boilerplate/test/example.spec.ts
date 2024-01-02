@@ -2,12 +2,12 @@ import path from 'path';
 import { TrinciNode, TX } from '@affidaty/trinci-sdk-as/ts_jest';
 import t2libcore from '@affidaty/t2-lib-core';
 
-const wasmFilePath = path.resolve(__dirname, '../build/sdk-develop_release.wasm');
+const wasmPath = '../build/release.wasm';
 let wasmFileHash = '';
 describe('d1', () => {
     test('t1', async () => {
         const node = new TrinciNode();
-        wasmFileHash = await node.registerContract(wasmFilePath);
+        wasmFileHash = await node.registerContract(wasmPath);
 
         const tx = new TX()
         .target('#testacc')
@@ -30,7 +30,7 @@ describe('d1', () => {
     });
     test('t2', async () => {
         const node = new TrinciNode();
-        wasmFileHash = await node.registerContract(wasmFilePath);
+        wasmFileHash = await node.registerContract(wasmPath);
 
         const tx = new TX()
         .target('#testacc')
@@ -49,7 +49,7 @@ describe('d1', () => {
     });
     test('t3', async () => {
         const node = new TrinciNode();
-        wasmFileHash = await node.registerContract(wasmFilePath);
+        wasmFileHash = await node.registerContract(wasmPath);
 
         const tx = new TX()
         .target('#testacc')
@@ -68,7 +68,7 @@ describe('d1', () => {
     });
     test('t4', async () => {
         const node = new TrinciNode();
-        wasmFileHash = await node.registerContract(wasmFilePath);
+        wasmFileHash = await node.registerContract(wasmPath);
 
         const tx = new TX()
         .target('#testacc')
