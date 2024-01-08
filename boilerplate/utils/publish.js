@@ -84,6 +84,12 @@ const argv = Yargs(Yargs.hideBin(process.argv))
     demandOption: false,
     description: 'Allows to create (same as "-z"/"--zip" option) and automatically send a preapproval archive to Affidaty (see the "-z" optio help for info on it\'s content). ',
 })
+.option('info', {
+    alias: 'i',
+    type: 'boolean',
+    demandOption: false,
+    description: 'Allows to just print smart contract and publlisher info without actually submitting publish transaction.',
+})
 .help()
 .argv;
 
@@ -287,12 +293,13 @@ async function main() {
     if(!await publishTx.verify()) {
         throw new Error('Could not verify signed publish transaction.');
     }
-
-    process.stdout.write(`Network:        [${publishTx.data.networkName}]\n`);
-    process.stdout.write(`Publisher:      [${publisherAccount.accountId}]\n`);
+    process.stdout.write(`\nPublisher:      [${publisherAccount.accountId}]\n`);
     process.stdout.write(`Contract hash:  [${wasmRefHash}]\n`);
     process.stdout.write(`Metadata:\n${JSON.stringify(metadata, null, 4)}\n`);
-    process.stdout.write(`Pub tx hash:    [${ await publishTx.getTicket()}]\n`);
+    if (!argv.info) {
+        process.stdout.write(`Pub tx hash:    [${ await publishTx.getTicket()}]\n`);
+    }
+    process.stdout.write('\n');
     const publishTxBytes = Buffer.from(await publishTx.toBytes());
 
     if (argv.txOutFile) {
@@ -340,8 +347,9 @@ async function main() {
         }
     }
 
-    if (argv.url) {
+    if (argv.url && !argv.info) {
         process.stdout.write("Connecting to TRINCI node...\n");
+        process.stdout.write(`Network:        [${publishTx.data.networkName}]\n`);
         process.stdout.write(`Url:            [${argv.url}]\n`);
         const client = new t2lib.Client(argv.url, publishTx.data.networkName);
         await testConnection(client);
@@ -362,8 +370,10 @@ async function main() {
         }
         process.stdout.write(`\n${metadata.name}: ${hashString}\n`);
     } else {
-        process.stdout.write('\nPublish transaction won\'t be submitted as url was not provided.');
-        process.stdout.write('\nPlease provide node url ("-u" or "--url" option) to submit publish transaction.\n\n');
+        if (!argv.info) {
+            process.stdout.write('\nPublish transaction won\'t be submitted as url was not provided.');
+            process.stdout.write('\nPlease provide node url ("-u" or "--url" option) to submit publish transaction.\n\n');
+        }
     }
     return true;
 }
