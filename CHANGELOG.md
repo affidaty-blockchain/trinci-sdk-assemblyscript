@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.0] - 2024-01-08
+
+### Added
+- "@publicMethod" decorator. It's used instead of "methodsMap" to mark method as callable from a transaction. For more info refer to documentation and examples in "assembly/index.ts" file.
+- "publish:info" npm script. It prints smart constract and publisher info without actually submmitting publish transaction to the blockchain
+- fields inside a @msgpackable class can now be decorated with @optional to define optional values which can be omitted in transaction arguments. If omittted in transaction, an optional field assumes default value;
+
+### Changed
+- No more need to define "alloc", "run" and "is_callable" functions in assembly/index.ts. They get added by transformer automatically during compilation process. It is, however, possible to define custom ones which won't be overwritten. only signature check will be done on custom functions.
+- (De)serialization using a @msgpackable class of transaction args containing extra fields or missing one or more field will now give a deserialization faillure error
+- executing  "npm run publishh:mainnet" now tries to actually submit the publish transaction to the TRINCI mainnet
+- changed example "assembly/index.ts" file to use new decorators
+
 ## [2.6.0] - 2023-10-04
 
 ### Added
