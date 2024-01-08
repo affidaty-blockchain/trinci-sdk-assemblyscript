@@ -1,5 +1,5 @@
 {
-  "include": ["msgpackable.ts"],
+  "include": ["transformer.ts"],
   "compilerOptions": {
     "outDir": "./boilerplate",
     "inlineSourceMap": false,

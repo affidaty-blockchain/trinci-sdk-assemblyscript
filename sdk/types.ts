@@ -15,7 +15,7 @@ namespace Types {
         offset: u32 = 0;
         /** Data length */
         length: u32 = 0;
-    };
+    }
 
     /** Application context */
     export class AppContext {
