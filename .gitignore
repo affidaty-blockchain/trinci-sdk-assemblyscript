@@ -3,3 +3,4 @@ package-lock.json
 .vscode
 visitor-as
 boilerplate/msgpackable.js
+docs
