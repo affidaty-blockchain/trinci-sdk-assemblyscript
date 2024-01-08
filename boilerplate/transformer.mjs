@@ -212,8 +212,9 @@ class Transformer extends TransformVisitor {
                         args: [],
                         return: '',
                     };
-                    if (!node.signature.parameters || node.signature.parameters.length != 2)
-                        throw new Error(`public method "${publicMethodName}" must have exactly 2 arguments; received: ${node.signature.parameters ? node.signature.parameters.length : 0}`);
+                    if (!node.signature.parameters
+                        || (node.signature.parameters.length != 1 && node.signature.parameters.length != 2))
+                        throw new Error(`public method "${publicMethodName}" must have 1 or 2 arguments; received: ${node.signature.parameters ? node.signature.parameters.length : 0}`);
                     for (let paramIdx = 0; paramIdx < node.signature.parameters.length; paramIdx++) {
                         const parameter = node.signature.parameters[paramIdx];
                         const paramName = utils.getName(parameter);
@@ -266,9 +267,12 @@ class Transformer extends TransformVisitor {
                         if (methodIdx > 0)
                             runStr += 'else ';
                         runStr += `if(ctx.method=='${publicMethodName}'){`;
-                        // at this time we know there are exactly 2 args: [[name0, type0],[name1, type1]]
-                        const secondArgType = publicMethod.args[1][1];
-                        if (secondArgType == 'ArrayBuffer' || secondArgType == '~lib/arraybuffer/ArrayBuffer') {
+                        // at this time we know there are 1 (only ctx) or 2 (ctx + args) args: [[name0, type0],[name1, type1]]
+                        const secondArgType = publicMethod.args.length == 2 ? publicMethod.args[1][1] : '';
+                        if (secondArgType == '') {
+                            // no secong argument, then no deserialization
+                        }
+                        else if (secondArgType == 'ArrayBuffer' || secondArgType == '~lib/arraybuffer/ArrayBuffer') {
                             // console.log(`No deserialization (${secondArgType}) for public method "${publicMethodName}"`);
                             runStr += 'const args=sdk.Utils.u8ArrayToArrayBuffer(argsU8);';
                         }
@@ -289,7 +293,7 @@ class Transformer extends TransformVisitor {
                         else {
                             throw new Error(`Unknown deserialization method for type "${secondArgType}", second argument of public method "${publicMethodName}"`);
                         }
-                        runStr += `return ${publicMethodName}(ctx, args);}`;
+                        runStr += `return ${publicMethodName}(ctx${secondArgType !== '' ? ', args' : ''});}`;
                     }
                     runStr += "return sdk.Return.Error('method not found');}";
                     // console.log(runStr);
