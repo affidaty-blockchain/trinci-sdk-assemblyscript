@@ -6,23 +6,17 @@ Below are some basic concepts which apply to every smart contract on TRINCI plat
 ---
 
 - [Combined pointer](#combined-pointer)
-
-&nbsp;
 - [Exports](#exports)
    - [`alloc()`](#allocsize-u32-u32)
    - [`run()`](#runctxaddress-u32-ctxsize-u32-argsaddress-u32-argssize-u32-u64)
-   - [`is_callable()`](#is_callablemethodnameaddress-u32-methodnamesize-u32-u8)  
-&nbsp;
-- [Imports (host functions)](#imports)  
-&nbsp;
+   - [`is_callable()`](#is_callablemethodnameaddress-u32-methodnamesize-u32-u8)
+- [Host functions](#host-functions)
 - [Data structures](#data-structures)
    - [CTX](#ctx)
-   - [Return](#return)  
-&nbsp;
+   - [Return](#return)
 - [Account data](#account-data)
    - [Owner data](#owner-data)
-   - [Asset data](#asset-data)  
-&nbsp;
+   - [Asset data](#asset-data)
 - [Transaction lifecycle](#transaction-lifecycle)
 ---
 
@@ -49,7 +43,7 @@ In order to achieve required functionality each WASM instance must have followin
 
 ---
 [^UP](#basic-concepts)
-## Combined pointer
+## Combined pointer (WasmResult)
 
 The only types that can be directly passed to and received from a called WASM functions are numeric types. While number of arguments passed to functions is virtually unlimited, only one number can be returned.
 
@@ -61,26 +55,23 @@ Because of this in cases where it is necessary to return something more complex 
 [^UP](#basic-concepts)
 ## Exports
 
+> You don't need to actually write functions described below.  
+> They are generated and added automatically by transformer during compilation process. It is possible, however, to write custom alloc, run and is_callable, should the need arise. Upon detecting custom function, trasformer will just check it for signature correctness.  
+> See [`index.ts` file](index_file.md) wiki section for more info and examples.
+
 In order for a smart contract to work properly a number of functions must be exported from entry file (usually `assembly/index.ts`):
-- #### `alloc(size: u32): u32`
-   **REQUIRED**  
-   Gets called both by core and internally before writing anything to WASM heap. It allows to use internal wasm memory allocator to safely allocate a contiguous region of WASM heap of `<size>` bytes to store there data to pass to the smart contract. It accepts a 32-bit integer number representing size of data to allocate in bytes and returns memory offset at which to start writing data.
-
-- #### `run(ctxAddress: u32, ctxSize: u32, argsAddress: u32, argsSize: u32): u64`
-   **REQUIRED**  
-   This is like main() function in many programming languages: it is an entry point that gets called by core and, depending on the internal smart contract logic, calls other internal methods. `run()` gets passed MessagePack encoded CTX (execution context, more on that later) and raw unchanged transaction argument bytes. It returns a 64-bit number, which is two 32-bit numbers representing offset and size of MessagePack encoded return structure (more on that later).
-- #### `is_callable(methodNameAddress: u32, methodNameSize: u32): u8`
-   **HIGHLY SUGGESTED**  
-   This function gets memory offset and size of the MessagePack encoded string containing name of the method. It returns 1 if such method can be called on this smart contract, 0 otherwise. Even if, technically, a smart contract can be executed perfectly fine even without this function exported, it is highly suggested to export such function in order to give core (and other smart contracts) a way to determine if a method can be called on your contract without actually trying to call it.
-
-> Functions described above are already implemented in boilerplate code, which can be found in `boilerplate` directory of the installed `@affidaty/trinci-sdk-as`.  
-> See `Initial project setup` section for more.
+- #### `alloc(u32): u32`
+   this function allows to safely allocate a contiguous region of WASM heap of `<size>` bytes to receive binary data from outside.
+- #### `run(u32, u32, u32, u32): u64`
+   This is like main() function in many programming languages: it is an entry point that actually gets called by core upon transaction execution.
+- #### `is_callable(u32, u32): u8`
+   This function returns 1 if a ceartain public method method can be called on this smart contract, 0 otherwise.
 
 &nbsp;
 
 ---
 [^UP](#basic-concepts)
-## Imports
+## Host functions
 
 These functions are implemented by the host (TRINCI core in our case) and declared as external functions inside smart contract code (`<package_install_dir>/@affidaty/trinci-sdk-as/sdk/env.ts`).
 More in dedicated [Host functions](host_functions.md) section
@@ -184,9 +175,7 @@ has stored two pieces of data in it's own database under keys `dataKey1` and `da
 
 Owner data are managed using following host functions:
 - [storeData()](./host_functions.md#storedatakey-string-data-u8-void)
-- [storeDataT()](./host_functions.md#storedatattkey-string-object-t-void)
 - [loadData()](./host_functions.md#loaddatakey-string-u8)
-- [loadDataT()](./host_functions.md#loaddatattkey-string-t)
 - [removeData()](./host_functions.md#removedatakey-string-void)
 - [getKeys()](./host_functions.md#getkeyspattern-string---string)
 
@@ -199,9 +188,7 @@ In the diagram above account `#MyTestAccount` has data stored by smart contracts
 
 Asset data are managed using following host functions:
 - [storeAsset()](./host_functions.md#storeassetaccountid-string-value-u8-void)
-- [storeAssetT()](./host_functions.md#storeassetttaccountid-string-object-t-void)
 - [loadAsset()](./host_functions.md#loadassetaccountid-string-u8)
-- [loadAssetT()](./host_functions.md#loadassetttaccountid-string-t)
 - [removeAsset()](./host_functions.md#removeassetaccountid-string-void)
 
 ---

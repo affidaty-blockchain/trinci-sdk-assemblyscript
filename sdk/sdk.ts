@@ -1,9 +1,9 @@
-import Types from './types';
-import Utils from './utils';
-import MemUtils from './memutils';
-import HostFunctions from './env';
-import MsgPack from './msgpack';
-import { Return, Response } from './wmio';
+import * as Types from './types';
+import * as Utils from './utils';
+import * as MemUtils from './memUtils';
+import * as HostFunctions from './env';
+import * as MsgPack from './msgpack';
+import * as Return from './wmio';
 import { AccountAssetU64, OwnerDB } from './account';
 
 export {
@@ -13,7 +13,6 @@ export {
     HostFunctions,
     MsgPack,
     Return,
-    Response,
     AccountAssetU64,
     OwnerDB,
 };

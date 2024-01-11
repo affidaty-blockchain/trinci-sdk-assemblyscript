@@ -1,125 +1,175 @@
-import {
-    HostFunctions,
-    MsgPack,
-} from './sdk';
+// import {
+//     HostFunctions,
+//     MsgPack,
+// } from './sdk';
+
+import * as MsgPack from './msgpack';
+import * as HostFunctions from './env';
+
+const ERR_OVERFLOW = 'value overflow';
+const ERR_NOTENOUGHBALANCE = 'insufficient balance';
 
 /**
- * Class to help manage an account's balance represented by a numeric (u64) value
+ * A helper class for managing another account's asset data as a numeric (u64) value
  */
 export class AccountAssetU64 {
-    private _accountId: string = '';
-    private _clearOnZero: bool = true;
+    accountId: string;
+    clearOnZero: bool;
+    currValue: u64;
+    error: string;
+    isError: bool;
 
     /**
      * @param accountId - account you want to manage
-     * @param clearOnZero - set to true to completely delete asset data when balance reaches 0. Otherwise 0 continues being stored as asset value and shows when you try to get account data from blockchain. True by default.
+     * @param clearOnZero - Default: `true`. Set to true to completely delete asset data when value reaches 0. Otherwise 0 continues being stored as asset value and shows when you try to get account data from blockchain.
      */
     constructor(accountId: string, clearOnZero: bool = true) {
-        this._accountId = accountId;
-        this._clearOnZero = clearOnZero;
+        this.accountId = accountId;
+        this.clearOnZero = clearOnZero;
+        this.currValue = 0;
+        this.error = '';
+        this.isError = false;
     }
 
-    /** Completely removes account's asset data. */
-    clear(): void {
-        HostFunctions.removeAsset(this._accountId);
+    private setError(errMsg: string): AccountAssetU64 {
+        this.isError = true;
+        this.error = errMsg;
+        return this;
+    }
+
+    /** Resets error state and clear error message */
+    clearError(): AccountAssetU64 {
+        this.isError = false;
+        this.error = '';
+        return this;
     }
 
     /**
-     * Sets account's asset balance to a new value.
-     * @param value - new value
+     * Increases managed account's balance by amount. Use `write` method to save new value to blockchain.
+     * Check `isError()` for value overflow
+     * @param value - value to add to balance
+     */
+    add(value: u64): AccountAssetU64 {
+        if (value <= 0) {
+            return this;
+        }
+        const maxValue: u64 = 0xffffffffffffffff - this.currValue;
+        if (value > maxValue) {
+            this.setError(ERR_OVERFLOW);
+        } else {
+            this.currValue += value;
+        }
+        return this;
+    }
+
+    /**
+     * Decreases managed account's balance by amount. . Use `write` method to save new value to blockchain.
+     * Check `.isError()` for insufficient balance
+     * @param value value to remove from balance
+     */
+    sub(value: u64): AccountAssetU64 {
+        if (value <= 0) {
+            return this;
+        }
+        if (this.currValue < value) {
+            this.setError(ERR_NOTENOUGHBALANCE);
+        } else {
+            this.currValue -= value
+        }
+        return this;
+    }
+
+    /**
+     * Sets a specific current value. Use `write` method to save new value to blockchain.
+     * @param newValue value to set as current
+     */
+    setValue(newValue: u64): AccountAssetU64 {
+        this.currValue = newValue
+        return this;
+    }
+
+    /**
+     * Read asset data from blockchain. If no asset data are present then 0 is assumed.
+     * Check `.isError()` for deserialization errors
+     */
+    read(): AccountAssetU64 {
+        const assetBytes = HostFunctions.loadAsset(this.accountId);
+        if(assetBytes.byteLength > 0) {
+            let newValue = MsgPack.deserializeInternalType<u64>(assetBytes);
+            if (MsgPack.isError()) {
+                this.setError(`Asset value deserialization error: ${MsgPack.errorMessage}`);
+            } else {
+                this.currValue = newValue;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Writes account's asset current balance value. Completely deletes asset data if necessary
      * @param clearOnZero - whether to clear balance when it is set to 0 zero. Defaults to value set in constructor.
      */
-    set(value: u64, clearOnZero: bool = this._clearOnZero): void {
-        if (clearOnZero && value <= 0) {
-            this.clear();
-            return;
+    write(clearOnZero: bool = this.clearOnZero): AccountAssetU64 {
+        if (clearOnZero && this.currValue <= 0) {
+            this.removeAssetData();
+        } else {
+            HostFunctions.storeAsset(this.accountId, MsgPack.serializeInternalType(this.currValue));
         }
-        HostFunctions.storeAsset(this._accountId, MsgPack.serializeInternalType(value));
+        return this;
     }
 
-    /**
-     * Returns account balance. If no asset data are present then 0 is assumed.
-     */
-    balance(): u64 {
-        let result: u64 = 0;
-        const assetBytes = HostFunctions.loadAsset(this._accountId);
-        if(assetBytes.length > 0) {
-            result = MsgPack.deserializeInternalType<u64>(assetBytes);
-        }
-        return result;
-    }
-
-    /**
-     * Increases managed account's balance by amount.
-     * @param value - value to add to balance
-     * @returns - false(no data changes) if overflow occurs (resulting value greater than 0xffffffffffffffff). True otherwise.
-     */
-    add(value: u64): bool {
-        if (value <= 0) {
-            return true;
-        }
-        const currBalance = this.balance();
-        const max: u64 = 0xffffffffffffffff - currBalance;
-        if (value > max) {
-            return false;
-        }
-        this.set(currBalance + value);
-        return true;
-    }
-
-    /**
-     * Decreases managed account's balance by amount
-     * @param value value to remove from balance
-     * @param clearOnZero - whether to clear balance when it reaches zero. Defaults to value set in constructor.
-     * @returns - false if balance in not enough (no data change). True otherwise.
-     */
-    sub(value: u64, clearOnZero: bool = this._clearOnZero): boolean {
-        const currBalance = this.balance();
-        if (value <= 0) {
-            return true;
-        }
-        if (currBalance < value) {
-            return false;
-        }
-        this.set(currBalance - value);
-        return true;
+    /** Completely removes account's asset data from blockchain. */
+    removeAssetData(): AccountAssetU64 {
+        HostFunctions.removeAsset(this.accountId);
+        return this;
     }
 }
 
 export class OwnerDB {
+    static isError: bool = false;
+    static error: string = '';
 
-    static get<T>(key:string):T {
+    private static setError(errMsg: string): void {
+        this.isError = true;
+        this.error = errMsg;
+    }
+
+    static clearError(): void {
+        this.isError = false;
+        this.error = '';
+    }
+
+    static hasKey(key: string): bool {
+        const keysList = HostFunctions.getKeys(`${key}*`);
+        return keysList.indexOf(key) >= 0;
+    }
+
+    static removeKey(key: string): void {
+        HostFunctions.removeData(key);
+    }
+
+    static loadInternalType<T>(key: string): T {
+        this.clearError();
         const valSer = HostFunctions.loadData(key);
-        return  MsgPack.deserializeInternalType<T>(valSer);
+        const result = MsgPack.deserializeInternalType<T>(valSer);
+        if (MsgPack.isError()) this.setError(`deserialization error: ${MsgPack.errorMessage}`);
+        return result;
     }
 
-    static set<T>(key:string,val:T):u8[] {
-        const valSer = MsgPack.serializeInternalType<T>(val);
-        HostFunctions.storeData(key,valSer);
-        return valSer;
+    static storeInternaltype<T>(key: string, value: T): void {
+        this.clearError();
+        HostFunctions.storeData(key, MsgPack.serializeInternalType<T>(value));
     }
 
-    static getObject<T>(key:string):T {
-        const valSer = HostFunctions.loadData(key);
-        return  MsgPack.deserialize<T>(valSer);
+    static loadDecorated<T>(key: string): T {
+        this.clearError();
+        const result =  MsgPack.deserializeDecorated<T>(HostFunctions.loadData(key));
+        if (MsgPack.isError()) this.setError(`deserialization error: ${MsgPack.errorMessage}`);
+        return result;
     }
 
-    static setObject<T>(key:string,val:T):u8[] {
-        const valSer = MsgPack.serialize<T>(val);
-        HostFunctions.storeData(key,valSer);
-        return valSer;
-    }
-
-    static has(key:string):boolean {
-        const ret = HostFunctions.getKeys(`${key}*`);
-        return ret.indexOf(key) >= 0;
-    }
-
-    static delete(key:string):boolean {
-        if(this.has(key)) {
-            HostFunctions.removeData(key);
-            return true;
-        }
-        return false;
+    static storeDecorated<T>(key:string, value:T): void {
+        this.clearError();
+        HostFunctions.storeData(key, MsgPack.serializeDecorated<T>(value));
     }
 }

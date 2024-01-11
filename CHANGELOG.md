@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0] - 2024-01-08
+## [3.0.0] - 0000-00-00
 
 ### Added
 - "@publicMethod" decorator. It's used instead of "methodsMap" to mark method as callable from a transaction. For more info refer to documentation and examples in "assembly/index.ts" file.
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - (De)serialization using a @msgpackable class of transaction args containing extra fields or missing one or more field will now give a deserialization faillure error
 - executing  "npm run publishh:mainnet" now tries to actually submit the publish transaction to the TRINCI mainnet
 - changed example "assembly/index.ts" file to use new decorators
+- general overhaul of names and return types for less unnecessary conversions and (hopefully) more readability. Logic is still pretty much the same. Refer to the documentation for more info.
 
 ## [2.6.0] - 2023-10-04
 

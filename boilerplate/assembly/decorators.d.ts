@@ -1,3 +1,3 @@
-declare function msgpackable(c: any): void;
-declare function optional(c: any): void;
-declare function publicMethod(c: any): void;
+declare function msgpackable(ctor: any): any;
+declare function optional(target: any, name: string): any;
+declare function exposed(): any;

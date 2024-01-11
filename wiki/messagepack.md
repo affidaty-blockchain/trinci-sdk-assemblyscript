@@ -160,7 +160,7 @@ const deserializedArgs = MsgPack.deserialize<TransferArgs>(receivedArgsBytes);
 const serializedArgsBytes = MsgPack.serialize(deserializedArgs);
 ```
 
-During deserialization of a decorated class it is ok if some fields are missing in serialized bytes(even all of them). In that case corresponding values will be set to default value. However if there's an unknown property deserialization will fail.
+During deserialization every (and all) field must be present in data being deserialized. Extra or missing fileds will trigger deserialization errors.
 
 If we define our class like this:
 
@@ -180,12 +180,30 @@ We could have 3 scenarios:
 
 2. Received args bytes: `82a466726f6daa2346726f6d56616c7565a2746fa823546f56616c7565`  
     This is ok. Missing `units` property. Default value is assumed.  
-    Deserialization result: `{from: "#FromValue", to: "#ToValue", units: 0}`
+    Deserialization error: `Missing required field "units"`
 
 3. Received args bytes: `83a466726f6daa2346726f6d56616c7565a2746fa823546f56616c7565a4756e6974cfffffffffffffffff`  
     This will throw. Property name  is `unit` instead of `units`
-    Deserialization result: Wasm machine fault.
+    Deserialization result: `Unknown field: "unit"`.
 &nbsp;
+
+## `@optional` field decorator
+
+> `@optional` decorator only works on a field of a class decorated with `@msgpackable` decorator
+
+It is possible to decorate a field of a class with `@optional` decorator so that it assumes default value if the said field is missing from transaction arguments.  
+If we take the last example in the section above and redefine i like this:
+```ts
+@msgpackable
+class TransferArgs {
+    from: string = '';
+    to: string = '';
+    @optional units: u64 = 0;
+}
+```
+
+Case 2 (missing `units`) will still pass, as field `units` of the decorated class will assume default value (`0`).  
+Case 3, however, will still fail with the same error.
 
 ## Examples of encoded data
 

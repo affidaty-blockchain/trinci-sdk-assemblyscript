@@ -1,78 +1,72 @@
-import { default as Utils } from './utils';
-import { default as MsgPack } from './msgpack';
-import { default as Types } from './types';
+import { AppOutput, WasmResult } from './types';
+import { combinePtr } from './utils';
+import { storeData as storeDataToMem } from './memUtils';
+import { serializeAppOutput, serializeDecorated, serializeInternalType } from './msgpack';
 
 /**
- * Helper functions that create, encode and save to memory various smart contract return types
+ * Returns an Error with passed error message. If this is returned by the top-level wasm call
+ * (originated directly by a transaction, meaning ctx.depth is 0) then the transaction fails.
+ * @param message - Error message
  */
-export namespace Return {
-    /**
-     * Returns an Error with passed error message. If this is returned by the top-level wasm call
-     * (originated directly by a transaction, meaning ctx.depth is 0) then the transaction fails.
-     * @param message - Error message
-     */
-    export function Error(message:string):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(false, Utils.stringToU8Array(message));
-    }
-
-    /**
-     * Returns combined pointer to a passed serialized value wrapped in a Success response;
-     * If this is returned by the top-level wasm call (originated directly by a transaction,
-     * meaning ctx.depth is 0) then the transaction succeeds.
-     * @template T - internal type
-     * @param value - value you want to return
-    */
-    export function Success<T>(value:T):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, MsgPack.serializeInternalType<T>(value));
-    }
-
-    /**
-     * Returns combined pointer to an array of bytes wrapped in a Success response;
-     * Useful when, for example, you need to use your own serialization format.
-     * @param bytes - bytes you want to return
-    */
-    export function SuccessBytes(bytes: u8[]):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, bytes);
-    }
-
-    /**
-     * Returns combined pointer to a passed serialized value wrapped in a Success response;
-     * In this case value must be a custom class decorated with a `@msgpackable` decorator..
-     * @template T - class decorated with a `@msgpackable` decorator.
-     * @param value - value you want to return
-    */
-    export function SuccessAsObject<T>(value:T):Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, MsgPack.serialize<T>(value));
-    }
-
-    /**
-     * Returns a combined pointer to encoded 'true' value wrapped in a 'Success' response;
-     */
-    export function True():Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, [0xc3]);
-    }
-
-    /**
-     * Returns a combined pointer to encoded 'false' value wrapped in a 'Success' response;
-     */
-    export function False():Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, [0xc2]);
-    }
-
-    /**
-     * Returns a combined pointer to encoded 'null' value wrapped in a 'Success' response;
-     */
-    export function Null():Types.TCombinedPtr {
-        return MsgPack.appOutputEncode(true, [0xc0]);
-    }
+export function Error(message: string): WasmResult {
+    const messageAb = String.UTF8.encode(message);
+    const outputAb = serializeAppOutput(new AppOutput(false, messageAb));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
 }
 
-export namespace Response {
-    export function isSome(data: u8[]): boolean {
-        return data.length > 0;
-    }
+/**
+ * Returns combined pointer to an array of bytes wrapped in a Success response;
+ * Useful when, for example, you need to use your own (de)serialization format.
+ * @param execResult - raw bytes you want to return as execution result
+*/
+export function SuccessWithRawBytes(execResult: ArrayBuffer): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, execResult));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
+}
 
-    export function isEmpty(data: u8[]): boolean {
-        return data.length <= 0;
-    }
+/**
+ * Returns combined pointer to a passed serialized value wrapped in a Success response;
+ * If this is returned by the top-level wasm call (originated directly by a transaction,
+ * meaning ctx.depth is 0) then the transaction succeeds.
+ * @template T - an internal type
+ * @param execResult - value you want to return
+*/
+export function SuccessWithInternalType<T>(execResult: T): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, serializeInternalType<T>(execResult)));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
+}
+
+/**
+ * Returns combined pointer to a passed serialized value wrapped in a Success response;
+ * In this case value must be a custom class decorated with a `@msgpackable` decorator..
+ * @template T - class decorated with a `@msgpackable` decorator.
+ * @param value - value you want to return
+*/
+export function SuccessWithDecoratedType<T>(value: T): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, serializeDecorated(value)));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
+}
+
+/**
+ * Returns a combined pointer to a msgpacked 'true' value wrapped in a 'Success' response;
+ */
+export function SuccessWithTrue(): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, changetype<ArrayBuffer>(([0xc3] as u8[]).dataStart)));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
+}
+
+/**
+ * Returns a combined pointer to a msgpacked 'false' value wrapped in a 'Success' response;
+ */
+export function SuccessWithFalse(): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, changetype<ArrayBuffer>(([0xc2] as u8[]).dataStart)));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
+}
+
+/**
+ * Returns a combined pointer to a msgpacked 'null' value wrapped in a 'Success' response;
+ */
+export function SuccessWithNull(): WasmResult {
+    const outputAb = serializeAppOutput(new AppOutput(true, changetype<ArrayBuffer>(([0xc0] as u8[]).dataStart)));
+    return combinePtr(storeDataToMem(outputAb), outputAb.byteLength);
 }

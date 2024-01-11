@@ -1,6 +1,6 @@
 import { TransformVisitor, utils, SimpleParser, } from '@affidaty/trinci-sdk-as/visitor-as/index.js';
 import { Parser, Tokenizer, Source, FieldDeclaration, } from 'assemblyscript/dist/assemblyscript.js';
-const pubMethodDecoratorName = 'publicMethod';
+const pubMethodDecoratorName = 'exposed';
 const msgpackableDecoratorName = 'msgpackable';
 const optClassFieldDecoratorName = 'optional';
 const reservedClassFields = [
@@ -234,8 +234,8 @@ class Transformer extends TransformVisitor {
         }
         return super.visitFunctionDeclaration(node);
     }
-    afterParse(_) {
-        let sources = _.sources.filter(utils.not(utils.isLibrary));
+    afterParse(parser) {
+        let sources = parser.sources.filter(utils.not(utils.isLibrary));
         this.visit(sources);
         sources.forEach((source) => {
             if (source.normalizedPath === 'assembly/index.ts') {
@@ -243,7 +243,7 @@ class Transformer extends TransformVisitor {
                 // append automatic functions only if they haven't already been defined by the user
                 // alloc
                 if (!isMainAllocDefined) {
-                    const allocStr = 'export function alloc(size: u32):u32 { return heap.alloc(size) as u32; }';
+                    const allocStr = 'export function alloc(size: u32):u32 { return sdk.MemUtils.alloc(size); }';
                     source.statements.push(parseTopLevelStatement(source.normalizedPath, allocStr));
                 }
                 //is_callable
@@ -254,12 +254,12 @@ class Transformer extends TransformVisitor {
                             isCallableStr += ',';
                         isCallableStr += `'${publicMethodsNames[nameIdx]}'`;
                     }
-                    isCallableStr += "];const calledMethod:string=sdk.MsgPack.deserializeInternalType<string>(sdk.MemUtils.u8ArrayFromMem(methodAddress,methodSize));return methodsList.includes(calledMethod)?1:0;}";
+                    isCallableStr += "];const calledMethod:string=sdk.MsgPack.deserializeInternalType<string>(sdk.MemUtils.loadData(methodAddress));return methodsList.includes(calledMethod)?1:0;}";
                     source.statements.push(parseTopLevelStatement(source.normalizedPath, isCallableStr));
                 }
                 //run
                 if (!isMainRunDefined) {
-                    let runStr = "export function run(ctxAddress:u32,ctxSize:u32,argsAddress:u32,argsSize:u32):sdk.Types.WasmResult{let ctxU8Arr:u8[]=sdk.MemUtils.u8ArrayFromMem(ctxAddress,ctxSize);let ctx=sdk.MsgPack.ctxDecode(ctxU8Arr);let argsU8:u8[]=sdk.MemUtils.u8ArrayFromMem(argsAddress,argsSize);";
+                    let runStr = "export function run(ctxAddress:u32,ctxSize:u32,argsAddress:u32,argsSize:u32):sdk.Types.WasmResult{let ctxBytes:ArrayBuffer=sdk.MemUtils.loadData(ctxAddress);let ctx=sdk.MsgPack.deserializeCtx(ctxBytes);let argsBytes:ArrayBuffer=sdk.MemUtils.loadData(argsAddress);";
                     for (let methodIdx = 0; methodIdx < publicMethodsNames.length; methodIdx++) {
                         const publicMethodName = publicMethodsNames[methodIdx];
                         const publicMethod = publicMethods[publicMethodName];
@@ -274,20 +274,16 @@ class Transformer extends TransformVisitor {
                         }
                         else if (secondArgType == 'ArrayBuffer' || secondArgType == '~lib/arraybuffer/ArrayBuffer') {
                             // console.log(`No deserialization (${secondArgType}) for public method "${publicMethodName}"`);
-                            runStr += 'const args=sdk.Utils.u8ArrayToArrayBuffer(argsU8);';
-                        }
-                        else if (secondArgType == 'Array<u8>') {
-                            // console.log(`No deserialization (${secondArgType}) for public method "${publicMethodName}"`);
-                            runStr += `const args=argsU8;`;
+                            runStr += 'const args=argsBytes;';
                         }
                         else if (isInternalType(secondArgType)) {
                             // console.log(`internal type deserialization (${secondArgType}) for public method "${publicMethodName}"`);
-                            runStr += `const args=sdk.MsgPack.deserializeInternalType<${secondArgType}>(argsU8);`;
+                            runStr += `const args=sdk.MsgPack.deserializeInternalType<${secondArgType}>(argsBytes);`;
                             runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
                         }
                         else if (msgpackableClasses.includes(secondArgType)) {
                             // console.log(`msgpackable deserialization (${secondArgType}) for public method "${publicMethodName}"`);
-                            runStr += `const args=sdk.MsgPack.deserialize<${secondArgType}>(argsU8);`;
+                            runStr += `const args=sdk.MsgPack.deserializeDecorated<${secondArgType}>(argsBytes);`;
                             runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
                         }
                         else {

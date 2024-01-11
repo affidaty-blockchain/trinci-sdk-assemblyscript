@@ -15,6 +15,8 @@ Assemblyscript is a relatively new language and some of the features could be mi
 
 - [Basic concepts](basic.md)
 - [Project setup](new_project.md)
+- [Exposed methods](exposed_methods.md)
+- [File `index.ts`](index_file.md)
 - [Host functions](host_functions.md)
 - [MessagePack](messagepack.md)
 - [Building and testing](build_and_test.md)

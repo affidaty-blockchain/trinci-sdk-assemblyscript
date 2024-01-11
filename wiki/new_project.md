@@ -64,12 +64,12 @@ to the directory of your choice, simply substitute the content of the current fo
 .
 ├──asconfig.json // assemblyscript compiler options
 ├──assembly // actual assemblyscrpt code
-│   ├──decorators.d.ts // @msgpackable type to make IDE happy
+│   ├──decorators.d.ts // @decorators type to make IDE happy
 │   ├──index.ts // smart contract entry point
 │   ├──sdk.ts // allows to import modules from just "./sdk"
 │   └──tsconfig.json // 
 ├──jest.config.js // jest test environment settings
-├──msgpackable.mjs // transformer. used during compilation
+├──transformer.mjs // transformer. used during compilation
 ├──package.json
 ├──publishAccount.json // used with publish scripts
 ├──publishMetadata.json // used with publish scripts
@@ -77,17 +77,6 @@ to the directory of your choice, simply substitute the content of the current fo
 │   └──example.spec.ts // example test
 ├──tsconfig.json
 └──utils // various utilities not required for development
-    ├──docker
-    │   ├──docker-compose.yml
-    │   ├──Makefile
-    │   ├──smartcontract
-    │   │   ├──Dockerfile
-    │   │   └──script
-    │   │       └──start.sh
-    │   └──trinci
-    │       ├──Dockerfile
-    │       └──script
-    │           └──start.sh
     ├──include // used by publish.js
     │   ├──hashlist.js
     │   └──submit.js

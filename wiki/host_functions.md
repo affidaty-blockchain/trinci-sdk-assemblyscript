@@ -209,27 +209,15 @@ Outputs a log message into node logs (only if launched with debug log level)
 
 &nbsp;
 
-### `storeData(key: string, data: u8[]): void`
+### `storeData(key: string, data: ArrayBuffer): void`
 
 Stores data under a specific key into owner data of the account hosting smart contract
 
 &nbsp;
 
-### `storeDataT<T>(key: string, object: T): void`
-
-Just as storeData() above, but accepts classes decorated with [`@msgpackable` decorator](./messagepack.md#class-decorator)
-
-&nbsp;
-
-### `loadData(key: string): u8[]`
+### `loadData(key: string): Arraybuffer`
 
 Loads data from a key. If key does not exist, returns empty array.
-
-&nbsp;
-
-### `loadDataT<T>(key: string): T`
-
-Just like `loadData()`above, but allows to retrieve data with automatic deserialization into a class decorated with [`@msgpackable` decorator](./messagepack.md#class-decorator)
 
 &nbsp;
 
@@ -239,27 +227,15 @@ Removes data by key from account hosting smart contract.
 
 &nbsp;
 
-### `storeAsset(accountId: string, value: u8[]): void`
+### `storeAsset(accountId: string, value: ArrayBuffer): void`
 
 Stores asset-specific data as raw bytes into destination account.
 
 &nbsp;
 
-### `storeAssetT<T>(accountId: string, object: T): void`
-
-Same as above, but also performs automatic serialization of classes decorated with [`@msgpackable` decorator](./messagepack.md#class-decorator).
-
-&nbsp;
-
-### `loadAsset(accountId: string): u8[]`
+### `loadAsset(accountId: string): ArrayBuffer`
 
 Loads asset-specific data from source account.
-
-&nbsp;
-
-### `loadAssetT<T>(accountId: string): T`
-
-Same as above, but also performs automatic deserialization of classes decorated with [`@msgpackable` decorator](./messagepack.md#class-decorator).
 
 &nbsp;
 
@@ -281,37 +257,37 @@ Check if method is callable in targetId account
 
 &nbsp;
 
-### `call(targetId: string, method: string, data: u8[]): Types.AppOutput`
+### `call(targetId: string, method: string, data: ArrayBuffer): Types.AppOutput`
 
 Calls another smart contract method from within a smart contract
 
 &nbsp;
 
-### `scall(targetId: string, method: string, contractHash: u8[], data: u8[]): Types.AppOutput`
+### `scall(targetId: string, method: string, contractHash: ArrayBuffer, data: ArrayBuffer): Types.AppOutput`
 
 Calls another smart contract method from within a smart contract just like `call`, but succeeds only if target has passed smart contract bound to it.
 
 &nbsp;
 
-### `emit(eventName: string, eventData: u8[]): void`
+### `emit(eventName: string, eventData: ArrayBuffer): void`
 
 Emits a smart contract event.
 
 &nbsp;
 
-### `getAccountContract(accountId: string): string`
+### `getAccountContract(accountId: string): ArrayBuffer`
 
 Returns smart contract associated with given account.
 
 &nbsp;
 
-### `sha256(data: u8[]): u8[]`
+### `sha256(data: ArrayBuffer): ArrayBuffer`
 
 Computes sha256 from given bytes.
 
 &nbsp;
 
-### `verify(publicKey: Types.PublicKey, data: u8[], signature: u8[]): bool`
+### `verify(publicKey: Types.PublicKey, data: ArrayBuffer, signature: ArrayBuffer): bool`
 
 Allows to verify data signature.
 
