@@ -1,13 +1,12 @@
-
 import fastSha256 from 'fast-sha256';
+import { ITxEvent } from '@affidaty/t2-lib';
 import * as Errors from './errors';
 import * as Defaults from './defaults';
 import * as Utils from './utils';
-import WasmResult from './wasmResult';
 import trinciDB  from './db';
+import WasmResult from './wasmResult';
 import CTX from './ctx';
 import WasmEventEmitter from './wasmEventEmitter';
-import { ITxEvent } from '@affidaty/t2-lib';
 
 // interface IHostFunctionMock {
 //     hf_log?(string): string;

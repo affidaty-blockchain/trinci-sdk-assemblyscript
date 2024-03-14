@@ -19,4 +19,4 @@ Assemblyscript is a relatively new language and some of the features could be mi
 - [File `index.ts`](index_file.md)
 - [Host functions](host_functions.md)
 - [MessagePack](messagepack.md)
-- [Building and testing](build_and_test.md)
+- [Build, test and deploy](build_and_test.md)

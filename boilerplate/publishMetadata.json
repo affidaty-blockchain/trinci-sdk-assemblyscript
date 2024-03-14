@@ -1,7 +1,7 @@
 {
-    "name": "",
-    "version": "",
+    "name": "my-smart-contract",
+    "version": "0.0.1",
     "description": "",
     "url": "",
-    "wasmFile": ""
+    "wasmFile": "./build/release.wasm"
 }

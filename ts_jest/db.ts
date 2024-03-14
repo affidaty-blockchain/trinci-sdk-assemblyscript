@@ -6,7 +6,6 @@ import {
     bytesToObject,
     objectToBytes,
 } from "./utils";
-import { binConversions } from "@affidaty/t2-lib";
 
 export interface IWasmPathWithName { path: string, name?: string };
 export interface IWasmBinWithName { bin: Uint8Array, name?: string };

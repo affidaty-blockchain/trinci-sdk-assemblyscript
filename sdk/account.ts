@@ -1,8 +1,3 @@
-// import {
-//     HostFunctions,
-//     MsgPack,
-// } from './sdk';
-
 import * as MsgPack from './msgpack';
 import * as HostFunctions from './env';
 
@@ -67,7 +62,7 @@ export class AccountAssetU64 {
      * Check `.isError()` for insufficient balance
      * @param value value to remove from balance
      */
-    sub(value: u64): AccountAssetU64 {
+    subtract(value: u64): AccountAssetU64 {
         if (value <= 0) {
             return this;
         }
@@ -83,7 +78,7 @@ export class AccountAssetU64 {
      * Sets a specific current value. Use `write` method to save new value to blockchain.
      * @param newValue value to set as current
      */
-    setValue(newValue: u64): AccountAssetU64 {
+    set(newValue: u64): AccountAssetU64 {
         this.currValue = newValue
         return this;
     }
@@ -92,7 +87,7 @@ export class AccountAssetU64 {
      * Read asset data from blockchain. If no asset data are present then 0 is assumed.
      * Check `.isError()` for deserialization errors
      */
-    read(): AccountAssetU64 {
+    readAssetData(): AccountAssetU64 {
         const assetBytes = HostFunctions.loadAsset(this.accountId);
         if(assetBytes.byteLength > 0) {
             let newValue = MsgPack.deserializeInternalType<u64>(assetBytes);
@@ -109,7 +104,7 @@ export class AccountAssetU64 {
      * Writes account's asset current balance value. Completely deletes asset data if necessary
      * @param clearOnZero - whether to clear balance when it is set to 0 zero. Defaults to value set in constructor.
      */
-    write(clearOnZero: bool = this.clearOnZero): AccountAssetU64 {
+    writeAssetData(clearOnZero: bool = this.clearOnZero): AccountAssetU64 {
         if (clearOnZero && this.currValue <= 0) {
             this.removeAssetData();
         } else {

@@ -64,7 +64,7 @@ server.on('connection', (socket) => {
     })
 
     socket.on('data', (data) => {
-        console.log(`Data from ${socket.id}:\n[${data.toString('hex')}]\n`);
+        console.log(`Received data(raw) from ${socket.id}:\n${data.toString('hex')}\n`);
         Object.keys(socketList).forEach((id) => {
             if (socket.id !== id) {
                 console.log(`Relaying data from ${socket.id} to ${id}\n`)
@@ -74,13 +74,16 @@ server.on('connection', (socket) => {
     });
 });
 
-const printBanner = () => {
-    const serverBanner = `╔════════════════════════╗\n║ TRINCI socket relay ON ║\n╚════════════════════════╝\n  Address: ${FULL_ADDRESS}\n\n`;
+function printBanner() {
+    const serverBanner = `╔════════════════════════╗\n║ TRINCI socket relay ON ║\n╚════════════════════════╝\n  Address: ${FULL_ADDRESS}\n`;
+    const info = 'This is for testing purposes.\nUse it to test smart contract events reception\n1. Add "await node.connectToSocket(\'<address>\', port);" \n   to your test before calling smart contract.\n2. Connect to relay from your client.\n3. Launch test. Every event emitted from smart\n   contract will be sent to relay, which will then\n   proxy it to every other connected client.\n4. Use "await node.closeSocket();" at the end of the test,\n   otherwise test will hang until it or relay are stopped\n   manually.\n';
     console.log(serverBanner);
+    console.log(info);
 };
+
+printBanner();
 
 server.listen(
     argv.port,
     argv.address,
-    printBanner,
 );

@@ -1,7 +1,5 @@
 import { Encoder, Decoder, Sizer, Writer } from '@wapc/as-msgpack';
 import { AppContext, AppOutput, WasmResult, PublicKey } from './types';
-import { combinePtr, splitPtr } from './utils';
-import { storeData, loadData } from './memUtils';
 
 let errOccured: bool = false;
 let errMessage: string = '';
@@ -927,7 +925,7 @@ export function serializeDecorated<T>(classObj: T): ArrayBuffer {
 
 /** Template function to deserialize a custom class decorated with `@msgpackable` decorator.
  * @template T - a type decorated with `@msgpackable` decorator.
- * @param u8Array - bytes to deserialize
+ * @param ab - bytes to deserialize
 */
 export function deserializeDecorated<T>(ab: ArrayBuffer): T {
     let decoder = new Decoder(ab);
@@ -939,7 +937,7 @@ export function deserializeDecorated<T>(ab: ArrayBuffer): T {
 /** Template function to serialize an internal type (or an array of type) value.
  * Supported types: u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, bool, string, ArrayBuffer
  * @template T - internal type.
- * @param classObj - object to serialize
+ * @param value - value to serialize
 */
 export function serializeInternalType<T>(value: T): ArrayBuffer {
     const typename = nameof<T>();

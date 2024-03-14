@@ -7,26 +7,17 @@
         "asbuild:release": "asc assembly/index.ts --config asconfig.json --target release --transform ./transformer.mjs --use abort=",
         "asbuild": "npm run asbuild:release",
         "test": "jest --no-coverage",
-        "publish": "./utils/publish.js",
-        "publish:help": "npm run publish -- --help",
-        "publish:info": "npm run publish -- -i",
-        "publish:local": "npm run publish -- -n \"QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ\" -u \"http://localhost:8000\"",
-        "publish:testnet": "npm run publish -- -n \"QmcvHfPC6XYpgxvJSZQCVBd7QAMEHnLbbK1ytA4McWx5UY\" -u \"https://testnet.trinci.net\"",
-        "publish:mainnet": "npm run publish -- -n \"QmPSjKEWBHshyvCAkppsfKAxoxqRn3RyW1n222zT1UFupd\" -u \"http://t27.trinci.net:8000\"",
-        "relay": "./utils/socketRelay.js"
+        "publish": "npx trinci-sdk-publish",
+        "publish:help": "npx trinci-sdk-publish --help",
+        "publish:info": "npx trinci-sdk-publish -i",
+        "publish:local": "npx trinci-sdk-publish -n \"QmNiibPaxdU61jSUK35dRwVQYjF9AC3GScWTRzRdFtZ4vZ\" -u \"http://localhost:8000\"",
+        "publish:testnet": "npx trinci-sdk-publish -n \"QmcvHfPC6XYpgxvJSZQCVBd7QAMEHnLbbK1ytA4McWx5UY\" -u \"https://testnet.trinci.net\"",
+        "publish:mainnet": "npx trinci-sdk-publish -n \"QmPSjKEWBHshyvCAkppsfKAxoxqRn3RyW1n222zT1UFupd\" -u \"http://t27.trinci.net:8000\"",
+        "relay": "npx trinci-sdk-sock-relay -a \"localhost\" -p 8001"
     },
     "author": "",
     "license": "",
-    "dependencies": {
-        "@affidaty/t2-lib": "^2.3.3",
-        "@affidaty/t2-lib-core": "^2.4.4",
-        "@affidaty/trinci-sdk-as": "^3.0.0-beta4",
-        "@types/yargs": "^17.0.13",
-        "adm-zip": "^0.5.10",
-        "yargs": "^17.7.2"
-    },
     "devDependencies": {
-        "@assemblyscript/loader": "0.27.22",
-        "assemblyscript": "0.27.22"
+        "@affidaty/trinci-sdk-as": "^3.0.0"
     }
 }

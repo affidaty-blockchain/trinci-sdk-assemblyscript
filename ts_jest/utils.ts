@@ -2,11 +2,11 @@ import {
     encode as mpEnc,
     EncoderOptions,
     decode as mpDec,
-    DecoderOptions,
+    DecoderOptions
 } from '@msgpack/msgpack';
 import fastSha256 from 'fast-sha256';
-import { toHex } from './binConversions';
 import { defMsgPackOptions } from './defaults';
+import { toHex } from './binConversions';
 
 export function padHexStr(s: string, bytes: number, cutIflonger: boolean = false): string {
     while ( s.length < ( bytes || 2 )) { s = "0" + s;}

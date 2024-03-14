@@ -1,12 +1,5 @@
-// import { Decoder } from '@wapc/as-msgpack';
-// import Types from './types';
-// import MemUtils from './memutils';
-// import Utils from './utils';
-// import MsgPack from './msgpack';
-
-import { Decoder as MsgpackDecoder } from '@wapc/as-msgpack';
 import { AppOutput, PublicKey } from './types';
-import { splitPtr, arrayBufferToHexString } from './utils';
+import { splitPtr } from './utils';
 import {
     storeData as storeDataToMem,
     loadData as loadDataFromMem,
@@ -97,21 +90,7 @@ export function getKeys(pattern: string = '*'): string[] {
             ).offset
         )
     );
-    let result = new Array<string>(0);
-    if (!getKeysResult.execSuccess) {
-        return new Array<string>(0);
-    }
-    const decoder = new MsgpackDecoder(getKeysResult.execResult);
-    const arraySize = decoder.readArraySize();
-    if (arraySize <= 0) {
-        return new Array<string>(0);
-    }
-
-    result = new Array<string>(arraySize);
-
-    for (let i: u32 = 0; i < arraySize; i++) {
-        result[i] = decoder.readString();
-    }
+    const result = MsgPack.deserializeInternalType<string[]>(getKeysResult.execResult);
 
     if (MsgPack.isError()) return new Array<string>(0);
 
@@ -193,7 +172,7 @@ export function isCallable(accountId: string, method: string): bool {
  * @param method - method to call
  * @param args - data to pass as call arguments
 */
-export function call(accountId: string, method: string, args: ArrayBuffer): AppOutput {
+export function call(accountId: string, method: string, args: ArrayBuffer = new ArrayBuffer(0)): AppOutput {
     const accountIdAb = String.UTF8.encode(accountId);
     const methodAb = String.UTF8.encode(method);
     return MsgPack.deserializeAppOutput(loadDataFromMem(splitPtr(hf_call(
@@ -212,7 +191,7 @@ export function call(accountId: string, method: string, args: ArrayBuffer): AppO
  * @param contractHash - expected smart contract bound to target
  * @param args - data to pass as call arguments
 */
-export function scall(accountId: string, method: string, contractHash: ArrayBuffer, args: ArrayBuffer): AppOutput {
+export function scall(accountId: string, method: string, contractHash: ArrayBuffer, args: ArrayBuffer = new ArrayBuffer(0)): AppOutput {
     const accountIdAb = String.UTF8.encode(accountId);
     const methodAb = String.UTF8.encode(method);
     return MsgPack.deserializeAppOutput(

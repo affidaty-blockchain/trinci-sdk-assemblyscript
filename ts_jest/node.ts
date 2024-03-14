@@ -1,3 +1,4 @@
+import { BridgeClient, Client, Message, Utils } from '@affidaty/t2-lib';
 import * as Errors from './errors';
 import TrinciDB, { IWasmPathWithName, IWasmBinWithName } from './db';
 import CTX from './ctx';
@@ -5,9 +6,7 @@ import TX from './tx';
 import WasmEventEmitter from './wasmEventEmitter';
 import WasmResult from './wasmResult';
 import WasmMachine from './wasmMachine';
-import { BridgeClient, Client, Message, Utils } from '@affidaty/t2-lib';
 
-/**  */
 export class TrinciNode {
 
     db: TrinciDB;
@@ -26,7 +25,9 @@ export class TrinciNode {
     /** Connecting to a socket makes so that all emitted transaction events get propagated to the connected socket. */
     async connectToSocket(address: string, port: number) {
         const tempAddress = address.startsWith('http') ? address : `http://${address}`;
-        this.bridgeClient = new BridgeClient(tempAddress, 0, port);
+        if (typeof this.bridgeClient === 'undefined') {
+            this.bridgeClient = new BridgeClient(tempAddress, 0, port);
+        }
         try {
             await this.bridgeClient.connectSocket();
         } catch (error) {
@@ -41,7 +42,18 @@ export class TrinciNode {
                 args.eventData,
             );
             this.bridgeClient!.writeMessage(txEventMsg);
+            return;
         });
+    }
+
+    async closeSocket() {
+        if (typeof this.bridgeClient !== 'undefined' && this.bridgeClient.connected) {
+            try {
+                await this.bridgeClient.closeSocket();
+            } catch (error) {
+                throw error;
+            }
+        }
     }
 
     async connectToBlockchain(nodeUrl: string, network: string) {
@@ -80,7 +92,7 @@ export class TrinciNode {
     /**
      * Reads smart contract file and stores it's compiled wasm module linked to it's hash. Can be accessed using getContractModule() method
      *
-     * @param wasmFilePath - can be a plain string containing path to wasm file or an object \{ path: string, name?: string \} where a custom alias name can be specified.
+     * @param wasmBin - smart contract binary.
      * @param bindAccount - specify this if newly registered smart contract needs to be immediately bound to an account.
      * @returns - newly registered smart contract hash
      */

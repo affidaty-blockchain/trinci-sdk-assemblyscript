@@ -121,6 +121,9 @@ describe('Test all smart contract functionalities', () => {
 
         let node = await init();
 
+        // Uncomment next line to connect to a socket and relay emitted events there
+        // await node.connectToSocket('localhost', 8001);
+
         const emitTx = new TX()
         .target(accounts.instance)
         .method('emit')
@@ -136,6 +139,9 @@ describe('Test all smart contract functionalities', () => {
         if (txResult.isError) {
             console.log(`Error: ${txResult.errorMessage}`);
         }
+
+        // uncomment next line if a socket connection has been established previously, otherwise test will hung up until stopped manually
+        // await node.closeSocket();
 
         expect(txResult.success).toBeTruthy();
         // node.db.printAssets();

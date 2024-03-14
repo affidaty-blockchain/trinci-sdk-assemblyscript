@@ -76,8 +76,8 @@ export function u8ArrayToArrayBuffer(arr: u8[]): ArrayBuffer {
  * Method that allows to split an amount into multiple parts according to passed proportions.  
  * If there is any remainder it will be inserted as last element of the array so that resulting array will have an extra element at the end.  
  * If fractions sum exceeds u64 max value (overflow) an empty array will be returned
- * @param value - value to split
- * @param partsArray - array representing proportion values. [3, 3, 5] means that total amount will be divided in 3 parts: 3/11, 3/11 and 5/11
+ * @param amount - value to split
+ * @param fractionsArray - array representing proportion values. [3, 3, 5] means that total amount will be divided in 3 parts: 3/11, 3/11 and 5/11
  * @returns array representing amounts relative to each member of the "partsArray" in the same order. If fractionsArray sum causes overflow (sum is greater than U64.MAX_VALUE) then an empty array is returned.
  * @example divideAmount(200, [9, 6, 15]) => [60, 40, 100]
  */

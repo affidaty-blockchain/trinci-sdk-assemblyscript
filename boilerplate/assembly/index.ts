@@ -86,8 +86,8 @@ function mint(ctx: sdk.Types.AppContext, args: MintArgs): sdk.Types.WasmResult {
         return sdk.Return.Error('Mint limit exceeded'); // error message must be a string
     }
 
-    const toAccount = new AccountAssetU64(args.to).read(); // use AccountAssetU64 class to wrap usesful method around a generic asset in u64
-    toAccount.add(args.units).write(); // add take care about previous balance and add token to actual balance
+    const toAccount = new AccountAssetU64(args.to).readAssetData(); // use AccountAssetU64 class to wrap usesful method around a generic asset in u64
+    toAccount.add(args.units).writeAssetData(); // add take care about previous balance and add token to actual balance
     config.total_minted += args.units;
     OwnerDB.storeDecorated('config', config); //update config with new total_minted value
     return sdk.Return.SuccessWithInternalType<u64>(toAccount.currValue); // in Success<Type>  you must specify native type such as u64,string, bool, ecc...
@@ -110,10 +110,10 @@ function transfer(ctx: sdk.Types.AppContext, args: TransferArgs): sdk.Types.Wasm
     if (ctx.caller !== args.from) {
         return sdk.Return.Error('Not authorized');
     }
-    const fromAsset = new AccountAssetU64(args.from).read().sub(args.units).write();
+    const fromAsset = new AccountAssetU64(args.from).readAssetData().subtract(args.units).writeAssetData();
     if (fromAsset.isError) return sdk.Return.Error(`Transfer error: ${fromAsset.error}`);
 
-    const toAsset = new AccountAssetU64(args.to).read().add(args.units).write();
+    const toAsset = new AccountAssetU64(args.to).readAssetData().add(args.units).writeAssetData();
     if (toAsset.isError) return sdk.Return.Error(`Transfer error: ${fromAsset.error}`);
     return sdk.Return.SuccessWithInternalType<u64>(fromAsset.currValue);
 }

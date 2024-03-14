@@ -1,9 +1,4 @@
 import {
-    TransformVisitor,
-    utils,
-    SimpleParser,
-} from '@affidaty/trinci-sdk-as/visitor-as/index.js';
-import {
     Parser,
     Tokenizer,
     Source,
@@ -12,6 +7,11 @@ import {
     FieldDeclaration,
     Statement,
 } from 'assemblyscript/dist/assemblyscript.js';
+import {
+    TransformVisitor,
+    utils,
+    SimpleParser,
+} from './visitor-as/index.js';
 
 const pubMethodDecoratorName = 'exposed';
 const msgpackableDecoratorName = 'msgpackable';

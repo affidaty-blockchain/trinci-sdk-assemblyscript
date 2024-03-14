@@ -1,7 +1,8 @@
 {
   "include": ["transformer.ts"],
+  "exclude": [],
   "compilerOptions": {
-    "outDir": "./boilerplate",
+    "outDir": "./",
     "inlineSourceMap": false,
     "inlineSources": false,
     "target": "ESNext",
