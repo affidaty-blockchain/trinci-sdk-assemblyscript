@@ -1,2 +1,2 @@
-import Transformer from '@developer2/trinci-sdk-as/transformer.mjs';
+import Transformer from '@affidaty/trinci-sdk-as/transformer.mjs';
 export default Transformer;
