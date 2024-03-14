@@ -5,13 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0] - 0000-00-00
+## [3.0.1] - 2024-03-14
+
+### Changed
+- fixed broken import in boilerplate/transformer.mjs
+
+## [3.0.0] - 2024-03-13
 
 ### Added
 - "@publicMethod" decorator. It's used instead of "methodsMap" to mark method as callable from a transaction. For more info refer to documentation and examples in "assembly/index.ts" file.
 - "publish:info" npm script. It prints smart constract and publisher info without actually submmitting publish transaction to the blockchain
 - fields inside a @msgpackable class can now be decorated with @optional to define optional values which can be omitted in transaction arguments. If omittted in transaction, an optional field assumes default value;
 - added a section describing usage of publish utility to wiki
+- added utilities as publish, init and relay as npx executable commands (`trinci-sdk-init`, `trinci-sdk-publish`, `trinci-sdk-sock-relay`)
 
 ### Changed
 - No more need to define "alloc", "run" and "is_callable" functions in assembly/index.ts. They get added by transformer automatically during compilation process. It is, however, possible to define custom ones which won't be overwritten. only signature check will be done on custom functions.
