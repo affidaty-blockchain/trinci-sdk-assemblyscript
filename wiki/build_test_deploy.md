@@ -121,13 +121,36 @@ Events emitted using [`emit()` host function](./host_functions.md#emiteventname-
 - Connecting to a socket relay.  
 
     `TrinciNode` class can connect to TCP socket and send transaction event messagges on event emission in the same way an ordinary TRINCI node would. This makes it possible to test your smart contract in conjunction with the rest of your backend architecture.  
-    If your project has been initialized using boilerplate code from sdk package, then a very basic socket relay can be found at `<projectRoot>/utils/socketRelay.js`.  
+    A socket relay can be launched via `npx trinci-sdk-sock-relay` or `npm run relay` commands.  
+
+    Example socket relay start command with all parameters:  
+    >`npx trinci-sdk-sock-relay -a "localhost" -p 8001`  
+
     Launching it will create a server listening for connections on `localhost:8001` (by default).  
     It will receive messages from a connected client and relay them to all other clients.  
-    Launching `./utils/socketRelay.js --help` will print help on launch arguments.  
     In order to connect to relay from inside a test add following code before executing transaction that should produce an event: 
     ```ts
     await node.connectToSocket('localhost', 8001);
     ```
 
-    P.S. On test execution socket relay must be already up and all receiving clients must be connected (for example using [T2Lib](https://www.npmjs.com/package/@affidaty/t2-lib)).
+    Make sure to disconnect from socket in the end:
+    ```ts
+    await node.closeSocket();
+    ```
+    Othewise the test will wait until the connection is dropped.
+
+    Upon test execution socket relay must be already up and all receiving clients must be connected (for example using [T2Lib](https://www.npmjs.com/package/@affidaty/t2-lib)).
+
+&nbsp;
+
+## Deployment(Publish)
+
+Publish can be done via a utility script included with sdk:  
+`npx trinci-sdk-publish` or `npm run publish`  
+Various scripts are available in the default `package.json` file:
+- `npm run publish:help` - publish utility help with all available  
+- `npm run publish:info` - prints all data about curent smart contract (including contract hash, metadata and publisher account) without sending publish transaction anywhere
+- `npm run publish:local` - sends publish transaction to a local node. Change script in `package.json` to match your node instance settings.
+- `npm run publish:testnet` - sends publish transaction to the TRINCI tesnet
+- `npm run publish:mainnet` - same as previous, but for the mainnet.
+> Note that in order for a contract to be published on testnet or mainnet, it's hash must be preauthorized first.
