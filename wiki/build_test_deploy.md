@@ -153,4 +153,5 @@ Various scripts are available in the default `package.json` file:
 - `npm run publish:local` - sends publish transaction to a local node. Change script in `package.json` to match your node instance settings.
 - `npm run publish:testnet` - sends publish transaction to the TRINCI tesnet
 - `npm run publish:mainnet` - same as previous, but for the mainnet.
-> Note that in order for a contract to be published on testnet or mainnet, it's hash must be preauthorized first.
+> Note that in order for a contract to be published on testnet or mainnet, it's hash must be preauthorized first.  
+> Also publisher account must have enough fuel.
