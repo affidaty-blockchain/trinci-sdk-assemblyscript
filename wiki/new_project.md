@@ -67,7 +67,7 @@ to the directory of your choice, simply substitute the content of the current fo
 │   ├──decorators.d.ts // @decorators type to make IDE happy
 │   ├──index.ts // smart contract entry point
 │   ├──sdk.ts // allows to import modules from just "./sdk"
-│   └──tsconfig.json // 
+│   └──tsconfig.json
 ├──jest.config.js // jest test environment settings
 ├──transformer.mjs // transformer. used during compilation
 ├──package.json
@@ -75,13 +75,7 @@ to the directory of your choice, simply substitute the content of the current fo
 ├──publishMetadata.json // used with publish scripts
 ├──test
 │   └──example.spec.ts // example test
-├──tsconfig.json
-└──utils // various utilities not required for development
-    ├──include // used by publish.js
-    │   ├──hashlist.js
-    │   └──submit.js
-    ├──publish.js // scripts to aid in deployment to blockchain
-    └──socketRelay.js // used during tests. See tests wiki section.
+└──tsconfig.json
 ```
 
 ## Following steps
