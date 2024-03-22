@@ -19,9 +19,10 @@ IDEs like VSCode use TypeScript to do code checks. Sinse TypeScript does not sup
 @exposed
 function init(ctx: sdk.Types.AppContext, config: Config): sdk.Types.WasmResult
 ```
-## Sigature
+## Signature
 ### Parameters
-> Parameter name doesn't matter.
+> Parameter name doesn't matter.  
+
 Public method parameters can have following formats:
 - one parameter of type `sdk.Types.AppContext`(exactly): args received from transaction (if any) are not passed to the called method
     ```ts
