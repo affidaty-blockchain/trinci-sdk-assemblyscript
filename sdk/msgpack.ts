@@ -4,12 +4,25 @@ import { AppContext, AppOutput, WasmResult, PublicKey } from './types';
 let errOccured: bool = false;
 let errMessage: string = '';
 
-function setMsgPackError(msg: string): void {
+export function isError(): bool {
+    return errOccured;
+}
+
+export function getErrorMessage(): string {
+    return errMessage;
+}
+
+/** @deprecated */
+export function errorMessage(): string {
+    return errMessage;
+}
+
+export function setError(msg: string): void {
     errOccured = true;
     errMessage = msg;
 }
 
-function clearMsgPackError(): void {
+export function clearError(): void {
     errOccured = false;
     errMessage = '';
 }
@@ -191,7 +204,7 @@ function readDecorated<T>(decoder: Decoder): T {
     for (let idx = 0; idx < numFields; idx++) {
         let fieldName = decoder.readString();
         if (!typesMap.has(fieldName)) {
-            setMsgPackError(`Unknown field: "${fieldName}"`);
+            setError(`Unknown field: "${fieldName}"`);
             return classObj;
         }
         let fieldType = typesMap.get(fieldName);
@@ -278,16 +291,16 @@ function readDecorated<T>(decoder: Decoder): T {
                     return decoder.readByteArray();
                 }));
             } else {
-                setMsgPackError(`Type not supported: ${fieldType}`);
+                setError(`Type not supported: ${fieldType}`);
                 break;
             }
         } else {
-            setMsgPackError(`Type not supported: ${fieldType}`);
+            setError(`Type not supported: ${fieldType}`);
             break;
         }
 
         if (decoder.error()) {
-            setMsgPackError(`"${fieldName}" field error: ${(decoder.error() as Error).message}`);
+            setError(`"${fieldName}" field error: ${(decoder.error() as Error).message}`);
             return classObj;
         }
 
@@ -298,7 +311,7 @@ function readDecorated<T>(decoder: Decoder): T {
     const isFieldSetKeys = isFieldSetMap.keys();
     for (let i = 0; i < isFieldSetKeys.length; i++) {
         if (!isFieldSetMap.get(isFieldSetKeys[i])) {
-            setMsgPackError(`Missing required field "${isFieldSetKeys[i]}"`);
+            setError(`Missing required field "${isFieldSetKeys[i]}"`);
             return classObj;
         }
     }
@@ -887,18 +900,6 @@ function writePubKey(writer: Writer, pubKey: PublicKey): void {
 }
 
 /** Contains ready-to-use serialization functions for most common use cases. */
-
-export function isError(): bool {
-    return errOccured;
-}
-
-export function errorMessage(): string {
-    return errMessage;
-}
-
-export function clearError(): void {
-    clearMsgPackError();
-}
 
 /** Specific unnamed public key encode. */
 export function serializePublicKey(pubKey: PublicKey): ArrayBuffer {

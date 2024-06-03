@@ -294,11 +294,11 @@ class Transformer extends TransformVisitor {
                         } else if (isInternalType(secondArgType)) {
                             // console.log(`internal type deserialization (${secondArgType}) for public method "${publicMethodName}"`);
                             runStr += `const args=sdk.MsgPack.deserializeInternalType<${secondArgType}>(argsBytes);`;
-                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
+                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.getErrorMessage()}`);';
                         } else if (msgpackableClasses.includes(secondArgType)) {
                             // console.log(`msgpackable deserialization (${secondArgType}) for public method "${publicMethodName}"`);
                             runStr += `const args=sdk.MsgPack.deserializeDecorated<${secondArgType}>(argsBytes);`;
-                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.errorMessage()}`);';
+                            runStr += 'if(sdk.MsgPack.isError())return sdk.Return.Error(`deserialization faillure: ${sdk.MsgPack.getErrorMessage()}`);';
                         } else {
                             throw new Error(`Unknown deserialization method for type "${secondArgType}", second argument of public method "${publicMethodName}"`);
                         }
